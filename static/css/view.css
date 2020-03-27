@@ -1,0 +1,21 @@
+* {
+  font-family: Assistant, sans-serif;
+}
+body {
+  font-size: 20px;
+}
+#patient-table {
+  border-collapse: collapse;
+  width: 50%;
+}
+th, td {
+  padding: 6px;
+  border-bottom: 1px solid #DDD;
+  text-align: center;
+}
+tr:hover {
+  background-color: #F0F0F0;
+}
+tr::selection {
+  background-color: #BABABA;
+}
