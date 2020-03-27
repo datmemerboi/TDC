@@ -1,0 +1,13 @@
+* {
+  font-family: Assistant, sans-serif;
+}
+body {
+  font-size: 20px;
+  background-color: #2471A3;
+}
+a {
+  color:#FFF;
+}
+a:hover {
+  color: #909090;
+}
