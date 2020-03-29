@@ -1,8 +1,6 @@
 window.onload= ()=>{
-  $.get('http://localhost:9090/data', {},(data)=>{
-      console.log(data);
+  $.post('http://localhost:9090/showdata', {},(data)=>{
       data.forEach((value, index) => {
-        // console.log(value)
         var row = document.createElement("TR");
 
         var name = document.createElement('TD');
