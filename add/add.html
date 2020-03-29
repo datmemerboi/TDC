@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Add Patient Details</title>
+    <link rel="stylesheet" href="/css/add.css">
+    <link href="https://fonts.googleapis.com/css?family=Assistant&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/js/add.js">
+  </head>
+  <body>
+    <form action="/posted" method="post" class="add-form">
+      <input type="text" name="patient[Name]" placeholder="Name" class="add-input">
+      <br class="no-select"><br class="no-select">
+      <input type="number" name="patient[Age]" min="1" placeholder="Age" class="add-input">
+      <br class="no-select"><br class="no-select">
+      <!-- <input type="text" name="patient-sex" placeholder="Sex" class="add-input"> -->
+      <input type="radio" name="patient[Sex]" value="Male">  <label for="Male">Male</label>
+      <input type="radio" name="patient[Sex]" value="Female">  <label for="Female">Female</label>
+      <input type="radio" name="patient[Sex]" value="Other"> <label for="Other">Other</label>
+      <br class="no-select"><br class="no-select">
+      <input type="submit" name="add-submit" value="ADD" class="add-submit">
+    </form>
+  </body>
+</html>
