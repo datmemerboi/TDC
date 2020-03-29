@@ -3,11 +3,11 @@ const fs = require('fs');
 const app = express();
 const path = require('path');
 
+app.use(express.urlencoded({extended:true})); app.use(express.json());
 app.use(express.static(__dirname + '/static'));
 
 app.get('/', (request, response)=>{
   if(request.method==="GET") {
-    // console.log("New GET request!")
     fs.readFile('./index.html', (err, data)=>{
       if(err){  throw err;  }
       else {
@@ -17,20 +17,37 @@ app.get('/', (request, response)=>{
       }
     })
   }
-})
+});
+
+app.post('/posted', (req, res)=>{
+  if(req.method==='POST'){
+    console.log(req.body.patient);
+    fs.readFile(path.join(__dirname, "/data/data.json"), (err, json)=>{
+      if(err){ throw err }
+      json = JSON.parse(json);
+      json.push(req.body.patient);
+      fs.writeFile(path.join(__dirname, "/data/data.json"), JSON.stringify(json), (err)=>{
+        if(err){  throw err }
+      });
+      res.writeHead(200, {'Content-Type':'text/plain'});
+      res.write("Added..")
+      res.end();
+    });
+  }
+});
 
 app.get('/view', (req, res)=>{
-  fs.readFile('./view/view.html', (err, html)=>{
+  fs.readFile(path.join(__dirname, '/view/view.html'), (err, html)=>{
     if(err){  throw err; }
     else {
       res.writeHead(200, {'Content-Type':'text/html'});
       res.write(html);
       res.end();
-      }
+    }
   })
 });
 
-app.get('/data', (req,res)=>{
+app.post('/showdata', (req,res)=>{
   fs.readFile(path.join(__dirname,"/data/data.json"), (err, json)=>{
     if(err){  throw err;  }
     let data = JSON.parse(json);
@@ -38,25 +55,17 @@ app.get('/data', (req,res)=>{
   });
 });
 
-app.listen(9090)
-console.log("Server currently running...")
+app.get('/add', (req,res)=>{
+  fs.readFile(path.join(__dirname,"/add/add.html"), (err, html)=>{
+    if(err){  throw err }
+    else if(req.method==='GET'){
+      res.writeHead(200, {'Content-Type':'text/html'});
+      res.write(html);
+      res.end();
+    }
+  })
+});
 
 
-
-
-// let body
-// fs.readFile('./data/data.json', (err,data)=>{
-//   if (err) {  throw err; }
-//   body = JSON.parse(data);
-//   // console.log(body);
-//   body.forEach((val, ind) => {
-//     console.log(val)
-//   });
-
-  // let ins = {"Name":"Andy", "Age":33, "Sex":"Male"}
-  // body.push(ins)
-  // fs.writeFile('./data/data.json', JSON.stringify(body),(err, writeRes)=>{
-  //   if(err){throw err}
-  //   console.log("Written!")
-  // })
-// });
+app.listen(9090);
+console.log("Server currently running...");
