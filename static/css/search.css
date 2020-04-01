@@ -28,3 +28,6 @@ tr:hover {
 tr::selection {
   background-color: #BABABA;
 }
+.no-select {
+  user-select: none;
+}

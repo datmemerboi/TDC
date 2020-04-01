@@ -11,3 +11,6 @@ a {
 a:hover {
   color: #BFBFBF;
 }
+li {
+  font-size: 25px;
+}
