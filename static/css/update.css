@@ -1,0 +1,62 @@
+* {
+  font-family: Assistant, sans-serif;
+}
+body {
+  font-size: 20px;
+}
+#update-table {
+  position: absolute; top: 18%;
+  border-collapse: collapse;
+  width: 99%;
+}
+th, td {
+  padding: 6px;
+  border-bottom: 1px solid #DDD;
+  text-align: center;
+}
+tr:hover {
+  background-color: #F0F0F0;
+}
+tr::selection {
+  background-color: #BABABA;
+}
+.update-div {
+  width: 30%;
+  position: absolute; left: 30vw;
+}
+#update-column-div {
+  top: 60%; left: 38vw;
+}
+#show-update-form {
+  top: 78%;
+  width: 40%; height: auto;
+}
+.update-column-select {
+  width: 20vw; height: 5vh;
+  background-color: #F0F0F0;
+  border: none; outline: none;
+  font-size: 18px;
+}
+.update-submit {
+  width: 10vw; height: 5vh;
+  background-color: #2471A3;
+  color: #FFF;
+  border: none; outline: none;
+  position: relative; left: 12vw;
+  font-size: 18px;
+}
+.update-input {
+  width: 23vw; height: 5vh;
+  padding: 10px;
+  background-color: #F0F0F0;
+  border: none; outline: none;
+  font-size: 18px;
+  position: relative; left: 6vw;
+}
+input[type=radio]{
+  width: 15px; height: 15px;
+  border:none;
+}
+.no-select {
+  user-select: none;
+}
