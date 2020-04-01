@@ -65,6 +65,7 @@ app.post('/posted', (req, res)=>{
     });
   }
 });
+
 app.get('/search', (req, res)=>{
   if(req.method==='GET'){
     fs.readFile(path.join(__dirname, "/search/search.html"), (err, html)=>{
@@ -77,5 +78,18 @@ app.get('/search', (req, res)=>{
     });
   }
 });
+
+app.get('/update', (req, res)=>{
+  if(req.method==='GET'){
+    fs.readFile( path.join(__dirname, "/update/update.html"), (err,html)=>{
+      if(err){  throw err }
+      else {
+        res.writeHead(200, {'Content-Type':'text/html'});
+        res.write(html);
+        res.end();
+      }
+    });
+  }
+});
 app.listen(9090);
-console.log("Server currently running...");
+console.log("Server currently running @ 9090...");
