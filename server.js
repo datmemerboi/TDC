@@ -19,23 +19,6 @@ app.get('/', (request, response)=>{
   }
 });
 
-app.post('/posted', (req, res)=>{
-  if(req.method==='POST'){
-    console.log(req.body.patient);
-    fs.readFile(path.join(__dirname, "/data/data.json"), (err, json)=>{
-      if(err){ throw err }
-      json = JSON.parse(json);
-      json.push(req.body.patient);
-      fs.writeFile(path.join(__dirname, "/data/data.json"), JSON.stringify(json), (err)=>{
-        if(err){  throw err }
-      });
-      res.writeHead(200, {'Content-Type':'text/plain'});
-      res.write("Added..")
-      res.end();
-    });
-  }
-});
-
 app.get('/view', (req, res)=>{
   fs.readFile(path.join(__dirname, '/view/view.html'), (err, html)=>{
     if(err){  throw err; }
@@ -66,6 +49,33 @@ app.get('/add', (req,res)=>{
   })
 });
 
-
+app.post('/posted', (req, res)=>{
+  if(req.method==='POST'){
+    console.log(req.body.patient);
+    fs.readFile(path.join(__dirname, "/data/data.json"), (err, json)=>{
+      if(err){ throw err }
+      json = JSON.parse(json);
+      json.push(req.body.patient);
+      fs.writeFile(path.join(__dirname, "/data/data.json"), JSON.stringify(json), (err)=>{
+        if(err){  throw err }
+      });
+      res.writeHead(200, {'Content-Type':'text/plain'});
+      res.write("Added..")
+      res.end();
+    });
+  }
+});
+app.get('/search', (req, res)=>{
+  if(req.method==='GET'){
+    fs.readFile(path.join(__dirname, "/search/search.html"), (err, html)=>{
+      if(err){  throw err }
+      else {
+        res.writeHead(200, {'Content-Type':'text/html'});
+        res.write(html);
+        res.end();
+      }
+    });
+  }
+});
 app.listen(9090);
 console.log("Server currently running...");
