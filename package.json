@@ -10,7 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "jsonexport": "^2.4.1"
+    "jsonexport": "^2.4.1",
+    "neat-csv": "^5.2.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"
