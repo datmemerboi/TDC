@@ -1,3 +1,11 @@
+document.getElementById('patient-name').addEventListener('keyup', (event)=>{
+  if(event.keycode>=48 && event.keyCode<=57 || event.keyCode >= 65 && event.keyCode <= 90)
+  {
+    toSearch(document.getElementById('patient-name').value);
+  }
+
+});
+
 function toSearch(patientName) {
   $.post('http://localhost:9090/showdata', {},(data)=>{
     data.forEach((record)=>{
