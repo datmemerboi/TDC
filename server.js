@@ -4,11 +4,11 @@ const app = express();
 const path = require('path');
 
 app.use(express.urlencoded({extended:true})); app.use(express.json());
-app.use(express.static(__dirname + '/static'));
+app.use(express.static( __dirname + '/static' ));
 
 app.get('/', (request, response)=>{
   if(request.method==="GET") {
-    fs.readFile('./index.html', (err, data)=>{
+    fs.readFile( './index.html' , (err, data)=>{
       if(err){  throw err;  }
       else {
         response.writeHead(200, {'Content-type':'text/html'});
@@ -20,7 +20,7 @@ app.get('/', (request, response)=>{
 });
 
 app.get('/view', (req, res)=>{
-  fs.readFile(path.join(__dirname, '/view/view.html'), (err, html)=>{
+  fs.readFile( path.join( __dirname, "/view/view.html"), (err, html)=>{
     if(err){  throw err; }
     else {
       res.writeHead(200, {'Content-Type':'text/html'});
@@ -31,7 +31,7 @@ app.get('/view', (req, res)=>{
 });
 
 app.post('/showdata', (req,res)=>{
-  fs.readFile(path.join(__dirname,"/data/data.json"), (err, json)=>{
+  fs.readFile( path.join( __dirname, "/data/data.json"), (err, json)=>{
     if(err){  throw err;  }
     let data = JSON.parse(json);
     res.json(data);
@@ -39,7 +39,7 @@ app.post('/showdata', (req,res)=>{
 });
 
 app.get('/add', (req,res)=>{
-  fs.readFile(path.join(__dirname,"/add/add.html"), (err, html)=>{
+  fs.readFile( path.join( __dirname, "/add/add.html"), (err, html)=>{
     if(err){  throw err }
     else if(req.method==='GET'){
       res.writeHead(200, {'Content-Type':'text/html'});
@@ -51,12 +51,11 @@ app.get('/add', (req,res)=>{
 
 app.post('/posted', (req, res)=>{
   if(req.method==='POST'){
-    console.log(req.body.patient);
-    fs.readFile(path.join(__dirname, "/data/data.json"), (err, json)=>{
+    fs.readFile( path.join( __dirname, "/data/data.json"), (err, json)=>{
       if(err){ throw err }
       json = JSON.parse(json);
       json.push(req.body.patient);
-      fs.writeFile(path.join(__dirname, "/data/data.json"), JSON.stringify(json), (err)=>{
+      fs.writeFile( path.join( __dirname, "/data/data.json"), JSON.stringify(json), (err)=>{
         if(err){  throw err }
       });
       res.writeHead(200, {'Content-Type':'text/plain'});
@@ -68,7 +67,7 @@ app.post('/posted', (req, res)=>{
 
 app.get('/search', (req, res)=>{
   if(req.method==='GET'){
-    fs.readFile(path.join(__dirname, "/search/search.html"), (err, html)=>{
+    fs.readFile( path.join( __dirname, "/search/search.html"), (err, html)=>{
       if(err){  throw err }
       else {
         res.writeHead(200, {'Content-Type':'text/html'});
@@ -81,7 +80,7 @@ app.get('/search', (req, res)=>{
 
 app.get('/update', (req, res)=>{
   if(req.method==='GET'){
-    fs.readFile( path.join(__dirname, "/update/update.html"), (err,html)=>{
+    fs.readFile( path.join( __dirname, "/update/update.html"), (err,html)=>{
       if(err){  throw err }
       else {
         res.writeHead(200, {'Content-Type':'text/html'});
@@ -91,5 +90,28 @@ app.get('/update', (req, res)=>{
     });
   }
 });
+
+app.post('/updation', (req, res)=>{
+  if(req.method==='POST'){
+    fromRecord = req.body.FromRecord; toRecord = req.body.ToRecord;
+    toKey = Object.keys(toRecord)[0];
+    fs.readFile( path.join( __dirname, "/data/data.json"), (err, json)=>{
+      if(err){  throw err }
+      json = JSON.parse(json);
+      json.forEach((record) => {
+        if(record.Name == fromRecord.Name){
+          record[toKey] = toRecord[toKey];
+        }
+      });
+      fs.writeFile( path.join( __dirname, "/data/data.json"), JSON.stringify(json), (err)=>{
+        if(err){ throw err  }
+        else {
+          res.sendStatus(200);
+        }
+      });
+    });
+  }
+})
+
 app.listen(9090);
 console.log("Server currently running @ 9090...");
