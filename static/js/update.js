@@ -1,3 +1,11 @@
+document.getElementById('patient-name').addEventListener('keyup', (event)=>{
+  if(event.keycode>=48 && event.keyCode<=57 || event.keyCode >= 65 && event.keyCode <= 90)
+  {
+    toUpdate(document.getElementById('patient-name').value);
+  }
+
+});
+
 function toUpdate(patientName) {
   $.post("http://localhost:9090/showdata", {}, (data)=>{
     data.forEach((record)=>{
@@ -39,20 +47,32 @@ function toUpdate(patientName) {
     });
   });
 }
-var UpdatedRecord = {};
+var FromRecord = {}; var ToRecord = {}; var ColumnToUpdate = null;
 function recordChoice(selection) {
   var tableRow = selection.parentNode.parentNode;
-  UpdatedRecord.Name = tableRow.childNodes[1].innerHTML;
-  UpdatedRecord.Age = tableRow.childNodes[2].innerHTML;
-  UpdatedRecord.Sex = tableRow.childNodes[3].innerHTML;
-  UpdatedRecord['Treatment-Date'] = tableRow.childNodes[4].innerHTML;
-  UpdatedRecord['Med-History'] = tableRow.childNodes[5].innerHTML;
-  UpdatedRecord.Treatment = tableRow.childNodes[6].innerHTML;
-  UpdatedRecord['Current-Meds'] = tableRow.childNodes[7].innerHTML;
-  UpdatedRecord['Next-Treatment'] = tableRow.childNodes[8].innerHTML;
 
-  console.log(UpdatedRecord);
+  FromRecord.Name = tableRow.childNodes[1].innerHTML;
+  FromRecord.Age = tableRow.childNodes[2].innerHTML;
+  FromRecord.Sex = tableRow.childNodes[3].innerHTML;
+  FromRecord['Treatment-Date'] = tableRow.childNodes[4].innerHTML;
+  FromRecord['Med-History'] = tableRow.childNodes[5].innerHTML;
+  FromRecord.Treatment = tableRow.childNodes[6].innerHTML;
+  FromRecord['Current-Meds'] = tableRow.childNodes[7].innerHTML;
+  FromRecord['Next-Treatment'] = tableRow.childNodes[8].innerHTML;
+
 }
 function showForm(updateOption) {
-  console.log(updateOption);
+  ColumnToUpdate = updateOption;
+  document.getElementById('updation-form').style.display = "block";
+}
+function submission() {
+  ToRecord[ColumnToUpdate] = document.getElementById('updation-form').elements.namedItem("updatedpatient["+ColumnToUpdate+"]").value;
+  $.post('http://localhost:9090/updation', {FromRecord, ToRecord},(res)=>{
+    if(res==="OK"){
+      alert("Updated");
+    }
+    else {
+      alert("Some issue arised..");
+    }
+  });
 }

@@ -27,7 +27,7 @@ tr::selection {
 #update-column-div {
   top: 60%; left: 38vw;
 }
-#show-update-form {
+#update-form-container{
   top: 78%;
   width: 40%; height: auto;
 }
@@ -45,6 +45,12 @@ tr::selection {
   position: relative; left: 12vw;
   font-size: 18px;
 }
+#updation-form {
+  display: none;
+}
+.hidden-input {
+  display: none;
+}
 .update-input {
   width: 23vw; height: 5vh;
   padding: 10px;
@@ -52,6 +58,9 @@ tr::selection {
   border: none; outline: none;
   font-size: 18px;
   position: relative; left: 6vw;
+}
+.update-input-name {
+  position: relative; left: 37vw;
 }
 input[type=radio]{
   width: 15px; height: 15px;
