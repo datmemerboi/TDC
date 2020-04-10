@@ -5,11 +5,18 @@ body {
   font-size: 20px;
   background-color: #2471A3;
 }
+h1, h2 {
+  text-align: center;
+}
 a {
   color:#FFF;
 }
 a:hover {
   color: #BFBFBF;
+}
+.center-container {
+  position:relative; left: 38vw;
+  width: 30vw;
 }
 li {
   font-size: 25px;
