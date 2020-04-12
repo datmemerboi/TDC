@@ -47,7 +47,9 @@ function toUpdate(patientName) {
     });
   });
 }
+
 var FromRecord = {}; var ToRecord = {}; var ColumnToUpdate = null;
+
 function recordChoice(selection) {
   var tableRow = selection.parentNode.parentNode;
 
@@ -60,19 +62,4 @@ function recordChoice(selection) {
   FromRecord['Current-Meds'] = tableRow.childNodes[7].innerHTML;
   FromRecord['Next-Treatment'] = tableRow.childNodes[8].innerHTML;
 
-}
-function showForm(updateOption) {
-  ColumnToUpdate = updateOption;
-  document.getElementById('updation-form').style.display = "block";
-}
-function submission() {
-  ToRecord[ColumnToUpdate] = document.getElementById('updation-form').elements.namedItem("updatedpatient["+ColumnToUpdate+"]").value;
-  $.post('http://localhost:9090/updation', {FromRecord, ToRecord},(res)=>{
-    if(res==="OK"){
-      alert("Updated");
-    }
-    else {
-      alert("Some issue arised..");
-    }
-  });
 }
