@@ -1,7 +1,8 @@
 const express = require('express');
-const fs = require('fs');
 const app = express();
+const fs = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
 
 app.use(express.urlencoded({extended:true})); app.use(express.json());
 app.use(express.static( __dirname + '/static' ));
@@ -58,7 +59,7 @@ app.post('/posted', (req, res)=>{
       fs.writeFile( path.join( __dirname, "/data/data.json"), JSON.stringify(json), (err)=>{
         if(err){  throw err }
       });
-      res.writeHead(200, {'Content-Type':'text/plain'});
+      res.writeHead(201, {'Content-Type':'text/plain'});
       res.write("Added..")
       res.end();
     });
@@ -106,12 +107,30 @@ app.post('/updation', (req, res)=>{
       fs.writeFile( path.join( __dirname, "/data/data.json"), JSON.stringify(json), (err)=>{
         if(err){ throw err  }
         else {
-          res.sendStatus(200);
+          res.sendStatus(202);
         }
       });
     });
   }
 })
+
+app.get('/import', (req, res)=>{
+  command = "node "+ path.join( __dirname, 'CSVtoJSON.js');
+  const ls = exec(command, function (err, result) {
+    if (err) {  throw err }
+    else
+      res.sendStatus(201);
+  });
+});
+
+app.get('/export', (req, res)=>{
+  command = "node "+ path.join( __dirname, 'JSONtoCSV.js');
+  const ls = exec(command, function (err, result) {
+    if (err) {  throw err }
+    else
+      res.sendStatus(201);
+  });
+});
 
 app.listen(9090);
 console.log("Server currently running @ 9090...");
