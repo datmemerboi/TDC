@@ -4,7 +4,7 @@
 body {
   font-size: 20px;
 }
-#update-table {
+table {
   position: absolute; top: 18%;
   border-collapse: collapse;
   width: 99%;
@@ -21,15 +21,14 @@ tr::selection {
   background-color: #BABABA;
 }
 .update-div {
-  width: 30%;
   position: absolute; left: 30vw;
 }
-#update-column-div {
+#update-column-container {
   top: 60%; left: 38vw;
 }
 #update-form-container{
   top: 78%;
-  width: 40%; height: auto;
+  width: 40vw; height: auto;
 }
 .update-column-select {
   width: 20vw; height: 5vh;
@@ -45,9 +44,6 @@ tr::selection {
   position: relative; left: 12vw;
   font-size: 18px;
 }
-#updation-form {
-  display: none;
-}
 .hidden-input {
   display: none;
 }
@@ -59,7 +55,7 @@ tr::selection {
   font-size: 18px;
   position: relative; left: 6vw;
 }
-.update-input-name {
+#patient-name {
   position: relative; left: 37vw;
 }
 input[type=radio]{
