@@ -1,4 +1,5 @@
-Name,Age,Sex,Treatment-Date,Med-History,Treatment,Current-Meds,Next-Treatment
-Vineetha,23,Female,11/03/2020,None,General Checkup,None,01/04/2020
-Ajay Gopal,40,Male,10/03/2020,None,Filling,None,20/03/2020
-Vanathi,40,Female,21/03/2020,Diabetes,Filling,Sensitive Toothpaste,11/04/2020
+Name,Phone No,Age,Sex,Treatment Date,Provisional Diagnosis,Investigations,Final Diagnosis,Treatment,Result,Next Appointment,Additional Information,Inital of the Medical Officer
+Mr.Venu,9840774332,43,Male,02-03-2020,,,,Metal Crown,,,,
+Vineetha,,23,Female,11-03-2020,None,General Checkup,,01/04/2020,,
+Ajay Gopal,,40,Male,10-03-2020,None,Filling,,20/03/2020,,
+Vanathi,,40,Female,21-03-2020,Diabetes,Filling,,11/04/2020,,
