@@ -17,6 +17,9 @@ body {
   border-collapse: collapse;
   width: 99%;
 }
+th {
+  background-color: #F0F0F0;
+}
 th, td {
   padding: 6px;
   border-bottom: 1px solid #DDD;

@@ -36,14 +36,6 @@ tr::selection {
   border: none; outline: none;
   font-size: 18px;
 }
-.update-submit {
-  width: 10vw; height: 5vh;
-  background-color: #2471A3;
-  color: #FFF;
-  border: none; outline: none;
-  position: relative; left: 12vw;
-  font-size: 18px;
-}
 .hidden-input {
   display: none;
 }
@@ -54,6 +46,20 @@ tr::selection {
   border: none; outline: none;
   font-size: 18px;
   position: relative; left: 6vw;
+}
+.update-input-select {
+  width: 24vw; height: 7vh;
+}
+.update-input-date {
+  width: 15vw;
+}
+.update-submit {
+  width: 10vw; height: 5vh;
+  background-color: #2471A3;
+  color: #FFF;
+  border: none; outline: none;
+  position: relative; left: 12vw;
+  font-size: 18px;
 }
 #patient-name {
   position: relative; left: 37vw;
