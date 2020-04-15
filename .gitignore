@@ -1,3 +1,8 @@
 about/
 node_modules/
 static/css/about.css
+DataInfo.md
+data/*.xlsx
+data/J*
+data/F*
+data/M*
