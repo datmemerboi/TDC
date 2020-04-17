@@ -1,8 +1,8 @@
 about/
 node_modules/
 static/css/about.css
-data/Feb*
-data/Jan*
-data/Mar*
-data/*.xlsx
 DataInfo.md
+data/*.xlsx
+data/J*
+data/F*
+data/M*
