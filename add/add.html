@@ -2,34 +2,57 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>Add Patient Details</title>
+    <title>Add Patient</title>
     <link rel="stylesheet" href="/css/add.css">
     <link href="https://fonts.googleapis.com/css?family=Assistant&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/js/add.js">
   </head>
   <body>
     <form action="/posted" method="post" class="add-form">
       <input type="text" name="patient[Name]" placeholder="Name" class="add-input" required>
       <br class="no-select"><br class="no-select">
+
+      <input type="tel" name="patient[Phone No]" placeholder="Phone No." class="add-input">
+      <br class="no-select"><br class="no-select">
+
       <input type="number" name="patient[Age]" min="1" placeholder="Age" class="add-input" required>
       <br class="no-select"><br class="no-select">
-      <!-- <input type="text" name="patient-sex" placeholder="Sex" class="add-input"> -->
+
       <input type="radio" name="patient[Sex]" value="Male">  <label for="Male">Male</label>
       <input type="radio" name="patient[Sex]" value="Female">  <label for="Female">Female</label>
       <input type="radio" name="patient[Sex]" value="Other"> <label for="Other">Other</label>
       <br class="no-select"><br class="no-select">
-      <label for="patient[Date]">Date of latest treatment</label>
-      <input type="date" name="patient[Treatment-Date]">
+
+      <label for="patient[Treatment Date]">Treatment Date</label>
+      <input type="date" name="patient[Treatment Date]" class="add-input add-input-date">
       <br class="no-select"><br class="no-select">
-      <input type="text" name="patient[Med-History]" placeholder="Medical History" class="add-input">
+
+      <input type="text" name="patient[Provisional Diagnosis]" placeholder="Provisional Diagnosis" class="add-input">
       <br class="no-select"><br class="no-select">
-      <input type="text" name="patient[Treatment]" placeholder="Treatment Done" class="add-input" required>
+
+      <input type="text" name="patient[Investigations]" placeholder="Investigations" class="add-input">
       <br class="no-select"><br class="no-select">
-      <input type="text" name="patient[Current-Meds]" placeholder="Current Medicines Provided" class="add-input">
+
+      <input type="text" name="patient[Final Diagnosis]" placeholder="Final Diagnosis" class="add-input">
       <br class="no-select"><br class="no-select">
-      <label for="patient[Next-Treatment]">Date of next treatment</label>
-      <input type="date" name="patient[Next-Treatment]">
+
+      <input type="text" name="patient[Treatment]" placeholder="Treatment Done" class="add-input">
       <br class="no-select"><br class="no-select">
+
+      <select class="add-input add-input-select" name="patient[Result]">
+        <option value="Cured">Cured</option>
+        <option value="Same Condition">Same Condition</option>
+        <option value="Referred">Referred</option>
+        <option value="Expired">Expired</option>
+      </select>
+      <br class="no-select"><br class="no-select">
+
+      <label for="patient[Next Appointment]">Next Appointment Date</label>
+      <input type="date" name="patient[Next Appointment]" class="add-input add-input-date">
+      <br class="no-select"><br class="no-select">
+
+      <input type="text" name="patient[Additional Information]" placeholder="Additional Info" class="add-input">
+      <br class="no-select"><br class="no-select">
+
       <input type="submit" name="add-submit" value="ADD" class="add-submit">
     </form>
   </body>

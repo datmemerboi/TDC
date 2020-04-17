@@ -15,7 +15,10 @@ body {
 #search-table {
   position: absolute; top: 18%;
   border-collapse: collapse;
-  width: 100%;
+  width: 99%;
+}
+th {
+  background-color: #F0F0F0;
 }
 th, td {
   padding: 6px;

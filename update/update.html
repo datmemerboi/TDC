@@ -15,13 +15,17 @@
         <tr>
           <th>  Select  </th>
           <th>  Name  </th>
+          <th>  Phone No</th>
           <th>  Age </th>
           <th>  Sex </th>
-          <th>  Date of Treatment </th>
-          <th>  Medical History </th>
-          <th>  Treatment Done  </th>
-          <th>  Current Medicines Provided  </th>
-          <th>  Date of Next Appointment  </th>
+          <th>  Treatment Date </th>
+          <th>  Provisional Diagnosis </th>
+          <th>  Investigations (if any)  </th>
+          <th>  Final Diagnosis  </th>
+          <th>  Treatment  </th>
+          <th>  Result  </th>
+          <th>  Next Appointment </th>
+          <th>  Additional Information </th>
         </tr>
       </thead>
       <tbody id="update-table-body">
@@ -31,13 +35,17 @@
       <label for="update-column">Which column to update?</label><br class="no-select">
       <select class="update-column-select" id="update-column" onmouseup="showForm(this.value)">
         <option value="Name">Name</option>
+        <option value="Phone No">Phone No</option>
         <option value="Age">Age</option>
         <option value="Sex">Sex</option>
-        <option value="Treatment-Date">Date of Treatment</option>
-        <option value="Med-History">Medical History</option>
+        <option value="Treatment Date">Treatment Date</option>
+        <option value="Provisional Diagnosis">Provisional Diagnosis</option>
+        <option value="Investigations">Investigations</option>
+        <option value="Final Diagnosis">Final Diagnosis</option>
         <option value="Treatment">Treatment Done</option>
-        <option value="Current-Meds">Current Medicines Provided</option>
-        <option value="Next-Treatment">Date of Next Appointment</option>
+        <option value="Result">Result</option>
+        <option value="Next Appointment">Next Appointment</option>
+        <option value="Additional Information">Additional Information</option>
       </select>
     </div>
     <div class="update-div" id="update-form-container">

@@ -6,13 +6,19 @@ body {
   color: #000;
 }
 .add-form {
-  position: absolute; left: 37vw;
+  position: absolute; left: 38vw;
 }
 .add-input {
   width: 23vw; height: 5vh;
   padding: 10px;
   background-color: #F0F0F0;
   border: none; outline: none;
+}
+.add-input-select {
+  width: 24vw; height: 7vh;
+}
+.add-input-date {
+  width: 15vw;
 }
 .add-submit {
   width: 10vw; height: 5vh;

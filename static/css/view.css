@@ -8,6 +8,9 @@ body {
   border-collapse: collapse;
   width: 100%;
 }
+th {
+  background-color: #F0F0F0;
+}
 th, td {
   padding: 6px;
   border-bottom: 1px solid #DDD;
@@ -16,6 +19,6 @@ th, td {
 tr:hover {
   background-color: #F0F0F0;
 }
-tr::selection {
+tr:active {
   background-color: #BABABA;
 }

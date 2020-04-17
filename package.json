@@ -1,10 +1,11 @@
 {
   "name": "tdc-app",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "The entire working app for TDC",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "DMB",
   "license": "ISC",
@@ -15,5 +16,13 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/datmemerboi/TDC.git"
+  },
+  "bugs": {
+    "url": "https://github.com/datmemerboi/TDC/issues"
+  },
+  "homepage": "https://github.com/datmemerboi/TDC#readme"
 }
