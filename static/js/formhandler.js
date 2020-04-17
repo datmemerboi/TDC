@@ -46,6 +46,7 @@ function submission() {
     $.post('http://localhost:9090/updation', {FromRecord, ToRecord},(res)=>{
       if(res==="Accepted"){
         alert("Updated");
+        location.reload();
       }
       else {
         alert("Some issue arised..");
