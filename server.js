@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 
+const dateformat = require('./date-format-module.js');
+
 app.use(express.urlencoded({extended:true})); app.use(express.json());
 app.use(express.static( __dirname + '/static' ));
 
@@ -55,6 +57,10 @@ app.post('/posted', (req, res)=>{
     fs.readFile( path.join( __dirname, "/data/data.json"), (err, json)=>{
       if(err){ throw err }
       json = JSON.parse(json);
+
+      req.body.patient['Treatment Date'] = dateformat.ddmonyyyy(req.body.patient['Treatment Date']);
+      req.body.patient['Next Appointment'] = dateformat.ddmonyyyy(req.body.patient['Next Appointment']);
+
       json.push(req.body.patient);
       fs.writeFile( path.join( __dirname, "/data/data.json"), JSON.stringify(json), (err)=>{
         if(err){  throw err }
@@ -96,6 +102,12 @@ app.post('/updation', (req, res)=>{
   if(req.method==='POST'){
     fromRecord = req.body.FromRecord; toRecord = req.body.ToRecord;
     toKey = Object.keys(toRecord)[0];
+
+    if( toKey =='Treatment Date' || toKey=='Next Appointment' ) {
+      toRecord[toKey] = dateformat.ddmonyyyy( toRecord[toKey] );
+      console.log( toRecord[toKey] );
+    }
+
     fs.readFile( path.join( __dirname, "/data/data.json"), (err, json)=>{
       if(err){  throw err }
       json = JSON.parse(json);
@@ -131,6 +143,14 @@ app.get('/export', (req, res)=>{
       res.sendStatus(201);
   });
 });
+
+app.get('/json', (req, res)=>{
+  fs.readFile( path.join(__dirname, '/data/data.json'), (err, json)=>{
+    if(err) { throw err }
+    res.json( JSON.parse(json) );
+    res.end();
+  })
+})
 
 app.listen(9090);
 console.log("Server currently running @ 9090...");
