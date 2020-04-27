@@ -8,6 +8,7 @@ const dateformat = require('./date-format-module.js');
 
 app.use(express.urlencoded({extended:true})); app.use(express.json());
 app.use(express.static( __dirname + '/static' ));
+app.use('/modules', express.static(__dirname + '/node_modules/jquery/dist/'));
 
 app.get('/', (request, response)=>{
   if(request.method==="GET") {
