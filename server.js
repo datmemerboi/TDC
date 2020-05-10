@@ -4,7 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 
-const dateformat = require('./date-format-module.js');
+const dateFormat = require('./date-format-module.js');
+const dataFiles = require('./data-files-module.js');
 
 app.use(express.urlencoded({extended:true})); app.use(express.json());
 app.use(express.static( __dirname + '/static' ));
@@ -34,11 +35,20 @@ app.get('/view', (req, res)=>{
   })
 });
 
-app.post('/showdata', (req,res)=>{
+app.post('/showData', (req,res)=>{
   fs.readFile( path.join( __dirname, "/data/data.json"), (err, json)=>{
     if(err){  throw err;  }
     let data = JSON.parse(json);
     res.json(data);
+  });
+});
+
+app.get('/monthlyExport', (req, res)=>{
+  command = "node "+ path.join( __dirname, 'monthly-export.js');
+  const ls = exec(command, function (err, result) {
+    if (err) {  throw err }
+    else
+      res.sendStatus(202);
   });
 });
 
@@ -57,17 +67,16 @@ app.post('/posted', (req, res)=>{
   if(req.method==='POST'){
     fs.readFile( path.join( __dirname, "/data/data.json"), (err, json)=>{
       if(err){ throw err }
-      json = JSON.parse(json);
+      json!="" ? json = JSON.parse(json) : json = [];
 
-      req.body.patient['Treatment Date'] = dateformat.ddmonyyyy(req.body.patient['Treatment Date']);
-      req.body.patient['Next Appointment'] = dateformat.ddmonyyyy(req.body.patient['Next Appointment']);
+      req.body.patient['Treatment Date'] = dateFormat.ddmonyyyy(req.body.patient['Treatment Date']);
+      req.body.patient['Next Appointment'] = dateFormat.ddmonyyyy(req.body.patient['Next Appointment']);
 
       json.push(req.body.patient);
       fs.writeFile( path.join( __dirname, "/data/data.json"), JSON.stringify(json), (err)=>{
         if(err){  throw err }
       });
-      res.writeHead(201, {'Content-Type':'text/plain'});
-      res.write("Added..")
+      res.redirect("/");
       res.end();
     });
   }
@@ -105,7 +114,7 @@ app.post('/updation', (req, res)=>{
     toKey = Object.keys(toRecord)[0];
 
     if( toKey =='Treatment Date' || toKey=='Next Appointment' ) {
-      toRecord[toKey] = dateformat.ddmonyyyy( toRecord[toKey] );
+      toRecord[toKey] = dateFormat.ddmonyyyy( toRecord[toKey] );
       console.log( toRecord[toKey] );
     }
 
@@ -123,6 +132,36 @@ app.post('/updation', (req, res)=>{
           res.sendStatus(202);
         }
       });
+    });
+  }
+})
+
+app.get('/whichMonth', (req, res)=>{
+  if(req.method==='GET'){
+    fs.readFile( path.join(__dirname, "view", "whichMonth.html"), (err, html)=>{
+      if(err){  throw err }
+      else{
+        res.writeHead(200, {'Content-Type':'text/html'});
+        res.write(html);
+        res.end();
+      }
+    });
+  }
+});
+
+app.post('/existingFiles', (req, res)=>{
+  var existingFiles = dataFiles.JSONFiles();
+  res.send( existingFiles );
+});
+
+app.post('/monthDetails', (req, res)=>{
+  var existingFiles = dataFiles.JSONFiles();
+  if(req.method==='POST') {
+    var fileChoice = req.body.fileChoice;
+    fs.readFile( path.join(__dirname, "data", fileChoice+".json"), (err, json)=>{
+      if(err){  throw err;  }
+      json = JSON.parse(json);
+      res.json(json);
     });
   }
 })
@@ -145,7 +184,7 @@ app.get('/export', (req, res)=>{
   });
 });
 
-app.get('/json', (req, res)=>{
+app.get('/datajson', (req, res)=>{
   fs.readFile( path.join(__dirname, '/data/data.json'), (err, json)=>{
     if(err) { throw err }
     res.json( JSON.parse(json) );
@@ -154,4 +193,4 @@ app.get('/json', (req, res)=>{
 })
 
 app.listen(9090);
-console.log("Server currently running @ 9090...");
+console.log("Server running @ http://127.0.0.1:9090...");
