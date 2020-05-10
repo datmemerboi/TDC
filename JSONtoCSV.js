@@ -11,19 +11,13 @@ if( process.argv[3] ){
   toFile = process.argv[3].replace("data/",'');
 }
 
-console.log( fromFile, toFile );
-
-
 fs.readFile( path.join(__dirname, "data", fromFile), (err, json)=>{
   if(err){  throw err }
   json = JSON.parse(json);
 
   var columns = ""; var keys = Object.keys(json[0]);
   keys.forEach((item, i) => {
-    if(i==0)
-      columns += item;
-    else
-      columns = columns + "," + item;
+    i==0 ? columns += item : columns = columns + "," + item;
   });
   columns+="\n";
 
