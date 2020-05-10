@@ -1,7 +1,10 @@
 body {
   font-size: 20px;
 }
-#patient-table {
+.container {
+  padding-bottom: 3em;
+}
+table {
   border-collapse: collapse;
   width: 100%;
 }
@@ -13,9 +16,30 @@ th, td {
   border-bottom: 1px solid #DDD;
   text-align: center;
 }
+.head-row {
+  user-select: none;
+  background-color: #FFF;
+}
+.head-row:hover {
+  background-color: #FFF;
+}
 tr:hover {
   background-color: #F0F0F0;
 }
 tr:active {
   background-color: #BABABA;
+}
+.btn {
+  border-style: thin; border-width: 0.1px; border-color: #000;
+  outline: none;
+  width: 10vw; height: 5vh;
+  background-color: #2471A3;
+  color: #FFF;
+  font-size: 18px;
+}
+.center-btn {
+  position: absolute; left: 44vw;
+}
+.center-btn:active {
+  background-color: #3582B4;
 }

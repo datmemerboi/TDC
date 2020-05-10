@@ -15,7 +15,7 @@ function clearTable() {
 }
 
 function toSearch(patientName) {
-  $.post('http://localhost:9090/showdata', {},(data)=>{
+  $.post('http://localhost:9090/showData', {},(data)=>{
     data.forEach((record)=>{
       if(record.Name==patientName){
         var row = document.createElement("TR");
