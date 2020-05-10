@@ -16,6 +16,7 @@ fs.readFile( path.join(__dirname, "data", fromFile), (err, json)=>{
   json = JSON.parse(json);
 
   var columns = ""; var keys = Object.keys(json[0]);
+  
   keys.forEach((item, i) => {
     i==0 ? columns += item : columns = columns + "," + item;
   });
