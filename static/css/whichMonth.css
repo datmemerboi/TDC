@@ -1,0 +1,51 @@
+body {
+  font-size: 20px;
+  color: #000;
+}
+.whichMonth-form {
+  position: absolute; left: 30vw; top: 2vh;
+}
+.whichMonth-input-select {
+  width: 24vw; height: 7vh;
+  padding: 10px;
+  background-color: #F0F0F0;
+  border: none; outline: none;
+  font-size: 18px;
+}
+.whichMonth-submit {
+  width: 10vw; height: 5vh;
+  background-color: #2471A3;
+  color: #FFF;
+  border: none; outline: none;
+  position: relative; left: 12vw;
+  font-size: 18px;
+}
+.container {
+  position: absolute; top: 14vh;
+  padding-bottom: 3em;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+th {
+  background-color: #F0F0F0;
+}
+th, td {
+  padding: 6px;
+  border-bottom: 1px solid #DDD;
+  text-align: center;
+}
+.head-row {
+  user-select: none;
+  background-color: #FFF;
+}
+.head-row:hover {
+  background-color: #FFF;
+}
+tr:hover {
+  background-color: #F0F0F0;
+}
+tr:active {
+  background-color: #BABABA;
+}
