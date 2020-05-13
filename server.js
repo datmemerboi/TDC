@@ -25,6 +25,7 @@ app.get('/', (request, response)=>{
 });
 
 app.get('/view', (req, res)=>{
+  dataFiles.NeverEmptyJSON();
   fs.readFile( path.join( __dirname, "/view/view.html"), (err, html)=>{
     if(err){  throw err; }
     else {
@@ -53,6 +54,7 @@ app.get('/monthlyExport', (req, res)=>{
 });
 
 app.get('/add', (req,res)=>{
+  dataFiles.NeverEmptyJSON();
   fs.readFile( path.join( __dirname, "/add/add.html"), (err, html)=>{
     if(err){  throw err }
     else if(req.method==='GET'){
@@ -83,6 +85,7 @@ app.post('/posted', (req, res)=>{
 });
 
 app.get('/search', (req, res)=>{
+  dataFiles.NeverEmptyJSON();
   if(req.method==='GET'){
     fs.readFile( path.join( __dirname, "/search/search.html"), (err, html)=>{
       if(err){  throw err }
@@ -96,6 +99,7 @@ app.get('/search', (req, res)=>{
 });
 
 app.get('/update', (req, res)=>{
+  dataFiles.NeverEmptyJSON();
   if(req.method==='GET'){
     fs.readFile( path.join( __dirname, "/update/update.html"), (err,html)=>{
       if(err){  throw err }
@@ -137,6 +141,7 @@ app.post('/updation', (req, res)=>{
 })
 
 app.get('/whichMonth', (req, res)=>{
+  dataFiles.NeverEmptyJSON();
   if(req.method==='GET'){
     fs.readFile( path.join(__dirname, "view", "whichMonth.html"), (err, html)=>{
       if(err){  throw err }

@@ -18,15 +18,17 @@ var methods = {
     });
     return filesArray;
   },
-  ImportBeforehand : function() {
-    fs.readFile('./data/data.json', (err, res)=>{
-      if( res==""){
-        const imp = exec("node CSVtoJSON.js", function (err) {
-          if (err) {  throw err }
+  NeverEmptyJSON : function() {
+    fs.readFile('./data/data.json', (err, open)=>{
+      if(err){ throw err  }
+      if( open=="" || open=="\n" ){
+        fs.writeFile('./data/data.json', "[]", (err, written)=>{
+          if(err){  throw err }
+          console.log("Written '[]' into data.json");
         });
       }
     });
-  },
+  }
 }
 
 module.exports = methods;

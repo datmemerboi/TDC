@@ -53,7 +53,7 @@ fs.readFile( path.join(__dirname, "data", "data.json"), (err, json)=>{
   });
   console.log("--- /data/data.json written into /data/"+toFile+" ---");
 
-  fs.writeFile( path.join(__dirname, "data", "data.json"), "", (err)=>{
+  fs.writeFile( path.join(__dirname, "data", "data.json"), "[]", (err)=>{
       if(err) { throw err }
     });
 });
