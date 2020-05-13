@@ -12,6 +12,9 @@
     <div class="container">
       <table id="patient-table">
         <thead>
+          <tr class="head-row">
+            <td colspan="100%" id="date-td"></td>
+          </tr>
           <th> Name </th>
           <th> Phone No. </th>
           <th> Age </th>
@@ -28,6 +31,8 @@
         <tbody id="patient-table-body">
         </tbody>
       </table>
+      <br style="user-select:none">
+      <button class="btn center-btn" onclick="exportFn()">Export for month</button>
     </div>
   </body>
   <script type="text/javascript" src="/js/view.js"></script>

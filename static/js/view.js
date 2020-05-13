@@ -1,5 +1,11 @@
+function showDate() {
+  var months=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  var monthYYYY = months[new Date().getMonth()]+" "+(new Date().getFullYear());
+  document.getElementById('date-td').innerHTML = monthYYYY;
+}
 window.onload= ()=>{
-  $.post('http://localhost:9090/showdata', {},(data)=>{
+  showDate();
+  $.post('http://localhost:9090/showData', {},(data)=>{
       data.forEach((record, index) => {
         var row = document.createElement("TR");
 
@@ -37,4 +43,16 @@ window.onload= ()=>{
       });
 
  })
+};
+function exportFn() {
+  $.get("http://localhost:9090/monthlyExport", {}, (res)=>{
+    if(res==="Accepted"){
+      alert("Exported!");
+      window.location.href = "/"
+    }
+    else {
+      console.log(res);
+      alert("Some error has occured.");
+    }
+  });
 };

@@ -14,16 +14,22 @@ var methods = {
     var changedDate = date.getDate()+'-'+months[date.getMonth()]+'-'+date.getFullYear();
     return changedDate;
   },
-  ddmmyy: function(argument) {
-    // 1-01-20
-    var date = new Date(argument);
-    var changedDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear().toString().slice(2,4);
-    return changedDate;
-  },
   ddmmyyyy: function(argument) {
     // 1-01-2020
     var date = new Date(argument);
     var changedDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear().toString();
+    return changedDate;
+  },
+  MonthsYYYY: function (argument) {
+    // January 2020
+    var date = new Date(argument);
+    var changedDate = months[date.getMonth()]+' '+date.getFullYear();
+    return changedDate;
+  },
+  Month: function(argument) {
+    // January
+    var date = new Date(argument);
+    var changedDate = months[date.getMonth()];
     return changedDate;
   }
 }
