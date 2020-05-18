@@ -14,11 +14,14 @@ A very basic system which mainly works on JSON / CSV files instead of using any 
 - CSV <--> JSON
 
 **Note**
-*data.json* is empty, which will crash the application on View / Search / Update. You can add data first and then view.
+
+Empty *data.json* will **NOT** crash the application. You can add data first and then check the View functionality.
 
 If you have pre-existing data, copy the file to */data* and run `node CSVtoJSON.js `*filename*` data.json`.
 Else, run `node CSVtoJSON.js` to use the dummy data from *data/data.csv*.
 
 **Run**
+
 Windows system: `node setup.js` and `node server.js`
+
 Other platforms: `npm install` and `nodemon server.js`
