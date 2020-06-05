@@ -45,11 +45,21 @@ app.post('/showData', (req,res)=>{
 });
 
 app.get('/monthlyExport', (req, res)=>{
-  command = "node "+ path.join( __dirname, 'monthly-export.js');
-  const ls = exec(command, function (err, result) {
-    if (err) {  throw err }
-    else
-      res.sendStatus(202);
+  fs.readFile( path.join(__dirname, "data", "data.json"), (err, json)=>{
+    if(err){  throw err }
+    json = JSON.parse(json);
+
+    if(!(json.length > 0)) {
+      res.send("Null Data");
+    }
+    else {
+      command = "node "+ path.join( __dirname, 'monthly-export.js');
+      const ls = exec(command, function (err, result) {
+        if (err) {  throw err }
+        else
+          res.sendStatus(202);
+      });
+    }
   });
 });
 
