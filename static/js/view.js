@@ -2,6 +2,7 @@ function showDate() {
   var months=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
   var monthYYYY = months[new Date().getMonth()]+" "+(new Date().getFullYear());
   document.getElementById('date-td').innerHTML = monthYYYY;
+  document.getElementById('modal-date-filename').innerHTML = monthYYYY;
 }
 window.onload= ()=>{
   showDate();
@@ -44,11 +45,20 @@ window.onload= ()=>{
 
  })
 };
+function makingSure() {
+  document.getElementById('modal-container').style.display = "block";
+}
+function cancelExport() {
+  document.getElementById('modal-container').style.display = "none";
+}
 function exportFn() {
   $.get("http://localhost:9090/monthlyExport", {}, (res)=>{
     if(res==="Accepted"){
       alert("Exported!");
       window.location.href = "/"
+    }
+    if(res==="Null Data") {
+      alert("No data to export!");
     }
     else {
       console.log(res);

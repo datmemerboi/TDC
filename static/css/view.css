@@ -43,3 +43,35 @@ tr:active {
 .center-btn:active {
   background-color: #3582B4;
 }
+@-webkit-keyframes slideIn {
+  from{ top: -20em; }
+  to{ top: 0; }
+}
+.modal-container {
+  background-color: rgba(0, 0, 0, 0.7);
+  display: none;
+  width: 100vw; height: 100vh;
+  position: fixed; left: 0; top: 0;
+  animation: slideIn 1s;
+}
+.modal-box {
+  background-color: #FFF;
+  width: 30vw; min-height: 20vh;
+  position: relative; top: 15vh; left: 32vw;
+  border: none; border-radius: 8px;
+  padding: 3vmin;
+}
+.small-btn {
+  border-style: solid; border-width: 2px; border-radius: 10px;
+  background-color: #FAFAFA;
+  width: 6vw;
+}
+.cancel-btn {
+  border-color: #A93226; color: #A93226;
+}
+.goAhead-btn {
+  border-color: #2ECC71; color: #2ECC71;
+}
+.no-select {
+  user-select: none;
+}
