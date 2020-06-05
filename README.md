@@ -20,6 +20,6 @@ If you have pre-existing data, copy the file to */data* and run `node CSVtoJSON.
 Else, run `node CSVtoJSON.js` to use the dummy data from *data/data.csv*.
 
 ### Run
-Windows system: `node setup.js` and `node server.js`
+Windows system: Executing `setup.bat` should start the server.
 
 Other platforms: `npm install` and `nodemon server.js`
