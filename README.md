@@ -20,6 +20,6 @@ If you have pre-existing data, copy the file to */data* and run `node CSVtoJSON.
 Else, run `node CSVtoJSON.js` to use the dummy data from *data/data.csv*.
 
 ### Run
-Windows system: Executing `setup.bat` should start the server.
+Windows system: `win-setup.bat` will create a desktop shortcut(`RunTDC.bat`). Simply run it.
 
-Other platforms: `npm install` and `nodemon server.js`
+Other platforms: Run `npm install && npm start`
