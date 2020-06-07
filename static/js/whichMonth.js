@@ -1,10 +1,11 @@
-function clearTable() {
-  document.getElementById('monthly-table-body').childNodes.forEach((child)=>{
-    document.getElementById('monthly-table-body').removeChild(child);
-  });
+async function clearTable() {
+  var mtb = document.getElementById('monthly-table-body')
+  while(mtb.firstElementChild) {
+    mtb.removeChild( mtb.firstElementChild );
+  }
 }
-window.onload = ()=> {
-  clearTable();
+window.onload = async()=> {
+  await clearTable();
   $.post('http://localhost:9090/existingFiles', {}, (existingFiles)=>{
     existingFiles.forEach( (file)=>{
       var option = document.createElement("OPTION");
@@ -15,8 +16,8 @@ window.onload = ()=> {
     });
   });
 }
-function choice(arg) {
-  clearTable();
+async function choice(arg) {
+  await clearTable();
   $.post('http://localhost:9090/monthDetails', {'fileChoice':arg}, (data)=>{
     data.forEach((record, index) => {
       var row = document.createElement("TR");
@@ -45,11 +46,12 @@ function choice(arg) {
       nextDate.innerHTML = record['Next Appointment'];
       var addInfo = document.createElement('TD');
       addInfo.innerHTML = record['Additional Information'];
+      var initial = document.createElement('TD');
 
       row.appendChild(name); row.appendChild(phone); row.appendChild(age);
       row.appendChild(sex); row.appendChild(treatmentDate); row.appendChild(provDiag);
       row.appendChild(investigation); row.appendChild(finalDiag); row.appendChild(treatment);
-      row.appendChild(result); row.appendChild(nextDate); row.appendChild(addInfo);
+      row.appendChild(result); row.appendChild(nextDate); row.appendChild(addInfo); row.appendChild(initial)
 
       document.getElementById('monthly-table-body').appendChild(row);
     });

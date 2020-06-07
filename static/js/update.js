@@ -8,10 +8,10 @@ document.getElementById('patient-name').addEventListener('keyup', (event)=>{
 });
 
 function clearTable() {
-  var table = document.getElementById('update-table-body');
-  table.childNodes.forEach(( node )=>{
-    table.removeChild( node );
-  });
+  var table = document.getElementById('search-table-body');
+  while(table.firstElementChild) {
+    table.removeChild( table.firstElementChild );
+  }
 }
 
 function toUpdate(patientName) {

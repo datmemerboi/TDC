@@ -9,9 +9,9 @@ document.getElementById('patient-name').addEventListener('keyup', (event)=>{
 
 function clearTable() {
   var table = document.getElementById('search-table-body');
-  table.childNodes.forEach(( node )=>{
-    table.removeChild( node );
-  });
+  while(table.firstElementChild) {
+    table.removeChild( table.firstElementChild );
+  }
 }
 
 function toSearch(patientName) {
