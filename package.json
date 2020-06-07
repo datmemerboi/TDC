@@ -1,6 +1,6 @@
 {
   "name": "tdc-app",
-  "version": "3.0.0",
+  "version": "2.0.0",
   "description": "The entire working app for TDC",
   "main": "server.js",
   "scripts": {
