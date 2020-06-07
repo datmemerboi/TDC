@@ -1,5 +1,5 @@
 body {
-  font-size: 20px;
+  font-size: 3vmin;
   color: #000;
 }
 .whichMonth-form {
@@ -7,10 +7,10 @@ body {
 }
 .whichMonth-input-select {
   width: 24vw; height: 7vh;
-  padding: 10px;
+  padding: 2vmin;
   background-color: #F0F0F0;
   border: none; outline: none;
-  font-size: 18px;
+  font-size: 2.5vmin;
 }
 .whichMonth-submit {
   width: 10vw; height: 5vh;
@@ -18,7 +18,7 @@ body {
   color: #FFF;
   border: none; outline: none;
   position: relative; left: 12vw;
-  font-size: 18px;
+  font-size: 2.5vmin;
 }
 .container {
   position: absolute; top: 14vh;
@@ -32,7 +32,7 @@ th {
   background-color: #F0F0F0;
 }
 th, td {
-  padding: 6px;
+  padding: 1vmin;
   border-bottom: 1px solid #DDD;
   text-align: center;
 }

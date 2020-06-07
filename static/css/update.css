@@ -1,13 +1,16 @@
 body {
-  font-size: 20px;
+  font-size: 3vmin;
 }
 table {
   position: absolute; top: 18%;
   border-collapse: collapse;
   width: 99%;
 }
+th {
+  background-color: #F0F0F0;
+}
 th, td {
-  padding: 6px;
+  padding: 2.2vmin;
   border-bottom: 1px solid #DDD;
   text-align: center;
 }
@@ -31,17 +34,17 @@ tr::selection {
   width: 20vw; height: 5vh;
   background-color: #F0F0F0;
   border: none; outline: none;
-  font-size: 18px;
+  font-size: 2.5vmin;
 }
 .hidden-input {
   display: none;
 }
 .update-input {
   width: 23vw; height: 5vh;
-  padding: 10px;
+  padding: 2vmin;
   background-color: #F0F0F0;
   border: none; outline: none;
-  font-size: 18px;
+  font-size: 2.5vmin;
   position: relative; left: 6vw;
 }
 .update-input-select {
@@ -56,7 +59,7 @@ tr::selection {
   color: #FFF;
   border-style: thin; border-width: 0.1px; border-color: #000; outline:none;
   position: relative; left: 12vw;
-  font-size: 18px;
+  font-size: 2.5vmin;
 }
 #patient-name {
   position: relative; left: 37vw;

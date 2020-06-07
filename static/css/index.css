@@ -1,5 +1,5 @@
 body {
-  font-size: 20px;
+  font-size: 3vmin;
   background-color: #2471A3;
 }
 h1, h2 {
@@ -16,5 +16,5 @@ a:hover {
   width: 30vw;
 }
 li {
-  font-size: 25px;
+  font-size: 4vmin;
 }
