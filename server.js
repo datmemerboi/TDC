@@ -208,4 +208,6 @@ app.get('/datajson', (req, res)=>{
 })
 
 app.listen(9090);
-console.log("Server running @ http://127.0.0.1:9090...");
+console.log("Server running @ http://127.0.0.1:9090..");
+console.log("Go to localhost:9090 on your browser");
+console.log("Press CTRL+C to stop..");
