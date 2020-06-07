@@ -53,16 +53,17 @@ function cancelExport() {
 }
 function exportFn() {
   $.get("http://localhost:9090/monthlyExport", {}, (res)=>{
-    if(res==="Accepted"){
-      alert("Exported!");
-      window.location.href = "/"
-    }
-    if(res==="Null Data") {
-      alert("No data to export!");
-    }
-    else {
-      console.log(res);
-      alert("Some error has occured.");
+    switch (res) {
+      case "Accepted":
+        alert("Exported!");
+        window.location.href = "/";
+        break;
+      case "Null Data":
+        alert("No data to export!");
+        break;
+      default:
+        console.log(res);
+        alert("Some error has occured.");
     }
   });
 };
