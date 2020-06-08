@@ -8,7 +8,7 @@ document.getElementById('patient-name').addEventListener('keyup', (event)=>{
 });
 
 function clearTable() {
-  var table = document.getElementById('search-table-body');
+  var table = document.getElementById('update-table-body');
   while(table.firstElementChild) {
     table.removeChild( table.firstElementChild );
   }
