@@ -10,16 +10,23 @@ A very basic system which mainly works on JSON / CSV files instead of using any 
 - Add patients
 - Search patient details
 - Update patient details
-- Monthly Split of Patients
+- Monthly Split of patients
 - CSV <--> JSON
 
-### Note
-Empty *data.json* will **NOT** crash the application. You can add data first and then check the View functionality.
-
-If you have pre-existing data, copy the file to */data* and run `node CSVtoJSON.js `*filename*` data.json`.
-Else, run `node CSVtoJSON.js` to use the dummy data from *data/data.csv*.
+### Requirements
+**Nodejs (with npm)**
 
 ### Run
 Windows system: `win-setup.bat` will create a desktop shortcut(`RunTDC.bat`). Simply run it.
 
 Other platforms: Run `npm install && npm start`
+
+### Note
+Exporting null data (monthly or copy) will crash the app; refrain from doing so until the necessary updates are made.
+
+If you have pre-existing CSV data:
+> run `node CSVtoJSON.js `filename` data.json`
+or
+> copy it into *data/data.csv* and run `node CSVtoJSON.js`
+
+Run `node CSVtoJSON.js` to use the dummy data in *data/data.csv*.
