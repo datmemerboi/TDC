@@ -191,7 +191,7 @@ app.get('/import', (req, res)=>{
 });
 
 app.get('/export', (req, res)=>{
-  command = "node "+ path.join( __dirname, 'JSONtoCSV.js');
+  command = "node "+ path.join( __dirname, 'JSONtoCSV.js data/data.json data/copy.csv');
   const ls = exec(command, function (err, result) {
     if (err) {  throw err }
     else
