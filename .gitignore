@@ -1,8 +1,24 @@
+# MISC FOLDERS
 about/
+pdf/
+invoice/
+
+# MISC FILES
+/*/try.js
+noder.js
+try.js
+export-module.js
+
+# ENV FILES
+.env
+
+# OLD CODE
+server/
+api/check-package.json
+
+# NPM
 node_modules/
-static/css/about.css
-DataInfo.md
-data/*.xlsx
-data/J*
-data/F*
-data/M*
+package-lock.json
+
+# TESTS
+test/
