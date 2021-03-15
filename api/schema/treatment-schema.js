@@ -3,16 +3,19 @@ const Schema = require('mongoose').Schema;
 var Treatment = new Schema({
   t_id: { type: String, required: true, index: true, unique: true },
   p_id: { type: String, required: true, index: true },
-  procedure_done: String,
+  procedure_done: { type: String, default: "" },
   teeth_number: [{ type: Number }],
   treatment_date: { type: Date, default: Date.now },
   doctor: { type: String },
-  remarks: String,
+  remarks: { type: String, default: null },
   created_at: { type: Date, default: Date.now }
 });
 
 Treatment.statics.getAll = function () {
-  return this.find({}, { _id: 0, __v: 0 }).sort('-created_at').exec();
+  return this.find({}, { _id: 0, __v: 0 })
+    .sort('-created_at')
+    .lean()
+    .exec();
 };
 
 Treatment.statics.countAll = function () {
@@ -20,16 +23,20 @@ Treatment.statics.countAll = function () {
 };
 
 Treatment.statics.getByTid = function (tid) {
-  return this.findOne({ t_id: tid }, { _id: 0, __v: 0 }).exec();
+  return this.findOne({ t_id: tid }, { _id: 0, __v: 0 })
+    .lean()
+    .exec();
 };
 
 Treatment.statics.findInTid = function (tid) {
   return this.find({ t_id: { $in: tid } }, { _id: 0, __v: 0 })
+    .lean()  
     .exec();
 };
 
 Treatment.statics.findByPid = function (pid) {
   return this.find({ p_id: pid }, { _id: 0, __v: 0 })
+    .lean()
     .exec();
 };
 
@@ -45,10 +52,10 @@ Treatment.statics.countByPid = function (pid) {
 };
 
 Treatment.statics.findByDoctor = function (doctor) {
-  return this.find(
-    { doctor: doctor },
-    { _id: 0, __v: 0 }
-  ).sort('-treatment_date').exec();
+  return this.find({ doctor: doctor }, { _id: 0, __v: 0 })
+    .sort('-treatment_date')
+    .lean()
+    .exec();
 };
 
 Treatment.statics.countByDoctor = function (doctor) {
@@ -68,7 +75,9 @@ Treatment.statics.findBetweenDate = function (from, to) {
       ]
     },
     { _id: 0, __v: 0 }
-  ).exec();
+  )
+    .lean()
+    .exec();
 };
 
 Treatment.statics.updateDoc = function (tid, doc) {
@@ -79,17 +88,8 @@ Treatment.statics.updateDoc = function (tid, doc) {
   ).exec();
 };
 
-Treatment.statics.updateOldToNew = function (o, n) {
-  return this.findOneAndUpdate(
-    { t_id: o.t_id },
-    { $set: n }
-  ).exec();
-};
-
 Treatment.statics.deleteByTid = function (tid) {
-  return this.deleteOne(
-    { t_id: tid }
-  ).exec();
+  return this.deleteOne({ t_id: tid }).exec();
 };
 
 // ALT MOST RECENT TREATMENT ID
