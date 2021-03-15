@@ -84,6 +84,22 @@ async function GetPatientHandler(pid) {
   }
 }
 
+async function BulkPatientsHandler(pidList) {
+  try {
+    const db = await dbUtils.connect();
+    const docs = await db.Patient.getByPidList(pidList);
+    if (!docs.length) {
+      console.log(`[UTILS] BulkPatientsHandler returns empty data`);
+      return { status: 404, body: null };
+    } else {
+      console.log(`[UTILS] BulkPatientsHandler success`);
+      return { status: 200, body: { total_docs: docs.length, docs } };
+    }
+  } catch (err) {
+    console.error(`[UTILS] Error @ BulkPatientsHandler`)
+  }
+}
+
 async function GetDistinctAreasHandler() {
   try {
     const db = await dbUtils.connect();
@@ -194,6 +210,7 @@ function SearchPatientHandler(term, type) {
 PatientUtils.prototype.NewPatientHandler = NewPatientHandler;
 PatientUtils.prototype.AllPatientHandler = AllPatientHandler;
 PatientUtils.prototype.GetPatientHandler = GetPatientHandler;
+PatientUtils.prototype.BulkPatientsHandler = BulkPatientsHandler;
 PatientUtils.prototype.GetDistinctAreasHandler = GetDistinctAreasHandler;
 PatientUtils.prototype.UpdatePatientHandler = UpdatePatientHandler;
 PatientUtils.prototype.SearchPatientHandler = SearchPatientHandler;
