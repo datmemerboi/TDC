@@ -53,6 +53,24 @@ router.all('/get/:pid', function (req, res) {
     }
 });
 
+router.post('/bulk', (req, res) => {
+  console.log(`[API] ${req.method} request to /api/patient/bulk/`);
+  if (!req.body || req.body === {} || !req.body.pids) {
+    console.error(`[API] Bad request: missing required parameters`);
+    res.sendStatus(400).end();
+  } else {
+    PatientUtils.BulkPatientsHandler(req.body.pids)
+      .then(result => {
+        console.log(`[API] Request handled successfully`);
+        res.status(result.status).json(result.body).end();
+      })
+      .catch(err => {
+        console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
+        res.sendStatus(500).end();
+      })
+  }
+})
+
 router.get('/areas', function (req, res) {
   console.log(`[API] ${req.method} request to /api/patient/areas/`);
   PatientUtils.GetDistinctAreasHandler()
