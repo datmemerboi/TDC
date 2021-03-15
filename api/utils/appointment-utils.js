@@ -64,14 +64,67 @@ function generateStatsForAppointment(docs) {
   return [...doctorStats, ...statusStats];
 }
 
+function mergePatientDetails(db, pid, doc) {
+  return new Promise((resolve, reject) => {
+    db.Patient.getByPid(pid)
+      .then(patient => {
+        var mergedDoc = {
+          ...doc,
+          patient: {
+            name: patient.name,
+            age: patient.age,
+            gender: patient.gender
+          }
+        };
+        return resolve(mergedDoc);
+      })
+      .catch(err => {
+        console.error(`[UTILS] Error @ mergePatientDetails \n ${JSON.stringify(err)}`);
+        return resolve(doc);
+      })
+  });
+}
+
+function checkAppointmentFeasibility(db, doc) {
+  // Check if a new appointment doc is feasible
+  return new Promise((resolve, reject) => {
+    if (!doc.app_id || !doc.appointment_date || !doc.doctor || !doc.status) {
+      // Appointment id, timing, doctor and status not mentioned
+      return resolve(false);
+    } else {
+      let from = doc.appointment_date - 900000, // 15 minutes before appointment_date
+          to = doc.appointment_date + 900000; // 15 minutes after appointment_date
+      
+      // Get count of instances for the same doctor, with the same status, 15 mins before & after the mentioned appointment timing
+      db.Appointment.countByAvailability(doc.doctor, doc.status, from, to)
+        .then(instances => {
+          if (instances > 0) {
+            return resolve(false);
+          } else {
+            return resolve(true);
+          }
+        })
+        .catch(err => {
+          console.error(`[UTILS] Error @ checkAppointmentFeasibility \n ${JSON.stringify(err)}`);
+          return reject(false);
+        });
+    }
+  });
+}
+
 function sanitize(doc) {
   // Create a clean object fit for the db
-  var cleanObj = { ...doc };
+  var cleanObj = new Object(doc);
   for (let key in cleanObj) {
+    // Removing empty & id keys from the object
     if (key === "app_id" || cleanObj[key] === null || cleanObj[key] === undefined || cleanObj[key] === "") {
       delete cleanObj[key];
     }
   }
+  // Convert appointment_date to JS milliseconds
+  cleanObj.appointment_date = cleanObj.appointment_date < 1000000000000
+    ? new Date(cleanObj.appointment_date * 1000).getTime()
+    : cleanObj.appointment_date;
   return cleanObj;
 }
 
@@ -81,8 +134,14 @@ async function NewAppointmentHandler(doc) {
     const appid = await makeNextAid(db); // Create the next appointment id
     doc = sanitize(doc);
     doc.app_id = appid;
-    await db.Appointment.create(doc);
-    return { status: 201, body: doc };
+    if (await checkAppointmentFeasibility()) {
+      await db.Appointment.create(doc);
+      console.log(`[UTILS] NewAppointmentHandler success`);
+      return { status: 201, body: doc };
+    } else {
+      console.log(`[UTILS] Mentioned appointment is not feasible`);
+      return { status: 409, body: doc };
+    }
   } catch (err) {
     console.error(`[UTILS] Error @ NewAppointmentHandler \n ${JSON.stringify(err)}`);
     return err;
@@ -206,9 +265,10 @@ async function DateAppointmentHandler(from, to, count = false) {
       // Request for only count of records
       return { status: 200, body: { total_docs: docs.length } };
     } else {
+      const mergedDocs = await Promise.all(docs.map(doc => mergePatientDetails(db, doc.p_id, doc)));
       var result = {
         total_docs: docs.length,
-        docs,
+        docs: mergedDocs,
         meta: generateStatsForAppointment(docs)
       };
       console.log(`[UTILS] DateAppointmentHandler success`);
