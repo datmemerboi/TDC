@@ -36,7 +36,7 @@ async function checkCompatibility(list) {
 }
 
 function sanitize(doc) {
-  var cleanObj = { ...doc };
+  var cleanObj = new Object(doc);
   for (let key in cleanObj) {
     if (key === "t_id" || cleanObj[key] === null || cleanObj[key] === undefined || cleanObj[key] === "") {
       delete cleanObj[key];
@@ -45,6 +45,9 @@ function sanitize(doc) {
   if (cleanObj.teeth_number && typeof cleanObj.teeth_number === "string") {
     cleanObj.teeth_number = cleanObj.teeth_number.split(',').map(t => parseInt(t));
   }
+  cleanObj.treatment_date = cleanObj.treatment_date < 1000000000000
+    ? new Date(cleanObj.treatment_date * 1000).getTime()
+    : cleanObj.treatment_date;
   return cleanObj;
 }
 
