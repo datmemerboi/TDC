@@ -13,6 +13,7 @@ var Appointment = new Schema({
 Appointment.statics.getAll = function () {
   return this.find({}, { _id: 0, __v: 0 })
     .sort('-appointment_date')
+    .lean()
     .exec();
 };
 
@@ -21,18 +22,16 @@ Appointment.statics.countAll = function () {
 };
 
 Appointment.statics.getByAppid = function (appid) {
-  return this.findOne(
-    { app_id: appid },
-    { _id: 0, __v: 0 }
-  ).exec();
+  return this.findOne({ app_id: appid }, { _id: 0, __v: 0 })
+    .lean()
+    .exec();
 };
 
 Appointment.statics.findByPid = function (pid) {
-  return this.find(
-    { p_id: pid },
-    { _id: 0, __v: 0 }
-  ).sort('-appointment_date')
-  .exec();
+  return this.find({ p_id: pid }, { _id: 0, __v: 0 })
+    .sort('-appointment_date')
+    .lean()
+    .exec();
 };
 
 Appointment.statics.countByPid = function (pid) {
@@ -48,7 +47,8 @@ Appointment.statics.getLatestAppId = function () {
 
 Appointment.statics.findByDoctor = function (doctor) {
   return this.find({ doctor: doctor }, { _id: 0, __v: 0 })
-    .sort('-created_at')
+    .sort('-appointment_date')
+    .lean()
     .exec();
 };
 
@@ -61,38 +61,57 @@ Appointment.statics.getDistinctDoctor = function () {
 };
 
 Appointment.statics.findBetweenDate = function (from, to) {
-  return this.find({
+  return this.find(
+    {
       $and: [
         { appointment_date: { $gte: from } },
         { appointment_date: { $lte: to } }
       ]
     },
     { _id: 0, __v: 0 }
-  ).exec();
+  )
+    .sort('-appointment_date')
+    .lean()
+    .exec();
 };
 
 Appointment.statics.countBetweenDate = function (from, to) {
-  return this.find({
-    $and: [
-      { appointment_date: { $gte: from } },
-      { appointment_date: { $lte: to } }
-    ]
-  }).countDocuments();
+  return this.find(
+    {
+      $and: [
+        { appointment_date: { $gte: from } },
+        { appointment_date: { $lte: to } }
+      ]
+    }
+  ).countDocuments();
 };
 
 Appointment.statics.findByStatus = function (status) {
-  return this.find({ status: status }, { _id: 0, __v: 0 }).exec();
+  return this.find({ status: status }, { _id: 0, __v: 0 })
+    .sort('-created_at')
+    .lean()
+    .exec();
 };
 
 Appointment.statics.countByStatus = function (status) {
   return this.find({ status: status }).countDocuments();
 };
 
+Appointment.statics.countByAvailability = function (doctor, status, from, to) {
+  return this.find(
+    {
+      $and: [
+        { appointment_date: { $gte: from } },
+        { appointment_date: { $lte: to } },
+        { status: status },
+        { doctor: doctor }
+      ]
+    }
+  ).countDocuments();
+};
+
 Appointment.statics.updateDoc = function (appid, doc) {
-  return this.findOneAndUpdate(
-    { app_id: appid },
-    { $set: doc }
-  ).exec();
+  return this.findOneAndUpdate({ app_id: appid }, { $set: doc }).exec();
 };
 
 Appointment.statics.deleteByAppid = function (appid) {
