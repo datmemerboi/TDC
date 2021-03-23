@@ -2,7 +2,8 @@ const express = require('express'),
       app = express(),
       AppointmentRoutes = require('./routes/appointment-routes'),
       TreatmentRoutes = require('./routes/treatment-routes'),
-      PatientRoutes = require('./routes/patient-routes');
+      PatientRoutes = require('./routes/patient-routes'),
+      InvoiceRoutes = require('./routes/invoice-routes');
 
 const config = require('./config.json')[process.env.NODE_ENV ?? "dev"],
       PORT = config?.PORT ?? 8080;
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use('/api/patient', PatientRoutes);
 app.use('/api/treatment', TreatmentRoutes);
 app.use('/api/appointment', AppointmentRoutes);
+app.use('/api/invoice', InvoiceRoutes);
 
 app.get('/_health', (req, res) => {
   console.log(`[API] ${req.method} request to /_health/`);
