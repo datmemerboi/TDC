@@ -141,8 +141,8 @@ router.post('/compatibility', (req, res) => {
       .catch(err => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
-      })
+      });
   }
-})
+});
 
 module.exports = router;

@@ -67,9 +67,9 @@ router.post('/bulk', (req, res) => {
       .catch(err => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
-      })
+      });
   }
-})
+});
 
 router.get('/areas', function (req, res) {
   console.log(`[API] ${req.method} request to /api/patient/areas/`);

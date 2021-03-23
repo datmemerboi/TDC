@@ -23,7 +23,7 @@ app.get('/_health', (req, res) => {
 
 app.all('*', (req, res) => {
   res.sendStatus(404).end();
-})
+});
 
 app.listen(PORT, (err) => {
   if (err) {

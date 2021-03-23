@@ -2,7 +2,6 @@ const router = require('express').Router(),
       InvoiceUtils = require('../utils/invoice-utils');
 
 router.post('/new', (req, res) => {
-  console.log(req.body)
   console.log(`[API] ${req.method} request to /api/invoice/new/`);
   if (!req.body || req.body === {} || !req.body.p_id || !req.body.treatments) {
     console.error(`[API] Bad Request: missing required parameters`);
@@ -30,7 +29,7 @@ router.all('/all', (req, res) => {
     .catch(err => {
       console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
       res.sendStatus(500).end();
-    })
+    });
 });
 
 router.all('/print/:invid', (req, res) => {

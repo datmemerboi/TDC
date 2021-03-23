@@ -23,7 +23,7 @@ router.all('/all', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/all/`);
   if (req.query?.from && req.query?.to) {
     // Date request
-    AppointmentUtils.DateAppointmentHandler(req.query.from, req.query.to, count = req.query?.count?.toLowerCase() === "true")
+    AppointmentUtils.DateAppointmentHandler(req.query.from, req.query.to, req.query?.count?.toLowerCase() === "true")
       .then(result => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();

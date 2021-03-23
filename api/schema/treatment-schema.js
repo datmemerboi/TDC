@@ -30,7 +30,7 @@ Treatment.statics.getByTid = function (tid) {
 
 Treatment.statics.findInTid = function (tid) {
   return this.find({ t_id: { $in: tid } }, { _id: 0, __v: 0 })
-    .lean()  
+    .lean()
     .exec();
 };
 

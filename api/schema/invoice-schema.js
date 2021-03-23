@@ -69,6 +69,6 @@ Invoice.statics.updateDoc = function (invid, doc) {
     { $set: doc },
   )
     .exec();
-}
+};
 
 module.exports = Invoice;

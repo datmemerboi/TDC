@@ -65,7 +65,7 @@ function generateStatsForAppointment(docs) {
 }
 
 function mergePatientDetails(db, pid, doc) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     db.Patient.getByPid(pid)
       .then(patient => {
         var mergedDoc = {
@@ -81,7 +81,7 @@ function mergePatientDetails(db, pid, doc) {
       .catch(err => {
         console.error(`[UTILS] Error @ mergePatientDetails \n ${JSON.stringify(err)}`);
         return resolve(doc);
-      })
+      });
   });
 }
 

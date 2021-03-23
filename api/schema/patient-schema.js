@@ -57,7 +57,7 @@ Patient.statics.findByName = function (name) {
 
 Patient.statics.findByArea = function (area) {
   return this.find({ area: { $regex: area, $options: 'i' } }, { _id: 0, __v: 0 })
-    .lean()  
+    .lean()
     .exec();
 };
 
