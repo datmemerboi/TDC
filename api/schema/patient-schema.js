@@ -17,6 +17,7 @@ var Patient = new Schema({
 
 Patient.statics.getAll = function () {
   return this.find({}, { _id: 0, __v: 0 })
+    .lean()
     .exec();
 };
 

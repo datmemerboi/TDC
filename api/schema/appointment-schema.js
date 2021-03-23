@@ -97,17 +97,19 @@ Appointment.statics.countByStatus = function (status) {
   return this.find({ status: status }).countDocuments();
 };
 
-Appointment.statics.countByAvailability = function (doctor, status, from, to) {
+Appointment.statics.findByAvailability = function (doctor, from, to) {
   return this.find(
     {
       $and: [
         { appointment_date: { $gte: from } },
         { appointment_date: { $lte: to } },
-        { status: status },
         { doctor: doctor }
       ]
     }
-  ).countDocuments();
+  )
+    .sort('-created_at')
+    .lean()
+    .exec();
 };
 
 Appointment.statics.updateDoc = function (appid, doc) {
