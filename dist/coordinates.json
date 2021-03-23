@@ -1,0 +1,110 @@
+{
+    "header": {
+        "title": {
+            "x": 120,
+            "y": 60
+        },
+        "address": {
+            "x": 120,
+            "line_1_y": 88,
+            "line_2_y": 103,
+            "line_3_y": 115
+        },
+        "invoice": {
+            "x": 460,
+            "y": 98
+        }
+    },
+    "data": {
+        "patient": {
+            "name": {
+                "x": 60,
+                "y": 150
+            },
+            "age": {
+                "x": 60,
+                "y": 167
+            },
+            "contact": {
+                "x": 100,
+                "y": 167
+            },
+            "pid": {
+                "x": 0,
+                "y": 150
+            }
+        },
+        "doctor": {
+            "x": 60,
+            "name_x": 126,
+            "y": 230
+        },
+        "invoice": {
+            "x": 0,
+            "y": 230
+        },
+        "date": {
+            "x": 0,
+            "y": 250
+        }
+    },
+    "table": {
+        "head": {
+            "banner_up": {
+                "x": 0,
+                "y": 290
+            },
+            "banner_down": {
+                "x": 612,
+                "y": 320
+            },
+            "proc_x": 120,
+            "cost_x": 310,
+            "qty_x": 400,
+            "total_x": 490,
+            "y": 298
+        },
+        "body": {
+            "base_proc": {
+                "x": 80,
+                "y": 340,
+                "max_width": 200,
+                "max_height": 20
+            },
+            "cost": {
+                "x": 310,
+                "max_width": 35
+            },
+            "qty": {
+                "x": 405,
+                "max_width": 25
+            },
+            "total": {
+                "x": 490,
+                "max_width": 60
+            }
+        },
+        "foot": {
+            "left_x": 60,
+            "right_x": 550,
+            "y": 610
+        }
+    },
+    "total_foot": {
+        "x": 380,
+        "sub_y": 620,
+        "grand_y": 650
+    },
+    "payment": {
+        "method": {
+            "name_x": 60,
+            "x": 160,
+            "y": 670
+        },
+        "id": {
+            "name_x": 60,
+            "x": 130,
+            "y": 690
+        }
+    }
+}
