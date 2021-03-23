@@ -1,6 +1,6 @@
 # MISC FOLDERS
 about/
-pdf/
+data/
 invoice/
 
 # MISC FILES
@@ -14,7 +14,6 @@ export-module.js
 
 # OLD CODE
 server/
-api/check-package.json
 
 # NPM
 node_modules/
