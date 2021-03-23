@@ -235,9 +235,9 @@ async function TreatmentHistoryHandler(pid, quick = false) {
 
 async function CheckCompatibilityHandler(list) {
   try {
-    let result = await checkCompatibility(list);
+    let compatibility = await checkCompatibility(list);
     console.log(`[UTILS] CheckCompatibilityHandler success`);
-    return { status: 200, body: result };
+    return { status: 200, body: { compatible: compatibility } };
   } catch (err) {
     console.error(`[UTILS] Error @ CheckCompatibilityHandler \n ${JSON.stringify(err)}`);
     return err;

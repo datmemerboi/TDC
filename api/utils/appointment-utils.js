@@ -92,14 +92,16 @@ function checkAppointmentFeasibility(db, doc) {
       // Appointment id, timing, doctor and status not mentioned
       return resolve(false);
     } else {
-      let from = doc.appointment_date - 900000, // 15 minutes before appointment_date
-          to = doc.appointment_date + 900000; // 15 minutes after appointment_date
-      
-      // Get count of instances for the same doctor, with the same status, 15 mins before & after the mentioned appointment timing
-      db.Appointment.countByAvailability(doc.doctor, doc.status, from, to)
-        .then(instances => {
-          if (instances > 0) {
-            return resolve(false);
+      let from = doc.appointment_date - 899000, // 15 minutes before appointment_date
+          to = doc.appointment_date + 899000; // 15 minutes after appointment_date
+
+      // Check if the doctor has any appointments 15 mins before or after the mentioned timing
+      db.Appointment.findByAvailability(doc.doctor, from, to)
+        .then(docs => {
+          if (docs && docs.length > 0) {
+            // Every record is either status Cancelled or Postponed
+            let possible = docs.every(doc => doc.status !== 1 && doc.status !== 2);
+            return resolve(possible);
           } else {
             return resolve(true);
           }
@@ -134,7 +136,7 @@ async function NewAppointmentHandler(doc) {
     const appid = await makeNextAid(db); // Create the next appointment id
     doc = sanitize(doc);
     doc.app_id = appid;
-    if (await checkAppointmentFeasibility()) {
+    if (await checkAppointmentFeasibility(db, doc)) {
       await db.Appointment.create(doc);
       console.log(`[UTILS] NewAppointmentHandler success`);
       return { status: 201, body: doc };
@@ -247,6 +249,7 @@ async function UpdateAppointmentHandler(appid, doc) {
     const db = await dbUtils.connect();
     doc = sanitize(doc);
     await db.Appointment.updateDoc(appid, doc);
+    console.log(`[UTILS] UpdateAppointmentHandler success`);
     return { status: 200, body: doc };
   } catch (err) {
     console.error(`[UTILS] Error @ UpdateAppointmentHandler \n ${JSON.stringify(err)}`);
