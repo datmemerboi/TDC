@@ -3,11 +3,7 @@ const router = require('express').Router(),
 
 router.post('/new', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/new/`);
-  if(!req.body || req.body === {}) {
-    console.error(`[API] Bad Request: missing request body`);
-    res.sendStatus(400).end();
-  }
-  else if(!(req.body?.p_id ?? req.body?.date ?? req.body?.doctor ?? false)) {
+  if (!req.body || req.body === {} || !req.body.p_id || !req.body.appointment_date || !req.body.doctor) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
@@ -27,7 +23,7 @@ router.all('/all', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/all/`);
   if (req.query?.from && req.query?.to) {
     // Date request
-    AppointmentUtils.DateAppointmentHandler(req.query.from, req.query.to, req.query?.count?.toLowerCase() === "true")
+    AppointmentUtils.DateAppointmentHandler(req.query.from, req.query.to, count = req.query?.count?.toLowerCase() === "true")
       .then(result => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
@@ -105,7 +101,7 @@ router.all('/status', (req, res) => {
 
 router.put('/update/:appid', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/update/`);
-  if(!req.body || req.body === {} || !req.params?.appid) {
+  if (!req.body || req.body === {} || !req.params.appid) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
