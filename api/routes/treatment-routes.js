@@ -128,4 +128,21 @@ router.put('/update/:tid', (req, res) => {
   }
 });
 
+router.post('/compatibility', (req, res) => {
+  console.log(`[API] ${req.method} request to /api/treatment/compatibility`);
+  if (!req.body || req.body === {} || !req.body.list) {
+    console.error(`[API] Bad Request: missing required parameters`);
+  } else {
+    TreatmentUtils.CheckCompatibilityHandler(req.body.list)
+      .then(result => {
+        console.log(`[API] Request handled successfully`);
+        res.status(result.status).json(result.body).end();
+      })
+      .catch(err => {
+        console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
+        res.sendStatus(500).end();
+      })
+  }
+})
+
 module.exports = router;
