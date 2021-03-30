@@ -1,5 +1,5 @@
-const mongoose = require('mongoose'),
-      config = require('../config.json')[process.env.NODE_ENV ?? "dev"];
+const mongoose = require('mongoose');
+const config = require('../config.json')[process.env.NODE_ENV ?? "development"];
 
 const Patient = require('../schema/patient-schema'),
       Treatment = require('../schema/treatment-schema'),

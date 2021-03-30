@@ -5,7 +5,7 @@ const fs = require('fs'),
   dbUtils = require('./db-utils'),
   posx = require('../coordinates.json');
 
-const config = require('../config.json')[process.env.NODE_ENV ?? 'dev'];
+const config = require('../config.json')[process.env.NODE_ENV ?? "development"];
 
 function InvoiceUtils() { }
 

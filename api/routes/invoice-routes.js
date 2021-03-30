@@ -1,5 +1,6 @@
-const router = require('express').Router(),
-      InvoiceUtils = require('../utils/invoice-utils');
+const _ = require('lodash');
+const router = require('express').Router();
+const InvoiceUtils = require('../utils/invoice-utils');
 
 router.post('/new', (req, res) => {
   console.log(`[API] ${req.method} request to /api/invoice/new/`);

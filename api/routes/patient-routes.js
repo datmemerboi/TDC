@@ -1,12 +1,10 @@
-const router = require('express').Router(),
-      PatientUtils = require('../utils/patient-utils');
+const _ = require('lodash');
+const router = require('express').Router();
+const PatientUtils = require('../utils/patient-utils');
 
 router.post('/new', function(req, res) {
   console.log(`[API] ${req.method} request to /api/patient/new/`);
-  if(!req.body || req.body === {}) {
-    console.error(`[API] Bad Request: missing request body`);
-    res.sendStatus(400).end();
-  } else if(!req.body.name || !req.body.contact) {
+  if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.name) || _.isNil(req.body.contact)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
@@ -37,7 +35,7 @@ router.all('/all', function (req, res) {
 
 router.all('/get/:pid', function (req, res) {
   console.log(`[API] ${req.method} request to /api/patient/get/`);
-  if(!req.params.pid) {
+  if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.params.pid)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
@@ -55,7 +53,7 @@ router.all('/get/:pid', function (req, res) {
 
 router.post('/bulk', (req, res) => {
   console.log(`[API] ${req.method} request to /api/patient/bulk/`);
-  if (!req.body || req.body === {} || !req.body.pids) {
+  if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.pids) || _.isEmpty(req.body.pids)) {
     console.error(`[API] Bad request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
@@ -84,7 +82,7 @@ router.get('/areas', function (req, res) {
 
 router.put('/update/:pid', function (req, res) {
   console.log(`[API] ${req.method} request to /api/patient/update/`);
-  if(!req.body || req.body === {} || !req.params.pid) {
+  if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.params.pid)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
@@ -104,7 +102,7 @@ router.all('/search', function (req, res) {
   console.log(`[API] ${req.method} request to /api/patient/search/`);
   if (req.method === "GET") {
     // Check query params
-    if (!req.query?.term || !req.query?.type) {
+    if (_.isNil(req.query.term) || _.isNil(req.query.type)) {
       console.error(`[API] Bad Request: missing required parameters`);
       res.sendStatus(400).end();
     } else {
@@ -120,7 +118,7 @@ router.all('/search', function (req, res) {
         });
     }
   } else {
-    if (!req.body?.term && !req.body?.type) {
+    if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.term) || _.isNil(req.body.type)) {
       console.error(`[API] Bad Request: missing required parameters`);
       res.sendStatus(400).end();
     } else {

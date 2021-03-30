@@ -1,5 +1,6 @@
-const router = require('express').Router(),
-      AppointmentUtils = require('../utils/appointment-utils');
+const _ = require('lodash');
+const router = require('express').Router();
+const AppointmentUtils = require('../utils/appointment-utils');
 
 router.post('/new', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/new/`);

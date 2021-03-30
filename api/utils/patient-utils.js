@@ -1,4 +1,5 @@
 'use strict';
+const _ = require('lodash');
 const dbUtils = require('./db-utils');
 
 function PatientUtils() { }
@@ -29,7 +30,7 @@ function makeNextPid(db) {
 async function NewPatientHandler(doc) {
   try {
     for (let key in doc) {
-      if (key === "p_id" || doc[key] === null || doc[key] === undefined || doc[key] === "") delete doc[key];
+      if (_.isNil(doc[key]) || key === "p_id") delete doc[key];
     }
     const db = await dbUtils.connect();
     // doc.p_id = doc.name.replace(/\s/g, '').split('.').filter(word => word.length > 2)[0].slice(0, 3) + doc.contact.toString().slice(-4);
@@ -71,7 +72,7 @@ async function GetPatientHandler(pid) {
   try {
     const db = await dbUtils.connect();
     const doc = await db.Patient.getByPid(pid);
-    if (!doc) {
+    if (_.isEmpty(doc) || _.isNil(doc)) {
       console.log(`[UTILS] GetPatientHandler returns empty data`);
       return { status: 204, body: {} };
     } else {
@@ -88,7 +89,7 @@ async function BulkPatientsHandler(pidList) {
   try {
     const db = await dbUtils.connect();
     const docs = await db.Patient.getByPidList(pidList);
-    if (!docs.length) {
+    if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] BulkPatientsHandler returns empty data`);
       return { status: 404, body: null };
     } else {
@@ -96,20 +97,20 @@ async function BulkPatientsHandler(pidList) {
       return { status: 200, body: { total_docs: docs.length, docs } };
     }
   } catch (err) {
-    console.error(`[UTILS] Error @ BulkPatientsHandler`)
+    console.error(`[UTILS] Error @ BulkPatientsHandler`);
   }
 }
 
 async function GetDistinctAreasHandler() {
   try {
     const db = await dbUtils.connect();
-    var areas = await db.Patient.getDistinctArea();
-    if (!areas || areas.length < 1) {
+    var docs = await db.Patient.getDistinctArea();
+    if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] GetDistinctAreasHandler returns empty data`);
       return { status: 204, body: {} };
     } else {
       console.log(`[UTILS] GetDistinctAreasHandler success`);
-      return { status: 200, body: areas };
+      return { status: 200, body: docs };
     }
   } catch (err) {
     console.error(`[UTILS] Error @ GetDistinctAreasHandler \n ${JSON.stringify(err)}`);
@@ -120,9 +121,7 @@ async function GetDistinctAreasHandler() {
 async function UpdatePatientHandler(pid, doc) {
   try {
     for (let key in doc) {
-      if (key === "p_id" || doc[key] === null || doc[key] === undefined || doc[key] === "") {
-        delete doc[key];
-      }
+      if (_.isNil(doc[key]) || key === "p_id") delete doc[key];
     }
     const db = await dbUtils.connect();
     await db.Patient.updateDoc(pid, doc);
@@ -139,7 +138,7 @@ async function SearchByName(term) {
   try {
     const db = await dbUtils.connect();
     var docs = await db.Patient.findByName(term);
-    if (!docs || docs.length < 1) {
+    if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] SearchByName returns empty data`);
       return { status: 404, body: null };
     } else {
@@ -157,7 +156,7 @@ async function SearchByArea(term) {
   try {
     const db = await dbUtils.connect();
     var docs = await db.Patient.findByArea(term);
-    if (!docs || docs.length < 1) {
+    if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] SearchByArea returns empty data`);
       return { status: 404, body: null };
     } else {
@@ -179,7 +178,7 @@ async function SearchByContact(term) {
     } else {
       const db = await dbUtils.connect();
       var docs = await db.Patient.findByContact(parseInt(term));
-      if (!docs || docs.length < 1) {
+      if (_.isNil(docs) || _.isEmpty(docs)) {
         console.log(`[UTILS] SearchByContact returns empty data`);
         return { status: 404, body: null };
       } else {

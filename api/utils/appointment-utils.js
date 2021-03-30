@@ -1,4 +1,5 @@
 'use strict';
+const _ = require('lodash');
 const dbUtils = require('./db-utils');
 
 function AppointmentUtils() { }
@@ -27,8 +28,8 @@ function makeNextAid(db) {
 }
 
 function generateStatsForAppointment(docs) {
-  let uniqueDoctors = [...new Set(docs.map(doc => doc.doctor))]; // Get list of unique doctors
-  let uniqueStatuses = [...new Set(docs.map(doc => doc.status))]; // Get list of unique statuses
+  let uniqueDoctors = _.chain(docs).map('doctor').uniq().value(); // Get list of unique doctors
+  let uniqueStatuses = _.chain(docs).map('status').uniq().value(); // Get list of unique statuses
   /*
   doctorsStats = [
     {
@@ -88,7 +89,7 @@ function mergePatientDetails(db, pid, doc) {
 function checkAppointmentFeasibility(db, doc) {
   // Check if a new appointment doc is feasible
   return new Promise((resolve, reject) => {
-    if (!doc.app_id || !doc.appointment_date || !doc.doctor || !doc.status) {
+    if (_.isNil(doc.app_id) || _.isNil(doc.appointment_date) || _.isNil(doc.doctor) || _.isNil(doc.status)) {
       // Appointment id, timing, doctor and status not mentioned
       return resolve(false);
     } else {
@@ -98,12 +99,13 @@ function checkAppointmentFeasibility(db, doc) {
       // Check if the doctor has any appointments 15 mins before or after the mentioned timing
       db.Appointment.findByAvailability(doc.doctor, from, to)
         .then(docs => {
-          if (docs && docs.length > 0) {
+          if (_.isNil(docs) || _.isEmpty(docs)) {
+            // No existing docs
+            return resolve(true);
+          } else {
             // Every record is either status Cancelled or Postponed
             let possible = docs.every(doc => doc.status !== 1 && doc.status !== 2);
             return resolve(possible);
-          } else {
-            return resolve(true);
           }
         })
         .catch(err => {
@@ -118,12 +120,8 @@ function sanitize(doc) {
   // Create a clean object fit for the db
   var cleanObj = new Object(doc);
   for (let key in cleanObj) {
-    // Removing empty & id keys from the object
-    if (key === "app_id" || cleanObj[key] === null || cleanObj[key] === undefined || cleanObj[key] === "") {
-      delete cleanObj[key];
-    }
+    if (key === "app_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
   }
-  // Convert appointment_date to JS milliseconds
   cleanObj.appointment_date = cleanObj.appointment_date < 1000000000000
     ? new Date(cleanObj.appointment_date * 1000).getTime()
     : cleanObj.appointment_date;

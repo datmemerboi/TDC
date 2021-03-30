@@ -1,4 +1,5 @@
 'use strict';
+const _ = require('lodash');
 const dbUtils = require('./db-utils');
 
 function TreatmentUtils() { }
@@ -7,9 +8,13 @@ function makeNextTid(db) {
   return new Promise((resolve, reject) => {
     db.Treatment.getLatestTid()
       .then(top => {
-        top = top[0] && top[0]?.t_id ? parseInt(top[0].t_id.replace('TRT', '')) : null;
+        top = top[0] && top[0]?.t_id
+          ? parseInt(top[0].t_id.replace('TRT', ''))
+          : null;
         if (top) {
-          let tid = top < 1000 ? "TRT" + ("0000" + (top + 1).toString()).slice(-4) : "TRT" + (top + 1).toString();
+          let tid = top < 1000
+            ? "TRT" + ("0000" + (top + 1).toString()).slice(-4)
+            : "TRT" + (top + 1).toString();
           return resolve(tid);
         } else {
           return resolve('TRT0001');
@@ -36,14 +41,13 @@ async function checkCompatibility(list) {
 }
 
 function sanitize(doc) {
+  // Create a clean object fit for the db
   var cleanObj = new Object(doc);
   for (let key in cleanObj) {
-    if (key === "t_id" || cleanObj[key] === null || cleanObj[key] === undefined || cleanObj[key] === "") {
-      delete cleanObj[key];
-    }
+    if (key === "t_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
   }
-  if (cleanObj.teeth_number && typeof cleanObj.teeth_number === "string") {
-    cleanObj.teeth_number = cleanObj.teeth_number.split(',').map(t => parseInt(t));
+  if (!_.isNil(cleanObj.teeth_number) && typeof cleanObj.teeth_number === "string") {
+    cleanObj.teeth_number = cleanObj.teeth_number.split(',').map(parseInt);
   }
   cleanObj.treatment_date = cleanObj.treatment_date < 1000000000000
     ? new Date(cleanObj.treatment_date * 1000).getTime()
@@ -90,12 +94,12 @@ async function GetTreatmentHandler(tid) {
   try {
     const db = await dbUtils.connect();
     var doc = await db.Treatment.getByTid(tid);
-    if (doc) {
-      console.log(`[UTILS] GetTreatmentHandler success`);
-      return { status: 200, body: doc };
-    } else {
+    if (_.isNil(doc)) {
       console.log(`[UTILS] GetTreatmentHandler returns empty data`);
       return { status: 404, body: doc };
+    } else {
+      console.log(`[UTILS] GetTreatmentHandler success`);
+      return { status: 200, body: doc };
     }
   } catch (err) {
     console.error(`[UTILS] Error @ GetTreatmentHandler \n ${JSON.stringify(err)}`);
@@ -126,7 +130,7 @@ async function DistinctProceduresHandler() {
   try {
     const db = await dbUtils.connect();
     var docs = await db.Treatment.getDistinctProcedures();
-    if (docs.length < 1) {
+    if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] DistinctProceduresHandler returns empty data`);
       return { status: 404, body: {} };
     } else {
@@ -195,33 +199,40 @@ async function TreatmentHistoryHandler(pid, quick = false) {
   try {
     const db = await dbUtils.connect();
     var docs = await db.Treatment.findByPid(pid);
-    if (!docs.length || docs.length < 1) {
+    if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] TreatmentHistoryHandler returns empty data`);
       return { status: 404, body: {} };
     } else {
       var result = { total_docs: docs.length };
       if (quick) {
         // Quick treatment history
-        result.procedures = docs.map(doc => {
-          return {
-            procedure_done: doc.procedure_done,
-            treatment_date: doc.treatment_date
-          };
-        }).sort((a, b) => b.treatment_date - a.treatment_date);
-        result.doctors = [...new Set(docs.map(doc => doc.doctor))];
+        result.procedures = _.chain(docs)
+          .map(doc => {
+            return {
+              procedure_done: doc.procedure_done,
+              treatment_date: doc.treatment_date
+            };
+          })
+          .sortBy('treatment_date')
+          .value();
+        result.doctors = _.chain(docs).map('doctor').uniq().value();
         result.last_visit = result.procedures[0]['treatment_date'];
       } else {
-        result.procedures = docs.map(doc => {
-          return {
-            procedure_done: doc.procedure_done,
-            treatment_date: doc.treatment_date,
-            remarks: doc?.remarks ?? null,
-            doctor: doc.doctor,
-            teeth_number: doc?.teeth_number ?? null,
-            t_id: doc.t_id
-          };
-        }).sort((a, b) => b.treatment_date - a.treatment_date);
-        result.doctors = [...new Set(docs.map(doc => doc.doctor))];
+        // Detailed treatment history
+        result.procedures = _.chain(docs)
+          .map(doc => {
+            return {
+              procedure_done: doc.procedure_done,
+              treatment_date: doc.treatment_date,
+              remarks: doc?.remarks ?? null,
+              doctor: doc.doctor,
+              teeth_number: doc?.teeth_number ?? null,
+              t_id: doc.t_id
+            };
+          })
+          .sortBy('treatment_date')
+          .value();
+        result.doctors = _.chain(docs).map('doctor').uniq().value();
         result.last_visit = result.procedures[0]['treatment_date'];
       }
       console.log(`[UTILS] TreatmentHistoryHandler success`);
