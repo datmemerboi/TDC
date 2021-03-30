@@ -1,5 +1,5 @@
 {
-  "dev": {
+  "development": {
     "PORT": 8000,
     "DB_URI": "mongodb://127.0.0.1/TDC",
     "CLINIC_NAME": "JOHN CLINIC",
@@ -7,9 +7,9 @@
     "CLINIC_ADDRESS_LINE_2": "90000 90000",
     "CLINIC_ADDRESS_LINE_3": "john@doe.com"
   },
-  "staging": {
-    "PORT": 8000,
-    "DB_URI": "mongodb://127.0.0.1/tdcTest",
+  "test": {
+    "PORT": 8080,
+    "DB_URI": "mongodb://127.0.0.1/tdc-test",
     "CLINIC_NAME": "TEST CLINIC",
     "CLINIC_ADDRESS_LINE_1": "100, Test road",
     "CLINIC_ADDRESS_LINE_2": "Test City",
