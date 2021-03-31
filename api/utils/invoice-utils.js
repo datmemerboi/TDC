@@ -1,10 +1,9 @@
 'use strict';
-const fs = require('fs'),
-  path = require('path'),
-  PDF = require('pdfkit'),
-  dbUtils = require('./db-utils'),
-  posx = require('../coordinates.json');
-
+const fs = require('fs');
+const path = require('path');
+const PDF = require('pdfkit');
+const dbUtils = require('./db-utils');
+const posx = require('../coordinates.json');
 const config = require('../config.json')[process.env.NODE_ENV ?? "development"];
 
 function InvoiceUtils() { }
@@ -191,7 +190,6 @@ async function AllInvoiceHandler(count = false) {
         return { status: 200, body: { total_docs: instances } };
       } else {
         var docs = await db.Invoice.getAll();
-        // docs.treatments.map(JSON.parse);
         for (let doc of docs) {
           doc.treatments = doc.treatments.map(JSON.parse);
         }
@@ -230,7 +228,6 @@ async function PrintInvoiceHandler(invid) {
     doc.treatments = doc.treatments.map(JSON.parse);
     doc.patient = patientObj;
     var outputFile = await generatePdf(doc);
-    console.log(outputFile);
     await dbUtils.close();
     return { status: 201, body: { file: outputFile } };
   } catch (err) {
