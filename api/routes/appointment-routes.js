@@ -4,7 +4,7 @@ const AppointmentUtils = require('../utils/appointment-utils');
 
 router.post('/new', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/new/`);
-  if (!req.body || req.body === {} || !req.body.p_id || !req.body.appointment_date || !req.body.doctor) {
+  if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.p_id) || _.isNil(req.body.appointment_date) || _.isNil(req.body.doctor)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
@@ -22,9 +22,10 @@ router.post('/new', (req, res) => {
 
 router.all('/all', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/all/`);
-  if (req.query?.from && req.query?.to) {
+  if (_.has(req.query, "from") && _.has(req.query, "to")) {
     // Date request
-    AppointmentUtils.DateAppointmentHandler(req.query.from, req.query.to, req.query?.count?.toLowerCase() === "true")
+    let count = _.has(req.query, "count") ? req.query.count.toLowerCase() === "true" : false;
+    AppointmentUtils.DateAppointmentHandler(req.query.from, req.query.to, count)
       .then(result => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
@@ -48,11 +49,12 @@ router.all('/all', (req, res) => {
 
 router.post('/patient/:pid', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/patient/`);
-  if(!req.body || req.body === {} || !req.params?.pid) {
+  if(_.isNil(req.params.pid)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
-    AppointmentUtils.PatientAppointmentHandler(req.params.pid, req.query?.count?.toLowerCase() === "true")
+    let count = _.has(req.query, "count") ? req.query.count.toLowerCase() === "true" : false;
+    AppointmentUtils.PatientAppointmentHandler(req.params.pid, count)
       .then(result => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
@@ -66,11 +68,12 @@ router.post('/patient/:pid', (req, res) => {
 
 router.all('/doctor', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/doctor/`);
-  if(!req.body || req.body === {} || !("doctor" in req.body)) {
+  if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.doctor)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
-    AppointmentUtils.DoctorAppointmentHandler(req.body.doctor, req.query?.count?.toLowerCase() === "true")
+    let count = _.has(req.query, "count") ? req.query.count.toLowerCase() === "true" : false;
+    AppointmentUtils.DoctorAppointmentHandler(req.body.doctor, count)
       .then(result => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
@@ -84,11 +87,12 @@ router.all('/doctor', (req, res) => {
 
 router.all('/status', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/status/`);
-  if(!req.body || req.body === {} || !("status" in req.body)) {
+  if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.status)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
-    AppointmentUtils.StatusAppointmentHandler(req.body.status, req.query?.count?.toLowerCase() === "true")
+    let count = _.has(req.query, "count") ? req.query.count.toLowerCase() === "true" : false;
+    AppointmentUtils.StatusAppointmentHandler(req.body.status, count)
       .then(result => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
@@ -102,7 +106,7 @@ router.all('/status', (req, res) => {
 
 router.put('/update/:appid', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/update/`);
-  if (!req.body || req.body === {} || !req.params.appid) {
+  if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.params.appid)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {

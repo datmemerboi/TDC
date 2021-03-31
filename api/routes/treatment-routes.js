@@ -4,7 +4,6 @@ const TreatmentUtils = require('../utils/treatment-utils');
 
 router.all('/new', (req, res) => {
   console.log(`[API] ${req.method} request to /api/treatment/new/`);
-  console.log(req.body);
   if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.p_id) || _.isNil(req.body.doctor) || _.isNil(req.body.procedure_done)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
@@ -95,7 +94,8 @@ router.all('/history/:pid', (req, res) => {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
-    TreatmentUtils.TreatmentHistoryHandler(req.params.pid, _.has(req.query, 'quick') ? req.query.quick.toLowerCase() === "true" : false)
+    let quick = _.has(req.query, "quick") ? req.query.quick.toLowerCase() === "true" : false;
+    TreatmentUtils.TreatmentHistoryHandler(req.params.pid, quick)
       .then(result => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body);

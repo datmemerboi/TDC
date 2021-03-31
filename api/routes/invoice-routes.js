@@ -4,7 +4,7 @@ const InvoiceUtils = require('../utils/invoice-utils');
 
 router.post('/new', (req, res) => {
   console.log(`[API] ${req.method} request to /api/invoice/new/`);
-  if (!req.body || req.body === {} || !req.body.p_id || !req.body.treatments) {
+  if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.p_id) || _.isNil(req.body.treatments)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
@@ -22,7 +22,8 @@ router.post('/new', (req, res) => {
 
 router.all('/all', (req, res) => {
   console.log(`[API] ${req.method} request to /api/invoice/all/`);
-  InvoiceUtils.AllInvoiceHandler(req.query?.count?.toLowerCase() === "true")
+  let count = _.has(req.query, "count") ? req.query.count.toLocaleLowerCase() === "true" : false;
+  InvoiceUtils.AllInvoiceHandler(count)
     .then(result => {
       console.log(`[API] Request handled successfully`);
       res.status(result.status).json(result.body).end();
@@ -35,7 +36,7 @@ router.all('/all', (req, res) => {
 
 router.all('/print/:invid', (req, res) => {
   console.log(`[API] ${req.method} request to /api/invoice/print/`);
-  if (!req.params.invid) {
+  if (_.isNil(req.params.invid)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {

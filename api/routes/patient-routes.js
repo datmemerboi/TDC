@@ -35,7 +35,7 @@ router.all('/all', function (req, res) {
 
 router.all('/get/:pid', function (req, res) {
   console.log(`[API] ${req.method} request to /api/patient/get/`);
-  if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.params.pid)) {
+  if(_.isNil(req.params.pid)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
@@ -73,6 +73,7 @@ router.get('/areas', function (req, res) {
   console.log(`[API] ${req.method} request to /api/patient/areas/`);
   PatientUtils.GetDistinctAreasHandler()
     .then(result => {
+      console.log(`[API] Request handled successfully`);
       res.status(result.status).json(result.body).end();
     })
     .catch(err => {
@@ -82,7 +83,7 @@ router.get('/areas', function (req, res) {
 
 router.put('/update/:pid', function (req, res) {
   console.log(`[API] ${req.method} request to /api/patient/update/`);
-  if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.params.pid)) {
+  if(_.isNil(req.params.pid)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
