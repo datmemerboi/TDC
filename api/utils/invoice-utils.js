@@ -59,7 +59,7 @@ function generatePdf(obj) {
   const outputPath = path.join(__dirname, '..', '..', 'invoice');
   const miscPath = path.join(__dirname, '..', '..', 'misc');
   const outputFile = path.join(outputPath, obj.inv_id + '.pdf');
-  var doc = new PDF();
+  let doc = new PDF();
 
   if (!fs.existsSync(outputPath)) {
     fs.mkdirSync(outputPath);
@@ -106,7 +106,10 @@ function generatePdf(obj) {
         width: posx.table.body.base_proc.max_width,
         height: posx.table.body.base_proc.max_height
       })
-      .text(trt.treatment_date ? new Date(trt.treatment_date).toLocaleString("default", { day: "numeric", month: "short", year: "numeric" }) : null)
+      .text(trt.treatment_date
+        ? new Date(trt.treatment_date).toLocaleString("default", { day: "numeric", month: "short", year: "numeric" })
+        : null
+      )
       .text(trt.teeth_number && trt.teeth_number.length ? `Teeth: ${trt.teeth_number.join(',')}` : null)
       .text(trt.cost, posx.table.body.cost.x, currentHeight, { width: posx.table.body.cost.max_width })
       .text(trt.qty, posx.table.body.qty.x, currentHeight, { width: posx.table.body.qty.max_width })
@@ -144,7 +147,7 @@ function generatePdf(obj) {
 }
 
 function sanitize(doc) {
-  var cleanObj = new Object(doc);
+  let cleanObj = new Object(doc);
   for (let key in cleanObj) {
     if (key === "inv_id" || cleanObj[key] === null || cleanObj[key] === undefined || cleanObj[key] === "") {
       delete cleanObj[key];
@@ -156,7 +159,7 @@ function sanitize(doc) {
 async function NewInvoiceHandler(pid, body) {
   try {
     const db = await dbUtils.connect();
-    var invoiceObj = {
+    let invoiceObj = {
       p_id: pid,
       doctor: [...new Set(body.treatments.map(obj => obj.doctor))],
       treatments: body.treatments.map(JSON.stringify),
@@ -180,7 +183,7 @@ async function NewInvoiceHandler(pid, body) {
 async function AllInvoiceHandler(count = false) {
   try {
     const db = await dbUtils.connect();
-    var instances = await db.Invoice.countAll();
+    let instances = await db.Invoice.countAll();
     if (instances < 1) {
       console.log(`[UTILS] AllInvoiceHandler returns empty data`);
       return { status: 204, body: {} };
@@ -189,7 +192,7 @@ async function AllInvoiceHandler(count = false) {
         console.log(`[UTILS] AllInvoiceHandler success`);
         return { status: 200, body: { total_docs: instances } };
       } else {
-        var docs = await db.Invoice.getAll();
+        let docs = await db.Invoice.getAll();
         for (let doc of docs) {
           doc.treatments = doc.treatments.map(JSON.parse);
         }
@@ -206,7 +209,7 @@ async function AllInvoiceHandler(count = false) {
 async function GetInvoiceHandler(invid) {
   try {
     const db = await dbUtils.connect();
-    var doc = await db.Invoice.getByInvid(invid);
+    let doc = await db.Invoice.getByInvid(invid);
     if (!doc) {
       console.log(`[UTILS] GetInvoiceHandler returns empty data`);
       return { status: 404, body: null };
@@ -223,11 +226,11 @@ async function GetInvoiceHandler(invid) {
 async function PrintInvoiceHandler(invid) {
   try {
     const db = await dbUtils.connect();
-    var doc = await db.Invoice.getByInvid(invid);
-    var patientObj = await db.Patient.getByPid(doc.p_id);
+    let doc = await db.Invoice.getByInvid(invid);
+    let patientObj = await db.Patient.getByPid(doc.p_id);
     doc.treatments = doc.treatments.map(JSON.parse);
     doc.patient = patientObj;
-    var outputFile = await generatePdf(doc);
+    let outputFile = await generatePdf(doc);
     await dbUtils.close();
     return { status: 201, body: { file: outputFile } };
   } catch (err) {

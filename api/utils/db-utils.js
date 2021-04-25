@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
-const config = require('../config.json')[process.env.NODE_ENV ?? "development"];
 
-const Patient = require('../schema/patient-schema'),
-      Treatment = require('../schema/treatment-schema'),
-      Appointment = require('../schema/appointment-schema'),
-      Invoice = require('../schema/invoice-schema');
+const Patient = require('../schema/patient-schema');
+const Treatment = require('../schema/treatment-schema');
+const Appointment = require('../schema/appointment-schema');
+const Invoice = require('../schema/invoice-schema');
+
+const config = require('../config.json')[process.env.NODE_ENV ?? "development"];
 
 mongoose.set('useCreateIndex', true);
 mongoose.set('useNewUrlParser', true);

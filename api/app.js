@@ -1,12 +1,13 @@
-const express = require('express'),
-      app = express(),
-      AppointmentRoutes = require('./routes/appointment-routes'),
-      TreatmentRoutes = require('./routes/treatment-routes'),
-      PatientRoutes = require('./routes/patient-routes'),
-      InvoiceRoutes = require('./routes/invoice-routes');
+const express = require('express');
+const app = express();
 
-const config = require('./config.json')[process.env.NODE_ENV ?? "dev"],
-      PORT = config?.PORT ?? 8080;
+const AppointmentRoutes = require('./routes/appointment-routes');
+const TreatmentRoutes = require('./routes/treatment-routes');
+const PatientRoutes = require('./routes/patient-routes');
+const InvoiceRoutes = require('./routes/invoice-routes');
+
+const config = require('./config.json')[process.env.NODE_ENV ?? "development"];
+const PORT = config?.PORT ?? 8080;
 
 app.use(express.json());
 

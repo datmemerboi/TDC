@@ -9,16 +9,33 @@
         "ecmaVersion": 12
     },
     "rules": {
-      "semi": ["error", "always"],
-      "no-trailing-spaces": "error",
-      "no-unused-vars": "error",
-      "no-mixed-spaces-and-tabs": "error",
-      "no-extra-semi": "error",
-      "no-irregular-whitespace": "warn",
-      "default-case": "error",
-      "default-case-last": "error",
-      "eqeqeq": "warn",
-      "require-await": "error",
-      "no-use-before-define": "warn"
+        "semi": [
+            "error",
+            "always"
+        ],
+        "arrow-spacing": [
+            "error",
+            {
+                "before": true,
+                "after": true
+            }
+        ],
+        "default-case": "error",
+        "default-case-last": "error",
+        "eqeqeq": "warn",
+        "require-await": "error",
+        "one-var": [
+            "error",
+            {
+                "initialized": "never"
+            }
+        ],
+        "no-trailing-spaces": "error",
+        "no-unused-vars": "error",
+        "no-mixed-spaces-and-tabs": "error",
+        "no-extra-semi": "error",
+        "no-irregular-whitespace": "warn",
+        "no-use-before-define": "warn",
+        "no-var": "error"
     }
 }
