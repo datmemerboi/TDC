@@ -27,7 +27,7 @@ function makeNextTid(db) {
 async function checkCompatibility(list) {
   try {
     const db = await dbUtils.connect();
-    var treatmentObjArray = await Promise.all(list.map(tid => db.Treatment.getByTid(tid)));
+    let treatmentObjArray = await Promise.all(list.map(tid => db.Treatment.getByTid(tid)));
     const patients = [...new Set(treatmentObjArray.map(obj => obj.p_id))]; // Get list of unique patients
     if (patients.length > 1) {
       throw `Multiple patient ids obtained ${patients.join(',')}`;
@@ -42,7 +42,7 @@ async function checkCompatibility(list) {
 
 function sanitize(doc) {
   // Create a clean object fit for the db
-  var cleanObj = new Object(doc);
+  let cleanObj = new Object(doc);
   for (let key in cleanObj) {
     if (key === "t_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
   }
@@ -73,13 +73,13 @@ async function NewTreatmentHandler(doc) {
 async function AllTreatmentHandler() {
   try {
     const db = await dbUtils.connect();
-    var instances = await db.Treatment.countAll();
+    let instances = await db.Treatment.countAll();
     if (instances < 1) {
       // No treatment records found
       console.error(`[UTILS] AllTreatmentHandler returns empty data`);
       return { status: 404, body: null };
     } else {
-      var docs = await db.Treatment.getAll();
+      let docs = await db.Treatment.getAll();
       console.log(`[UTILS] AllTreatmentHandler success`);
       return { status: 200, body: { total_docs: docs.length, docs } };
     }
@@ -93,7 +93,7 @@ async function AllTreatmentHandler() {
 async function GetTreatmentHandler(tid) {
   try {
     const db = await dbUtils.connect();
-    var doc = await db.Treatment.getByTid(tid);
+    let doc = await db.Treatment.getByTid(tid);
     if (_.isNil(doc)) {
       console.log(`[UTILS] GetTreatmentHandler returns empty data`);
       return { status: 404, body: doc };
@@ -110,13 +110,13 @@ async function GetTreatmentHandler(tid) {
 async function PidTreatmentHandler(pid) {
   try {
     const db = await dbUtils.connect();
-    var instances = await db.Treatment.countByPid(pid);
+    let instances = await db.Treatment.countByPid(pid);
     if (instances < 1) {
       // No treament records found
       console.log(`[UTILS] PidTreatmentHandler returns empty data`);
       return { status: 404, body: {} };
     } else {
-      var docs = await db.Treatment.findByPid(pid);
+      let docs = await db.Treatment.findByPid(pid);
       console.log(`[UTILS] PidTreatmentHandler success`);
       return { status: 200, body: { total_docs: instances, docs } };
     }
@@ -129,7 +129,7 @@ async function PidTreatmentHandler(pid) {
 async function DistinctProceduresHandler() {
   try {
     const db = await dbUtils.connect();
-    var docs = await db.Treatment.getDistinctProcedures();
+    let docs = await db.Treatment.getDistinctProcedures();
     if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] DistinctProceduresHandler returns empty data`);
       return { status: 404, body: {} };
@@ -146,7 +146,7 @@ async function DistinctProceduresHandler() {
 async function DoctorTreatmentHandler(doctor, count = false) {
   try {
     const db = await dbUtils.connect();
-    var instances = await db.Treatment.countByDoctor(doctor);
+    let instances = await db.Treatment.countByDoctor(doctor);
     if (instances < 1) {
       // No treament records found
       console.log(`[UTILS] DoctorTreatmentHandler returns empty data`);
@@ -157,7 +157,7 @@ async function DoctorTreatmentHandler(doctor, count = false) {
         console.log(`[UTILS] DoctorTreatmentHandler success`);
         return { status: 200, body: { total_docs: instances } };
       } else {
-        var docs = await db.Treatment.findByDoctor(doctor);
+        let docs = await db.Treatment.findByDoctor(doctor);
         console.log(`[UTILS] DoctorTreatmentHandler success`);
         return { status: 200, body: { total_docs: instances, docs } };
       }
@@ -186,7 +186,7 @@ async function DateTreatmentHandler(from, to) {
     const db = await dbUtils.connect();
     from = from < 1000000000000 ? from * 1000 : from;
     to = to < 1000000000000 ? to * 1000 : to;
-    var docs = await db.Treatment.findBetweenDate(from, to);
+    let docs = await db.Treatment.findBetweenDate(from, to);
     console.log(`[UTILS] DateTreatmentHandler success`);
     return { status: 200, body: { total_docs: docs.length, docs } };
   } catch (err) {
@@ -198,12 +198,12 @@ async function DateTreatmentHandler(from, to) {
 async function TreatmentHistoryHandler(pid, quick = false) {
   try {
     const db = await dbUtils.connect();
-    var docs = await db.Treatment.findByPid(pid);
+    let docs = await db.Treatment.findByPid(pid);
     if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] TreatmentHistoryHandler returns empty data`);
       return { status: 404, body: {} };
     } else {
-      var result = { total_docs: docs.length };
+      let result = { total_docs: docs.length };
       if (quick) {
         // Quick treatment history
         result.procedures = _.chain(docs)
@@ -255,6 +255,30 @@ async function CheckCompatibilityHandler(list) {
   }
 }
 
+async function ImportTreatmentsHandler(docs) {
+  try {
+    const db = await dbUtils.connect();
+    for (let doc of docs) {
+      if (!_.isNil(doc.t_id)) {
+        let existing = await db.Treatment.getByTid(doc.t_id);
+        if (!_.isEqual(existing, doc)) {
+          await db.Treatment.updateDoc(existing.t_id, doc);
+        }
+      } else {
+        if (!_.isNil(doc.created_at)) delete doc.created_at;
+        let tid = await makeNextTid(db);
+        doc.t_id = tid;
+        await db.Treatment.create(doc);
+      }
+    }
+    console.log(`[UTILS] ImportTreatmentsHandler success`);
+    return { status: 200, body: null };
+  } catch (err) {
+    console.error(`[UTILS] Error @ ImportTreatmentsHandler \n ${JSON.stringify(err)}`);
+    return err;
+  }
+}
+
 TreatmentUtils.prototype.NewTreatmentHandler = NewTreatmentHandler;
 TreatmentUtils.prototype.AllTreatmentHandler = AllTreatmentHandler;
 TreatmentUtils.prototype.GetTreatmentHandler = GetTreatmentHandler;
@@ -265,5 +289,6 @@ TreatmentUtils.prototype.UpdateTreatmentHandler = UpdateTreatmentHandler;
 TreatmentUtils.prototype.DateTreatmentHandler = DateTreatmentHandler;
 TreatmentUtils.prototype.TreatmentHistoryHandler = TreatmentHistoryHandler;
 TreatmentUtils.prototype.CheckCompatibilityHandler = CheckCompatibilityHandler;
+TreatmentUtils.prototype.ImportTreatmentsHandler = ImportTreatmentsHandler;
 
 module.exports = new TreatmentUtils();

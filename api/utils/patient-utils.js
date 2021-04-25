@@ -34,7 +34,7 @@ async function NewPatientHandler(doc) {
     }
     const db = await dbUtils.connect();
     // doc.p_id = doc.name.replace(/\s/g, '').split('.').filter(word => word.length > 2)[0].slice(0, 3) + doc.contact.toString().slice(-4);
-    var pid = await makeNextPid(db);
+    let pid = await makeNextPid(db);
     doc.p_id = pid;
     await db.Patient.create(doc);
     console.log(`[UTILS] NewPatientHandler success`);
@@ -48,16 +48,16 @@ async function NewPatientHandler(doc) {
 async function AllPatientHandler(count = false) {
   try {
     const db = await dbUtils.connect();
-    var instances = await db.Patient.countAll();
+    let instances = await db.Patient.countAll();
     if (instances < 1) {
       console.log(`[UTILS] AllPatientHandler returns empty data`);
-      return { status: 204, body: {} };
+      return { status: 204, body: null };
     } else {
       if (count) {
         console.log(`[UTILS] AllPatientHandler success`);
         return { status: 200, body: { total_docs: instances } };
       } else {
-        var docs = await db.Patient.getAll();
+        let docs = await db.Patient.getAll();
         console.log(`[UTILS] AllPatientHandler success`);
         return { status: 200, body: { total_docs: instances, docs } };
       }
@@ -104,7 +104,7 @@ async function BulkPatientsHandler(pidList) {
 async function GetDistinctAreasHandler() {
   try {
     const db = await dbUtils.connect();
-    var docs = await db.Patient.getDistinctArea();
+    let docs = await db.Patient.getDistinctArea();
     if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] GetDistinctAreasHandler returns empty data`);
       return { status: 204, body: {} };
@@ -137,7 +137,7 @@ async function SearchByName(term) {
   console.log("[UTILS] Searching for Name");
   try {
     const db = await dbUtils.connect();
-    var docs = await db.Patient.findByName(term);
+    let docs = await db.Patient.findByName(term);
     if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] SearchByName returns empty data`);
       return { status: 404, body: null };
@@ -155,7 +155,7 @@ async function SearchByArea(term) {
   console.log("[UTILS] Searching for Area");
   try {
     const db = await dbUtils.connect();
-    var docs = await db.Patient.findByArea(term);
+    let docs = await db.Patient.findByArea(term);
     if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] SearchByArea returns empty data`);
       return { status: 404, body: null };
@@ -177,7 +177,7 @@ async function SearchByContact(term) {
       return { status: 400, body: null };
     } else {
       const db = await dbUtils.connect();
-      var docs = await db.Patient.findByContact(parseInt(term));
+      let docs = await db.Patient.findByContact(parseInt(term));
       if (_.isNil(docs) || _.isEmpty(docs)) {
         console.log(`[UTILS] SearchByContact returns empty data`);
         return { status: 404, body: null };
@@ -206,6 +206,29 @@ function SearchPatientHandler(term, type) {
   }
 }
 
+async function ImportPatientsHandler(docs) {
+  try {
+    const db = await dbUtils.connect();
+    for (let doc of docs) {
+      if (!_.isNil(doc.p_id)) {
+        let existing = await db.Patient.getByPid(doc.p_id);
+        if (!_.isEqual(existing, doc)) {
+          await db.Patient.updateDoc(existing.p_id, doc);
+        }
+      } else {
+        if (!_.isNil(doc.created_at)) delete doc.created_at;
+        let pid = await makeNextPid(db);
+        doc.p_id = pid;
+        await db.Patient.create(doc);
+      }
+    }
+    return { status: 200, body: null };
+  } catch (err) {
+    console.error(`[UTILS] Error @ ImportPatientsHandler \n ${JSON.stringify(err)}`);
+    return err;
+  }
+}
+
 PatientUtils.prototype.NewPatientHandler = NewPatientHandler;
 PatientUtils.prototype.AllPatientHandler = AllPatientHandler;
 PatientUtils.prototype.GetPatientHandler = GetPatientHandler;
@@ -213,5 +236,6 @@ PatientUtils.prototype.BulkPatientsHandler = BulkPatientsHandler;
 PatientUtils.prototype.GetDistinctAreasHandler = GetDistinctAreasHandler;
 PatientUtils.prototype.UpdatePatientHandler = UpdatePatientHandler;
 PatientUtils.prototype.SearchPatientHandler = SearchPatientHandler;
+PatientUtils.prototype.ImportPatientsHandler = ImportPatientsHandler;
 
 module.exports = new PatientUtils();

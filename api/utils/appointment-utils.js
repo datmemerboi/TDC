@@ -4,7 +4,7 @@ const dbUtils = require('./db-utils');
 
 function AppointmentUtils() { }
 
-function makeNextAid(db) {
+function makeNextAppid(db) {
   return new Promise((resolve, reject) => {
     db.Appointment.getLatestAppId()
       .then(top => {
@@ -21,7 +21,7 @@ function makeNextAid(db) {
         }
       })
       .catch(err => {
-        console.error(`[UTILS] Error @ makeNextAid \n ${JSON.stringify(err)}`);
+        console.error(`[UTILS] Error @ makeNextAppid \n ${JSON.stringify(err)}`);
         return reject(err);
       });
   });
@@ -69,7 +69,7 @@ function mergePatientDetails(db, pid, doc) {
   return new Promise((resolve) => {
     db.Patient.getByPid(pid)
       .then(patient => {
-        var mergedDoc = {
+        let mergedDoc = {
           ...doc,
           patient: {
             name: patient.name,
@@ -93,8 +93,8 @@ function checkAppointmentFeasibility(db, doc) {
       // Appointment id, timing, doctor and status not mentioned
       return resolve(false);
     } else {
-      let from = doc.appointment_date - 899000, // 15 minutes before appointment_date
-          to = doc.appointment_date + 899000; // 15 minutes after appointment_date
+      let from = doc.appointment_date - 899000; // 15 minutes before appointment_date
+      let to = doc.appointment_date + 899000; // 15 minutes after appointment_date
 
       // Check if the doctor has any appointments 15 mins before or after the mentioned timing
       db.Appointment.findByAvailability(doc.doctor, from, to)
@@ -118,7 +118,7 @@ function checkAppointmentFeasibility(db, doc) {
 
 function sanitize(doc) {
   // Create a clean object fit for the db
-  var cleanObj = new Object(doc);
+  let cleanObj = new Object(doc);
   for (let key in cleanObj) {
     if (key === "app_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
   }
@@ -131,7 +131,7 @@ function sanitize(doc) {
 async function NewAppointmentHandler(doc) {
   try {
     const db = await dbUtils.connect();
-    const appid = await makeNextAid(db); // Create the next appointment id
+    const appid = await makeNextAppid(db); // Create the next appointment id
     doc = sanitize(doc);
     doc.app_id = appid;
     if (await checkAppointmentFeasibility(db, doc)) {
@@ -151,13 +151,13 @@ async function NewAppointmentHandler(doc) {
 async function AllAppointmentHandler() {
   try {
     const db = await dbUtils.connect();
-    var instances = await db.Appointment.countAll();
+    let instances = await db.Appointment.countAll();
     if (instances < 1) {
       // No appointment records found
       console.error(`[UTILS] AllAppointmentHandler returns empty data`);
       return { status: 404, body: null };
     } else {
-      var docs = await db.Appointment.getAll();
+      let docs = await db.Appointment.getAll();
       console.log(`[UTILS] AllAppointmentHandler success`);
       return { status: 200, body: { total_docs: instances, docs, meta: generateStatsForAppointment(docs) } };
     }
@@ -170,7 +170,7 @@ async function AllAppointmentHandler() {
 async function PatientAppointmentHandler(pid, count = false) {
   try {
     const db = await dbUtils.connect();
-    var instances = await db.Appointment.countByPid(pid);
+    let instances = await db.Appointment.countByPid(pid);
     if (instances < 1) {
       // No appointment records found
       console.log(`[UTILS] PatientAppointmentHandler returns empty data`);
@@ -181,7 +181,7 @@ async function PatientAppointmentHandler(pid, count = false) {
         console.log(`[UTILS] PatientAppointmentHandler success`);
         return { status: 200, body: { total_docs: instances } };
       } else {
-        var docs = db.Appointment.findByPid(pid);
+        let docs = db.Appointment.findByPid(pid);
         console.log(`[UTILS] PatientAppointmentHandler success`);
         return { status: 200, body: { total_docs: instances, docs: docs } };
       }
@@ -195,7 +195,7 @@ async function PatientAppointmentHandler(pid, count = false) {
 async function DoctorAppointmentHandler(doctor, count = false) {
   try {
     const db = await dbUtils.connect();
-    var instances = await db.Appointment.countByDoctor(doctor);
+    let instances = await db.Appointment.countByDoctor(doctor);
     if (instances < 1) {
       // No appointment records found
       console.error(`[UTILS] DoctorAppointmentHandler returns empty data`);
@@ -206,7 +206,7 @@ async function DoctorAppointmentHandler(doctor, count = false) {
         console.log(`[UTILS] DoctorAppointmentHandler success`);
         return { status: 200, body: { total_docs: instances } };
       } else {
-        var docs = await db.Appointment.findByDoctor(doctor);
+        let docs = await db.Appointment.findByDoctor(doctor);
         console.log(`[UTILS] DoctorAppointmentHandler success`);
         return { status: 200, body: { total_docs: instances, docs } };
       }
@@ -220,7 +220,7 @@ async function DoctorAppointmentHandler(doctor, count = false) {
 async function StatusAppointmentHandler(status, count = false) {
   try {
     const db = await dbUtils.connect();
-    var instances = await db.Appointment.countByStatus(status);
+    let instances = await db.Appointment.countByStatus(status);
     if (instances < 0) {
       // No appointment records found
       console.log(`[UTILS] StatusAppointmentHandler return empty data`);
@@ -231,7 +231,7 @@ async function StatusAppointmentHandler(status, count = false) {
         console.log(`[UTILS] StatusAppointmentHandler success`);
         return { status: 200, body: { total_docs: instances } };
       } else {
-        var docs = await db.Appointment.findByStatus(status);
+        let docs = await db.Appointment.findByStatus(status);
         console.log(`[UTILS] StatusAppointmentHandler success`);
         return { status: 200, body: { total_docs: instances, docs } };
       }
@@ -261,13 +261,13 @@ async function DateAppointmentHandler(from, to, count = false) {
     from = from < 1000000000000 ? from * 1000 : from;
     to = to < 1000000000000 ? to * 1000 : to;
     const db = await dbUtils.connect();
-    var docs = await db.Appointment.findBetweenDate(from, to);
+    let docs = await db.Appointment.findBetweenDate(from, to);
     if (count) {
       // Request for only count of records
       return { status: 200, body: { total_docs: docs.length } };
     } else {
       const mergedDocs = await Promise.all(docs.map(doc => mergePatientDetails(db, doc.p_id, doc)));
-      var result = {
+      let result = {
         total_docs: docs.length,
         docs: mergedDocs,
         meta: generateStatsForAppointment(docs)
@@ -281,6 +281,28 @@ async function DateAppointmentHandler(from, to, count = false) {
   }
 }
 
+async function ImportAppointmentsHandler(docs) {
+  try {
+    const db = await dbUtils.connect();
+    for (let doc of docs) {
+      if (!_.isNil(doc.app_id)) {
+        let existing = await db.Appointment.getByPid(doc.app_id);
+        if (!_.isEqual(existing, doc)) {
+          await db.Appointment.updateDoc(existing.app_id, doc);
+        }
+      } else {
+        if (!_.isNil(doc.created_at)) delete doc.created_at;
+        let appid = await makeNextAppid(db);
+        doc.app_id = appid;
+        await db.Appointment.create(doc);
+      }
+    }
+    return { status: 200, body: null };
+  } catch (err) {
+    console.error(`[UTILS] Error @ ImportAppointmentsHandler \n ${JSON.stringify(err)}`);
+    return err;
+  }
+}
 
 AppointmentUtils.prototype.NewAppointmentHandler = NewAppointmentHandler;
 AppointmentUtils.prototype.AllAppointmentHandler = AllAppointmentHandler;
@@ -289,5 +311,6 @@ AppointmentUtils.prototype.DoctorAppointmentHandler = DoctorAppointmentHandler;
 AppointmentUtils.prototype.StatusAppointmentHandler = StatusAppointmentHandler;
 AppointmentUtils.prototype.UpdateAppointmentHandler = UpdateAppointmentHandler;
 AppointmentUtils.prototype.DateAppointmentHandler = DateAppointmentHandler;
+AppointmentUtils.prototype.ImportAppointmentsHandler = ImportAppointmentsHandler;
 
 module.exports = new AppointmentUtils();
