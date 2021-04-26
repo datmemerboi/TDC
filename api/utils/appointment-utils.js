@@ -122,9 +122,9 @@ function sanitize(doc) {
   for (let key in cleanObj) {
     if (key === "app_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
   }
-  cleanObj.appointment_date = cleanObj.appointment_date < 1000000000000
-    ? new Date(cleanObj.appointment_date * 1000).getTime()
-    : cleanObj.appointment_date;
+  if (!_.isNil(cleanObj.appointment_date) && cleanObj.appointment_date < 1000000000000) {
+    cleanObj.appointment_date = new Date(cleanObj.appointment_date * 1000).getTime()
+  }
   return cleanObj;
 }
 
@@ -246,9 +246,11 @@ async function UpdateAppointmentHandler(appid, doc) {
   try {
     const db = await dbUtils.connect();
     doc = sanitize(doc);
-    await db.Appointment.updateDoc(appid, doc);
+    let updatedDoc = await db.Appointment.updateDoc(appid, doc);
+    delete updatedDoc['_id'];
+    delete updatedDoc['__v'];
     console.log(`[UTILS] UpdateAppointmentHandler success`);
-    return { status: 200, body: doc };
+    return { status: 200, body: updatedDoc };
   } catch (err) {
     console.error(`[UTILS] Error @ UpdateAppointmentHandler \n ${JSON.stringify(err)}`);
     return err;

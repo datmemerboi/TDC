@@ -49,9 +49,9 @@ function sanitize(doc) {
   if (!_.isNil(doc.teeth_number) && typeof doc.teeth_number === "string") {
     cleanObj.teeth_number = doc.teeth_number.split(',').map(n => parseInt(n, 10));
   }
-  cleanObj.treatment_date = cleanObj.treatment_date < 1000000000000
-    ? new Date(cleanObj.treatment_date * 1000).getTime()
-    : cleanObj.treatment_date;
+  if (!_.isNil(cleanObj.treatment_date) && cleanObj.treatment_date < 1000000000000) {
+    cleanObj.treatment_date = new Date(cleanObj.treatment_date * 1000).getTime()
+  }
   return cleanObj;
 }
 
@@ -172,9 +172,11 @@ async function UpdateTreatmentHandler(tid, doc) {
   try {
     const db = await dbUtils.connect();
     doc = sanitize(doc);
-    await db.Treatment.updateDoc(tid, doc);
+    let updatedDoc = await db.Treatment.updateDoc(tid, doc);
+    delete updatedDoc['_id'];
+    delete updatedDoc['__v'];
     console.log(`[UTILS] UpdateTreatmentHandler success`);
-    return { status: 200, body: doc };
+    return { status: 200, body: updatedDoc };
   } catch (err) {
     console.error(`[UTILS] Error @ UpdateTreatmentHandler \n ${JSON.stringify(err)}`);
     return err;
