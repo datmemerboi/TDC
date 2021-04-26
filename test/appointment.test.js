@@ -13,8 +13,6 @@ describe("Appointment test cases", () => {
     await db.Appointment.deleteMany({});
   });
   after(async function () {
-    const db = await dbUtils.connect();
-    await db.Appointment.deleteMany({});
     await dbUtils.close();
   });
   describe("POST /api/appointment/new", () => {
@@ -58,16 +56,9 @@ describe("Appointment test cases", () => {
   });
   describe("PUT /api/appointment/update", () => {
     it("Update appointment record", (done) => {
-      let appointmentObj = {
-        p_id: "PAT0001",
-        appointment_date: new Date("2021-05-20T11:50:00Z").getTime(),
-        doctor: "Dr. Zoe Test",
-        status: 2,
-        room: 13
-      };
       chai.request(app)
         .put('/api/appointment/update/APP0001')
-        .send(appointmentObj)
+        .send({ status: 2, room: 13 })
         .end((err, res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");

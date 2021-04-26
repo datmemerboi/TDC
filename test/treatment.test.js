@@ -13,8 +13,6 @@ describe("Treatment test cases", () => {
     await db.Treatment.deleteMany({});
   });
   after(async function () {
-    const db = await dbUtils.connect();
-    await db.Treatment.deleteMany({});
     await dbUtils.close();
   })
   describe("POST /api/treatment/new", () => {
@@ -23,7 +21,7 @@ describe("Treatment test cases", () => {
         p_id: "PAT0001",
         procedure_done: "Filling",
         teeth_number: "31,32,33",
-        treatment_date: new Date("2021-07-13T19:00:00Z"),
+        treatment_date: new Date("2021-05-20T11:50:00Z"),
         doctor: "Dr. Zeo Test"
       };
       chai.request(app)
@@ -70,20 +68,15 @@ describe("Treatment test cases", () => {
   });
   describe("PUT /api/treatment/update", () => {
     it("Update treatment object", (done) => {
-      let treatmentObj = {
-        p_id: "PAT0001",
-        treatment_date: new Date("2021-01-13"),
-        doctor: "Dr. Pro Test"
-      };
       chai.request(app)
         .put('/api/treatment/update/TRT0001')
-        .send(treatmentObj)
+        .send({ doctor: "Dr. Pro Test" })
         .end((err, res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           expect(res.body).to.have.property("p_id");
           expect(res.body).to.have.property("doctor");
-          expect(res.body.doctor).to.eql(treatmentObj.doctor);
+          expect(res.body.doctor).to.eql("Dr. Pro Test");
           done();
         });
     });

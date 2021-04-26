@@ -12,8 +12,6 @@ describe("Patient test cases", () => {
     await db.Patient.deleteMany({});
   });
   after(async function () {
-    const db = await dbUtils.connect();
-    await db.Patient.deleteMany({});
     await dbUtils.close();
   });
   describe("POST /api/patient/new", () => {
@@ -46,6 +44,7 @@ describe("Patient test cases", () => {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           expect(res.body).to.have.property("docs");
+          expect(res.body.docs).to.be.an("array");
           expect(res.body.docs.length).to.be.greaterThan(0);
           done();
         });
@@ -54,11 +53,12 @@ describe("Patient test cases", () => {
   describe("GET /api/patient/search", () => {
     it("Search for patient via GET method", (done) => {
       chai.request(app)
-        .get(`/api/patient/search?type=area&term=CIT Nagar`)
+        .get(`/api/patient/search?type=area&term=CIT%20Nagar`)
         .end((err, res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           expect(res.body).to.have.property("docs");
+          expect(res.body.docs).to.be.an("array");
           expect(res.body.docs.length).to.be.greaterThan(0);
           expect(res.body.docs[0]['p_id']).to.equal("PAT0001");
           done();
@@ -67,24 +67,14 @@ describe("Patient test cases", () => {
   });
   describe("PUT /api/patient/update", () => {
     it("Update patient object", (done) => {
-      let patientObj = {
-        name: "Arjun",
-        age: 29,
-        gender: "M",
-        contact: 9000190001,
-        area: "CIT Nagar",
-        address: "10, CIT Nagar 1st street, Chennai",
-        med_history: [],
-        current_meds: [ "Paracetamol", "Aspirin" ]
-      };
       chai.request(app)
         .put('/api/patient/update/PAT0001')
-        .send(patientObj)
+        .send({ contact: 9000190001 })
         .end((err, res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           expect(res.body).to.have.property("contact");
-          expect(res.body.contact).to.eql(patientObj.contact);
+          expect(res.body.contact).to.eql(9000190001);
           done();
         })
     });
@@ -101,6 +91,7 @@ describe("Patient test cases", () => {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           expect(res.body).to.have.property("docs");
+          expect(res.body.docs).to.be.an("array");
           expect(res.body.docs.length).to.be.greaterThan(0);
           expect(res.body.docs[0]['p_id']).to.equal("PAT0001");
           done();
