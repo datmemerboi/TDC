@@ -124,9 +124,11 @@ async function UpdatePatientHandler(pid, doc) {
       if (_.isNil(doc[key]) || key === "p_id") delete doc[key];
     }
     const db = await dbUtils.connect();
-    await db.Patient.updateDoc(pid, doc);
+    let updatedDoc = await db.Patient.updateDoc(pid, doc);
+    delete updatedDoc['_id'];
+    delete updatedDoc['__v'];
     console.log("[UTILS] UpdatePatientHandler success");
-    return { status: 200, body: doc };
+    return { status: 200, body: updatedDoc };
   } catch (err) {
     console.error(`[UTILS] Error @ UpdatePatientHandler \n ${JSON.stringify(err)}`);
     return err;
