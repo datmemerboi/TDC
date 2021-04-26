@@ -47,7 +47,7 @@ router.all('/all', (req, res) => {
   }
 });
 
-router.post('/patient/:pid', (req, res) => {
+router.all('/patient/:pid', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/patient/`);
   if(_.isNil(req.params.pid)) {
     console.error(`[API] Bad Request: missing required parameters`);
@@ -66,7 +66,7 @@ router.post('/patient/:pid', (req, res) => {
   }
 });
 
-router.all('/doctor', (req, res) => {
+router.post('/doctor', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/doctor/`);
   if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.doctor)) {
     console.error(`[API] Bad Request: missing required parameters`);
@@ -85,7 +85,7 @@ router.all('/doctor', (req, res) => {
   }
 });
 
-router.all('/status', (req, res) => {
+router.post('/status', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/status/`);
   if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.status)) {
     console.error(`[API] Bad Request: missing required parameters`);
