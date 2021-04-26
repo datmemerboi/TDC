@@ -83,9 +83,11 @@ Treatment.statics.findBetweenDate = function (from, to) {
 Treatment.statics.updateDoc = function (tid, doc) {
   return this.findOneAndUpdate(
     { t_id: tid },
-    { $set: doc },
-    { upsert: true }
-  ).exec();
+    doc,
+    { new: true }
+  )
+    .lean()
+    .exec();
 };
 
 Treatment.statics.deleteByTid = function (tid) {

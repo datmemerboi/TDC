@@ -70,9 +70,11 @@ Patient.statics.findByContact = function (contact) {
 Patient.statics.updateDoc = function (pid, doc) {
   return this.findOneAndUpdate(
     { p_id: pid },
-    { $set: doc },
-    { upsert: true }
-  ).exec();
+    doc,
+    { new: true }
+  )
+    .lean()
+    .exec();
 };
 
 Patient.statics.deleteByPid = function (pid) {

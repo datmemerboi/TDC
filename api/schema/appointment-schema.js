@@ -113,7 +113,13 @@ Appointment.statics.findByAvailability = function (doctor, from, to) {
 };
 
 Appointment.statics.updateDoc = function (appid, doc) {
-  return this.findOneAndUpdate({ app_id: appid }, { $set: doc }).exec();
+  return this.findOneAndUpdate(
+    { app_id: appid },
+    doc,
+    { new: true }
+  )
+    .lean()
+    .exec();
 };
 
 Appointment.statics.deleteByAppid = function (appid) {

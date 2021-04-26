@@ -66,7 +66,8 @@ Invoice.statics.findBetweenDate = function (from, to) {
 Invoice.statics.updateDoc = function (invid, doc) {
   return this.findOneAndUpdate(
     { inv_id: invid },
-    { $set: doc },
+    doc,
+    { new: true }
   )
     .exec();
 };
