@@ -43,7 +43,7 @@ function generateStatsForAppointment(docs) {
     return {
       type: "doctor",
       name: doctor,
-      count: docs.filter(doc => doc.doctor === doctor).length
+      count: _.chain(docs).filter({ "doctor": doctor }).size()
     };
   });
   /*
@@ -59,7 +59,7 @@ function generateStatsForAppointment(docs) {
     return {
       type: "status",
       value: status,
-      count: docs.filter(doc => doc.status === status).length
+      count: _.chain(docs).filter({ "status": status }).size()
     };
   });
   return [...doctorStats, ...statusStats];
