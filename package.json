@@ -6,17 +6,18 @@
     "start": "node dist/app.js",
     "dev": "nodemon api/app.js",
     "build": "babel api --out-dir dist --copy-files",
-    "staging": "NODE_ENV=test nodemon api/app.js"
+    "staging": "NODE_ENV=test nodemon api/app.js",
+    "test": "NODE_ENV=test mocha --exit"
   },
   "main": "api/app.js",
   "author": "datmemerboi",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "json2xls": "^0.1.2",
     "lodash": "^4.17.21",
     "mongoose": "^5.10.2",
-    "pdfkit": "^0.11.0"
+    "pdfkit": "^0.11.0",
+    "xlsx": "^0.16.9"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.10",
