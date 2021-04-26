@@ -72,7 +72,7 @@ function fitForDB(doc) {
 
   // w.r.t Treatment
   fitObj.teeth_number = !_.isNil(doc.teeth_number)
-    ? doc.teeth_number.split(',').map(parseInt)
+    ? doc.teeth_number.split(',').map(n => parseInt(n, 10))
     : null;
   fitObj.treatment_date = !_.isNil(doc.treatment_date)
     ? new Date(doc.treatment_date)

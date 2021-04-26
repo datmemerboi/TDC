@@ -46,8 +46,8 @@ function sanitize(doc) {
   for (let key in cleanObj) {
     if (key === "t_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
   }
-  if (!_.isNil(cleanObj.teeth_number) && typeof cleanObj.teeth_number === "string") {
-    cleanObj.teeth_number = cleanObj.teeth_number.split(',').map(parseInt);
+  if (!_.isNil(doc.teeth_number) && typeof doc.teeth_number === "string") {
+    cleanObj.teeth_number = doc.teeth_number.split(',').map(n => parseInt(n, 10));
   }
   cleanObj.treatment_date = cleanObj.treatment_date < 1000000000000
     ? new Date(cleanObj.treatment_date * 1000).getTime()
