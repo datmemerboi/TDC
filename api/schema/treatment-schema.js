@@ -1,6 +1,6 @@
 const Schema = require('mongoose').Schema;
 
-var Treatment = new Schema({
+let Treatment = new Schema({
   t_id: { type: String, required: true, index: true, unique: true },
   p_id: { type: String, required: true, index: true },
   procedure_done: { type: String, default: "" },

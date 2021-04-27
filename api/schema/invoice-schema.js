@@ -1,6 +1,6 @@
 const Schema = require('mongoose').Schema;
 
-var Invoice = new Schema({
+let Invoice = new Schema({
   inv_id: { type: String, required: true, index: true, unique: true },
   p_id: { type: String, index: true },
   treatments: [{ type: String }],

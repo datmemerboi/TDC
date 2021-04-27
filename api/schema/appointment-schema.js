@@ -1,6 +1,6 @@
 const Schema = require('mongoose').Schema;
 
-var Appointment = new Schema({
+let Appointment = new Schema({
   app_id: { type: String, required: true, index: true },
   p_id: { type: String, index: true },
   appointment_date: { type: Date, required: true },

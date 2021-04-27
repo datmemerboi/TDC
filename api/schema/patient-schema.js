@@ -1,6 +1,6 @@
 const Schema = require('mongoose').Schema;
 
-var Patient = new Schema({
+let Patient = new Schema({
   p_id: { type: String, required: true, index: true, unique: true },
   name: String,
   dob: { type: Date, default: null },
