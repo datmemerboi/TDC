@@ -91,15 +91,10 @@ function fitForDB(doc) {
 }
 
 async function createXlsFile(outFile, docs, keys) {
-  try {
-    let workbook = XLSX.utils.book_new();
-    let data = XLSX.utils.json_to_sheet(docs, { header: keys });
-    XLSX.utils.book_append_sheet(workbook, data, "Sheet1");
-    await XLSX.writeFileSync(workbook, outFile);
-    return true;
-  } catch (err) {
-    return err;
-  }
+  let workbook = XLSX.utils.book_new();
+  let data = XLSX.utils.json_to_sheet(docs, { header: keys });
+  XLSX.utils.book_append_sheet(workbook, data, "Sheet1");
+  await XLSX.writeFileSync(workbook, outFile);
 }
 
 function ImportXlsHandler(filename, type) {
@@ -134,7 +129,7 @@ function ImportXlsHandler(filename, type) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ ImportXlsHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -158,7 +153,7 @@ async function ExportPatientsAsXls(outFile) {
     return { status: 200, body: { total_docs: docs.length } };
   } catch (err) {
     console.error(`[UTILS] Error @ ExportPatientsAsXls \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -181,7 +176,7 @@ async function ExportTreatmentsAsXls(outFile) {
     return { status: 200, body: { total_docs: docs.length } };
   } catch (err) {
     console.error(`[UTILS] Error @ ExportTreatmentsAsXls \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -204,33 +199,29 @@ async function ExportAppointmentsAsXls(outFile) {
     return { status: 200, body: { total_docs: docs.length } };
   } catch (err) {
     console.error(`[UTILS] Error @ ExportAppointmentsAsXls \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
 function ExportXlsHandler(type) {
-  try {
-    if (!_.includes(["Patient", "Treatment", "Appointment"], type)) {
-      console.error(`[UTILS] Invalid type @ ExportXlsHandler \n ${type}`);
-      return { status: 400, body: null };
-    }
+  if (!_.includes(["Patient", "Treatment", "Appointment"], type)) {
+    console.error(`[UTILS] Invalid type @ ExportXlsHandler \n ${type}`);
+    return { status: 400, body: null };
+  }
 
-    let monthYear = new Date().toLocaleString('default', { month: "short", year: "numeric" });
-    let outPath = path.join(__dirname, '..', '..', 'data');
-    let outFile;
+  let monthYear = new Date().toLocaleString('default', { month: "short", year: "numeric" });
+  let outPath = path.join(__dirname, '..', '..', 'data');
+  let outFile;
 
-    if (type === "Patient") {
-      outFile = path.join(outPath, `Patient List(${monthYear}).xls`);
-      return ExportPatientsAsXls(outFile);
-    } else if (type === "Treatment") {
-      outFile = path.join(outPath, `Treatment List(${monthYear}).xls`);
-      return ExportTreatmentsAsXls(outFile);
-    } else {
-      outFile = path.join(outPath, `Appointment List(${monthYear}).xls`);
-      return ExportAppointmentsAsXls(outFile);
-    }
-  } catch (err) {
-    return err;
+  if (type === "Patient") {
+    outFile = path.join(outPath, `Patient List(${monthYear}).xls`);
+    return ExportPatientsAsXls(outFile);
+  } else if (type === "Treatment") {
+    outFile = path.join(outPath, `Treatment List(${monthYear}).xls`);
+    return ExportTreatmentsAsXls(outFile);
+  } else {
+    outFile = path.join(outPath, `Appointment List(${monthYear}).xls`);
+    return ExportAppointmentsAsXls(outFile);
   }
 }
 

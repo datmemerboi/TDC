@@ -50,7 +50,7 @@ function sanitize(doc) {
     cleanObj.teeth_number = doc.teeth_number.split(',').map(n => parseInt(n, 10));
   }
   if (!_.isNil(cleanObj.treatment_date) && cleanObj.treatment_date < 1000000000000) {
-    cleanObj.treatment_date = new Date(cleanObj.treatment_date * 1000).getTime()
+    cleanObj.treatment_date = new Date(cleanObj.treatment_date * 1000).getTime();
   }
   return cleanObj;
 }
@@ -66,7 +66,7 @@ async function NewTreatmentHandler(doc) {
     return { status: 201, body: doc };
   } catch (err) {
     console.error(`[UTILS] Error @ NewTreatmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -86,7 +86,7 @@ async function AllTreatmentHandler() {
   }
   catch (err) {
     console.error(`[UTILS] Error @ AllTreatmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -103,7 +103,7 @@ async function GetTreatmentHandler(tid) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ GetTreatmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -122,7 +122,7 @@ async function PidTreatmentHandler(pid) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ PidTreatmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -139,7 +139,7 @@ async function DistinctProceduresHandler() {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ DistinctProceduresHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -164,7 +164,7 @@ async function DoctorTreatmentHandler(doctor, count = false) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ DoctorTreatmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -179,7 +179,7 @@ async function UpdateTreatmentHandler(tid, doc) {
     return { status: 200, body: updatedDoc };
   } catch (err) {
     console.error(`[UTILS] Error @ UpdateTreatmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -193,7 +193,7 @@ async function DateTreatmentHandler(from, to) {
     return { status: 200, body: { total_docs: docs.length, docs } };
   } catch (err) {
     console.error(`[UTILS] Error @ DateTreatmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -242,7 +242,7 @@ async function TreatmentHistoryHandler(pid, quick = false) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ TreatmentHistoryHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -253,7 +253,7 @@ async function CheckCompatibilityHandler(list) {
     return { status: 200, body: { compatible: compatibility } };
   } catch (err) {
     console.error(`[UTILS] Error @ CheckCompatibilityHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -277,7 +277,7 @@ async function ImportTreatmentsHandler(docs) {
     return { status: 200, body: null };
   } catch (err) {
     console.error(`[UTILS] Error @ ImportTreatmentsHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 

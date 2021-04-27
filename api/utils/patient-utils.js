@@ -27,13 +27,28 @@ function makeNextPid(db) {
   });
 }
 
+function sanitize(doc) {
+  let cleanObj = new Object(doc);
+  for (let key in cleanObj) {
+    if (_.isNil(cleanObj[key]) || key === "p_id") delete cleanObj[key];
+  }
+  if (!_.isNil(cleanObj.dob)) {
+    if (_.isFinite(cleanObj.dob) && cleanObj.dob < 1000000000000) {
+      cleanObj.dob = new Date(cleanObj.dob * 1000).getTime();
+    }
+    if (_.isNil(cleanObj.age)) {
+      // Calculate age from DOB
+      cleanObj.age = Math.floor((new Date() - cleanObj.dob) / 3.15576e+10);
+    }
+  }
+  return cleanObj;
+}
+
 async function NewPatientHandler(doc) {
   try {
-    for (let key in doc) {
-      if (_.isNil(doc[key]) || key === "p_id") delete doc[key];
-    }
     const db = await dbUtils.connect();
     // doc.p_id = doc.name.replace(/\s/g, '').split('.').filter(word => word.length > 2)[0].slice(0, 3) + doc.contact.toString().slice(-4);
+    doc = sanitize(doc);
     let pid = await makeNextPid(db);
     doc.p_id = pid;
     await db.Patient.create(doc);
@@ -41,7 +56,7 @@ async function NewPatientHandler(doc) {
     return { status: 201, body: doc };
   } catch (err) {
     console.error(`[UTILS] Error @ NewPatientHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -64,7 +79,7 @@ async function AllPatientHandler(count = false) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ AllPatientHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -81,7 +96,7 @@ async function GetPatientHandler(pid) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ GetPatientHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -98,6 +113,7 @@ async function BulkPatientsHandler(pidList) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ BulkPatientsHandler`);
+    throw err;
   }
 }
 
@@ -114,16 +130,14 @@ async function GetDistinctAreasHandler() {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ GetDistinctAreasHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
 async function UpdatePatientHandler(pid, doc) {
   try {
-    for (let key in doc) {
-      if (_.isNil(doc[key]) || key === "p_id") delete doc[key];
-    }
     const db = await dbUtils.connect();
+    doc = sanitize(doc);
     let updatedDoc = await db.Patient.updateDoc(pid, doc);
     delete updatedDoc['_id'];
     delete updatedDoc['__v'];
@@ -131,7 +145,7 @@ async function UpdatePatientHandler(pid, doc) {
     return { status: 200, body: updatedDoc };
   } catch (err) {
     console.error(`[UTILS] Error @ UpdatePatientHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -149,7 +163,7 @@ async function SearchByName(term) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ SearchByName \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -167,7 +181,7 @@ async function SearchByArea(term) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ SearchByArea \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -190,7 +204,7 @@ async function SearchByContact(term) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ SearchByContact \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -227,7 +241,7 @@ async function ImportPatientsHandler(docs) {
     return { status: 200, body: null };
   } catch (err) {
     console.error(`[UTILS] Error @ ImportPatientsHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 

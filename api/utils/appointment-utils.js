@@ -28,8 +28,6 @@ function makeNextAppid(db) {
 }
 
 function generateStatsForAppointment(docs) {
-  let uniqueDoctors = _.chain(docs).map('doctor').uniq().value(); // Get list of unique doctors
-  let uniqueStatuses = _.chain(docs).map('status').uniq().value(); // Get list of unique statuses
   /*
   doctorsStats = [
     {
@@ -39,13 +37,18 @@ function generateStatsForAppointment(docs) {
     }
   ]
   */
-  let doctorStats = uniqueDoctors.map(doctor => {
-    return {
-      type: "doctor",
-      name: doctor,
-      count: _.chain(docs).filter({ "doctor": doctor }).size()
-    };
-  });
+  let doctorStats =
+  _.chain(docs)
+    .map('doctor')
+    .uniq()
+    .map(doctor => {
+      return {
+        type: "doctor",
+        name: doctor,
+        count: _.chain(docs).filter({ "doctor": doctor }).size()
+      };
+    })
+    .value();
   /*
   statusStats = [
     {
@@ -55,13 +58,18 @@ function generateStatsForAppointment(docs) {
     }
   ]
   */
-  let statusStats = uniqueStatuses.map(status => {
-    return {
-      type: "status",
-      value: status,
-      count: _.chain(docs).filter({ "status": status }).size()
-    };
-  });
+  let statusStats =
+  _.chain(docs)
+    .map('status')
+    .uniq()
+    .map(status => {
+      return {
+        type: "status",
+        value: status,
+        count: _.chain(docs).filter({ "status": status }).size()
+      };
+    })
+    .value();
   return [...doctorStats, ...statusStats];
 }
 
@@ -123,7 +131,7 @@ function sanitize(doc) {
     if (key === "app_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
   }
   if (!_.isNil(cleanObj.appointment_date) && cleanObj.appointment_date < 1000000000000) {
-    cleanObj.appointment_date = new Date(cleanObj.appointment_date * 1000).getTime()
+    cleanObj.appointment_date = new Date(cleanObj.appointment_date * 1000).getTime();
   }
   return cleanObj;
 }
@@ -144,7 +152,7 @@ async function NewAppointmentHandler(doc) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ NewAppointmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -163,7 +171,7 @@ async function AllAppointmentHandler() {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ AllAppointmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -188,7 +196,7 @@ async function PatientAppointmentHandler(pid, count = false) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ PatientAppointmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -213,7 +221,7 @@ async function DoctorAppointmentHandler(doctor, count = false) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ DoctorAppointmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -238,7 +246,7 @@ async function StatusAppointmentHandler(status, count = false) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ StatusAppointmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -253,7 +261,7 @@ async function UpdateAppointmentHandler(appid, doc) {
     return { status: 200, body: updatedDoc };
   } catch (err) {
     console.error(`[UTILS] Error @ UpdateAppointmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -279,7 +287,7 @@ async function DateAppointmentHandler(from, to, count = false) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ DateAppointmentHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
@@ -302,7 +310,7 @@ async function ImportAppointmentsHandler(docs) {
     return { status: 200, body: null };
   } catch (err) {
     console.error(`[UTILS] Error @ ImportAppointmentsHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
