@@ -8,6 +8,7 @@ invoice/
 noder.js
 try.js
 export-module.js
+*.zip
 
 # ENV FILES
 .env
