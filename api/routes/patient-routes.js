@@ -7,6 +7,9 @@ router.post('/new', function(req, res) {
   if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.name) || _.isNil(req.body.contact)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
+  } else if (!_.isString(req.body.name) || !_.isFinite(req.body.contact)) {
+    console.error(`[API] Bad Request: parameters of invalid type`);
+    res.sendStatus(400).end();
   } else {
     PatientUtils.NewPatientHandler(req.body)
       .then(result => {
@@ -107,7 +110,8 @@ router.all('/search', function (req, res) {
       console.error(`[API] Bad Request: missing required parameters`);
       res.sendStatus(400).end();
     } else {
-      let term = req.query.term, type = req.query.type;
+      let term = req.query.term;
+      let type = req.query.type;
       PatientUtils.SearchPatientHandler(term, type.toLowerCase())
         .then(result => {
           console.log(`[API] Request handled successfully`);
@@ -123,7 +127,8 @@ router.all('/search', function (req, res) {
       console.error(`[API] Bad Request: missing required parameters`);
       res.sendStatus(400).end();
     } else {
-      let term = req.body.term, type = req.body.type;
+      let term = req.body.term;
+      let type = req.body.type;
       PatientUtils.SearchPatientHandler(term, type.toLowerCase())
         .then(result => {
           console.log(`[API] Request handled successfully`);

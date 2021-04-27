@@ -7,6 +7,9 @@ router.post('/new', (req, res) => {
   if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.p_id) || _.isNil(req.body.appointment_date) || _.isNil(req.body.doctor)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
+  } else if (!_.isString(req.body.p_id) || !_.isString(req.body.doctor) || !_.isFinite(req.body.appointment_date)) {
+    console.error(`[API] Bad Request: parameters of invalid type`);
+    res.sendStatus(400).end();
   } else {
     AppointmentUtils.NewAppointmentHandler(req.body)
       .then(result => {
@@ -24,6 +27,10 @@ router.all('/all', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/all/`);
   if (_.has(req.query, "from") && _.has(req.query, "to")) {
     // Date request
+    if (_.isNaN(req.query.from) || _.isNaN(req.query.to)) {
+      console.error(`[API] Bad Request: parameters of invalid type`);
+      res.sendStatus(400).end();
+    }
     let count = _.has(req.query, "count") ? req.query.count.toLowerCase() === "true" : false;
     AppointmentUtils.DateAppointmentHandler(req.query.from, req.query.to, count)
       .then(result => {
@@ -71,6 +78,9 @@ router.post('/doctor', (req, res) => {
   if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.doctor)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
+  } else if (!_.isString(req.body.doctor)) {
+    console.error(`[API] Bad Request: parameters of invalid type`);
+    res.sendStatus(400).end();
   } else {
     let count = _.has(req.query, "count") ? req.query.count.toLowerCase() === "true" : false;
     AppointmentUtils.DoctorAppointmentHandler(req.body.doctor, count)
@@ -89,6 +99,9 @@ router.post('/status', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/status/`);
   if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.status)) {
     console.error(`[API] Bad Request: missing required parameters`);
+    res.sendStatus(400).end();
+  } else if (_.isNaN(req.body.status)) {
+    console.error(`[API] Bad Request: parameters of invalid type`);
     res.sendStatus(400).end();
   } else {
     let count = _.has(req.query, "count") ? req.query.count.toLowerCase() === "true" : false;

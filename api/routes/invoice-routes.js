@@ -7,6 +7,9 @@ router.post('/new', (req, res) => {
   if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.p_id) || _.isNil(req.body.treatments)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
+  } else if (!_.isString(req.body.p_id) || !_.isArray(req.body.treatments)) {
+    console.error(`[API] Bad Request: parameters of invalid type`);
+    res.sendStatus(400).end();
   } else {
     InvoiceUtils.NewInvoiceHandler(req.body.p_id, req.body)
       .then(result => {

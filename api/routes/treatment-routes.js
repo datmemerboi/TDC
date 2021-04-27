@@ -7,6 +7,9 @@ router.all('/new', (req, res) => {
   if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.p_id) || _.isNil(req.body.doctor) || _.isNil(req.body.procedure_done)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
+  } else if (!_.isString(req.body.p_id) || !_.isString(req.body.doctor) || !_.isString(req.body.procedure_done)) {
+    console.error(`[API] Bad Request: parameters of invalid type`);
+    res.sendStatus(400).end();
   } else {
     TreatmentUtils.NewTreatmentHandler(req.body)
       .then(result => {
@@ -73,6 +76,9 @@ router.all('/doctor', (req, res) => {
   console.log(`[API] ${req.method} request to /api/treatment/doctor/`);
   if(_.isNil(req.query.doctor) && _.isNil(req.body.doctor)) {
     console.error(`[API] Bad Request: missing required parameters`);
+    res.sendStatus(400).end();
+  } else if (!_.isString(req.body.doctor)) {
+    console.error(`[API] Bad Request: parameters of invalid type`);
     res.sendStatus(400).end();
   } else {
     let doctor = req.query.doctor ?? req.body.doctor;
