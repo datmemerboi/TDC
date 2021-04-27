@@ -1,6 +1,5 @@
 const chai = require('chai');
 const http = require('chai-http');
-const { toPlainObject } = require('lodash');
 const app = require('../api/app.js');
 const dbUtils = require('../api/utils/db-utils');
 

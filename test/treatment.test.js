@@ -1,6 +1,5 @@
 const chai = require('chai');
 const http = require('chai-http');
-const { toPlainObject } = require('lodash');
 const app = require('../api/app.js');
 const dbUtils = require('../api/utils/db-utils');
 
@@ -14,7 +13,7 @@ describe("Treatment test cases", () => {
   });
   after(async function () {
     await dbUtils.close();
-  })
+  });
   describe("POST /api/treatment/new", () => {
     it("Create a new treatment", (done) => {
       let treatmentObj = {

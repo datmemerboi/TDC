@@ -3,7 +3,7 @@ const http = require('chai-http');
 const app = require('../api/app.js');
 
 chai.use(http);
-var expect = chai.expect;
+let expect = chai.expect;
 
 describe("GET /_health", () => {
   it("Check health of entire app", (done) => {
@@ -15,5 +15,5 @@ describe("GET /_health", () => {
         expect(res.body.success).to.be.true;
         done();
       });
-  })
+  });
 });

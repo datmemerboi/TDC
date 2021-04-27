@@ -76,7 +76,7 @@ describe("Patient test cases", () => {
           expect(res.body).to.have.property("contact");
           expect(res.body.contact).to.eql(9000190001);
           done();
-        })
+        });
     });
   });
   describe("POST /api/patient/search", () => {
