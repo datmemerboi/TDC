@@ -1,5 +1,6 @@
 'use strict';
 const fs = require('fs');
+const _ = require('lodash');
 const path = require('path');
 const PDF = require('pdfkit');
 const dbUtils = require('./db-utils');
@@ -149,9 +150,13 @@ function generatePdf(obj) {
 function sanitize(doc) {
   let cleanObj = new Object(doc);
   for (let key in cleanObj) {
-    if (key === "inv_id" || cleanObj[key] === null || cleanObj[key] === undefined || cleanObj[key] === "") {
-      delete cleanObj[key];
-    }
+    if (key === "inv_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
+  }
+  if (!_.isNil(cleanObj.sub_total) && _.isFinite(cleanObj.sub_total) && _.isInteger(cleanObj.sub_total)) {
+    cleanObj.sub_total = parseFloat(cleanObj.sub_total);
+  }
+  if (!_.isNil(cleanObj.grand_total) && _.isFinite(cleanObj.grand_total) && _.isInteger(cleanObj.grand_total)) {
+    cleanObj.grand_total = parseFloat(cleanObj.grand_total);
   }
   return cleanObj;
 }
@@ -161,13 +166,13 @@ async function NewInvoiceHandler(pid, body) {
     const db = await dbUtils.connect();
     let invoiceObj = {
       p_id: pid,
-      doctor: [...new Set(body.treatments.map(obj => obj.doctor))],
+      doctor: _.chain(body.treatments).map('doctor').uniq().value(),
       treatments: body.treatments.map(JSON.stringify),
-      payment_method: body?.payment_method ? body.payment_method : null,
-      payment_id: body?.payment_id ? body.payment_id : null,
-      sub_total: body?.sub_total ? body.sub_total : null,
-      discount: body?.discount ? body.discount : null,
-      grand_total: body?.grand_total ? body.grand_total : null
+      payment_method: _.has(body,"payment_method") ? body.payment_method : null,
+      payment_id: _.has(body,"payment_id") ? body.payment_id : null,
+      sub_total: _.has(body,"sub_total") ? body.sub_total : null,
+      discount: _.has(body,"discount") ? body.discount : null,
+      grand_total: _.has(body,"grand_total") ? body.grand_total : null
     };
     invoiceObj = sanitize(invoiceObj);
     invoiceObj.inv_id = await makeNextInvid(db);
@@ -193,9 +198,11 @@ async function AllInvoiceHandler(count = false) {
         return { status: 200, body: { total_docs: instances } };
       } else {
         let docs = await db.Invoice.getAll();
-        for (let doc of docs) {
-          doc.treatments = doc.treatments.map(JSON.parse);
-        }
+        _.chain(docs)
+          .map(doc => {
+            return _.set(doc, 'treatments', _.map(doc.treatments, JSON.parse));
+          })
+          .value();
         console.log(`[UTILS] AllInvoiceHandler success`);
         return { status: 200, body: { total_docs: instances, docs } };
       }
@@ -210,7 +217,7 @@ async function GetInvoiceHandler(invid) {
   try {
     const db = await dbUtils.connect();
     let doc = await db.Invoice.getByInvid(invid);
-    if (!doc) {
+    if (_.isNil(doc) || _.isEmpty(doc)) {
       console.log(`[UTILS] GetInvoiceHandler returns empty data`);
       return { status: 404, body: null };
     } else {
@@ -219,7 +226,7 @@ async function GetInvoiceHandler(invid) {
     }
   } catch (err) {
     console.error(`[UTILS] Error @ GetInvoiceHandler \n ${JSON.stringify(err)}`);
-    return err;
+    throw err;
   }
 }
 
