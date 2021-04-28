@@ -1,10 +1,12 @@
 const _ = require('lodash');
 const router = require('express').Router();
 const PatientUtils = require('../utils/patient-utils');
+const FileUtils = require('../utils/file-utils');
 
-router.post('/new', function(req, res) {
+
+router.post('/new', (req, res) => {
   console.log(`[API] ${req.method} request to /api/patient/new/`);
-  if(_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.name) || _.isNil(req.body.contact)) {
+  if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.name) || _.isNil(req.body.contact)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else if (!_.isString(req.body.name) || !_.isFinite(req.body.contact)) {
@@ -23,7 +25,7 @@ router.post('/new', function(req, res) {
   }
 });
 
-router.all('/all', function (req, res) {
+router.all('/all', (req, res) => {
   console.log(`[API] ${req.method} request to /api/patient/all/`);
   PatientUtils.AllPatientHandler()
     .then(result => {
@@ -36,9 +38,9 @@ router.all('/all', function (req, res) {
     });
 });
 
-router.all('/get/:pid', function (req, res) {
+router.all('/get/:pid', (req, res) => {
   console.log(`[API] ${req.method} request to /api/patient/get/`);
-  if(_.isNil(req.params.pid)) {
+  if (_.isNil(req.params.pid)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
@@ -51,7 +53,7 @@ router.all('/get/:pid', function (req, res) {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
       });
-    }
+  }
 });
 
 router.post('/bulk', (req, res) => {
@@ -72,7 +74,7 @@ router.post('/bulk', (req, res) => {
   }
 });
 
-router.get('/areas', function (req, res) {
+router.get('/areas', (req, res) => {
   console.log(`[API] ${req.method} request to /api/patient/areas/`);
   PatientUtils.GetDistinctAreasHandler()
     .then(result => {
@@ -84,13 +86,13 @@ router.get('/areas', function (req, res) {
     });
 });
 
-router.put('/update/:pid', function (req, res) {
+router.put('/update/:pid', (req, res) => {
   console.log(`[API] ${req.method} request to /api/patient/update/`);
-  if(_.isNil(req.params.pid)) {
+  if (_.isNil(req.params.pid)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
-    PatientUtils.UpdatePatientHandler(req.params.pid.trim(), req.body)
+    PatientUtils.UpdatePatientHandler(req.params.pid, req.body)
       .then(result => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
@@ -102,7 +104,7 @@ router.put('/update/:pid', function (req, res) {
   }
 });
 
-router.all('/search', function (req, res) {
+router.all('/search', (req, res) => {
   console.log(`[API] ${req.method} request to /api/patient/search/`);
   if (req.method === "GET") {
     // Check query params
@@ -140,6 +142,40 @@ router.all('/search', function (req, res) {
         });
     }
   }
+});
+
+router.put('/import', (req, res) => {
+  console.log(`[API] ${req.method} request to /api/patient/import`);
+  if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.file)) {
+    console.error(`[API] Bad Request: missing required parameters`);
+    res.sendStatus(400).end();
+  } else if (!_.isString(req.body.file)) {
+    console.error(`[API] Bad Request: parameters of invalid type`);
+    res.sendStatus(400).end();
+  } else {
+    FileUtils.ImportXlsHandler(req.body.file, "Patient")
+      .then(result => {
+        console.log(`[API] Request handled successfully`);
+        res.status(result.status).json(result.body).end();
+      })
+      .catch(err => {
+        console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
+        res.sendStatus(500).end();
+      });
+  }
+});
+
+router.post('/export', (req, res) => {
+  console.log(`[API] ${req.method} request to /api/patient/export`);
+  FileUtils.ExportXlsHandler("Patient")
+    .then(result => {
+      console.log(`[API] Request handled successfully`);
+      res.status(result.status).json(result.body).end();
+    })
+    .catch(err => {
+      console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
+      res.sendStatus(500).end();
+    });
 });
 
 module.exports = router;
