@@ -261,22 +261,22 @@ async function ImportTreatmentsHandler(docs) {
   try {
     const db = await dbUtils.connect();
     for (let doc of docs) {
-      if (!_.isNil(doc.t_id)) {
-        let existing = await db.Treatment.getByTid(doc.t_id);
-        if (!_.isEqual(existing, doc)) {
+      if (_.has(doc, 't_id')) {
+        let existing = await db.Treatment.getByPid(doc.t_id);
+        if (!_.isNil(existing) && !_.isEmpty(existing)) {
           await db.Treatment.updateDoc(existing.t_id, doc);
+          continue;
         }
-      } else {
-        if (!_.isNil(doc.created_at)) delete doc.created_at;
-        let tid = await makeNextTid(db);
-        doc.t_id = tid;
-        await db.Treatment.create(doc);
       }
+      doc = sanitize(doc);
+      if (_.has(doc, 'created_at')) delete doc.created_at;
+      let tid = await makeNextTid(db);
+      doc.t_id = tid;
+      await db.Treatment.create(doc);
     }
-    console.log(`[UTILS] ImportTreatmentsHandler success`);
-    return { status: 200, body: null };
+    return { status: 200, body: { total_docs: docs.length, docs } };
   } catch (err) {
-    console.error(`[UTILS] Error @ ImportTreatmentsHandler \n ${JSON.stringify(err)}`);
+    console.error(`[UTILS] Error @ ImportPatientsHandler \n ${JSON.stringify(err)}`);
     throw err;
   }
 }
