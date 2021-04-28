@@ -41,6 +41,15 @@ function sanitize(doc) {
       cleanObj.age = Math.floor((new Date() - cleanObj.dob) / 3.15576e+10);
     }
   }
+  if (!_.isNil(cleanObj.med_history) && _.isString(cleanObj.med_history)) {
+    cleanObj.med_history = doc.med_history.split(',');
+  }
+  if (!_.isNil(cleanObj.current_meds) && _.isString(cleanObj.current_meds)) {
+    cleanObj.current_meds = doc.current_meds.split(',');
+  }
+  if (!_.isNil(cleanObj.files) && _.isString(cleanObj.files)) {
+    cleanObj.files = doc.files.split(',');
+  }
   return cleanObj;
 }
 
@@ -226,19 +235,20 @@ async function ImportPatientsHandler(docs) {
   try {
     const db = await dbUtils.connect();
     for (let doc of docs) {
-      if (!_.isNil(doc.p_id)) {
+      if (_.has(doc, 'p_id')) {
         let existing = await db.Patient.getByPid(doc.p_id);
-        if (!_.isEqual(existing, doc)) {
+        if (!_.isNil(existing) && !_.isEmpty(existing)) {
           await db.Patient.updateDoc(existing.p_id, doc);
+          continue;
         }
-      } else {
-        if (!_.isNil(doc.created_at)) delete doc.created_at;
-        let pid = await makeNextPid(db);
-        doc.p_id = pid;
-        await db.Patient.create(doc);
       }
+      doc = sanitize(doc);
+      if (_.has(doc, 'created_at')) delete doc.created_at;
+      let pid = await makeNextPid(db);
+      doc.p_id = pid;
+      await db.Patient.create(doc);
     }
-    return { status: 200, body: null };
+    return { status: 200, body: { total_docs: docs.length, docs } };
   } catch (err) {
     console.error(`[UTILS] Error @ ImportPatientsHandler \n ${JSON.stringify(err)}`);
     throw err;
