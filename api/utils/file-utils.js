@@ -9,39 +9,39 @@ const AppointmentUtils = require('./appointment-utils');
 
 const STATUS_AS_WORDS = ["Cancelled", "Scheduled", "Completed", "Postponed"];
 
-function FileUtils() {}
+function FileUtils() { }
 
 function fitForXls(doc) {
   let fitObj = new Object(doc);
   // w.r.t Patient
-  fitObj.dob = !_.isNil(doc.dob)
-    ? new Date(doc.dob).toISOString()
-    : null;
-  fitObj.med_history = !_.isNil(doc.med_history) && !_.isEmpty(doc.med_history)
-    ? doc.med_history.join(',')
-    : null;
-  fitObj.current_meds = !_.isNil(doc.current_meds) && !_.isEmpty(doc.current_meds)
-    ? doc.current_meds.join(',')
-    : null;
-  fitObj.files = !_.isNil(doc.files) && !_.isEmpty(doc.files)
-    ? doc.files.join(',')
-    : null;
+  if (!_.isNil(doc.dob)) {
+    fitObj.dob = new Date(doc.dob).toISOString();
+  }
+  if (!_.isNil(doc.med_history) && !_.isEmpty(doc.med_history)) {
+    fitObj.med_history = doc.med_history.join(',');
+  }
+  if (!_.isNil(doc.current_meds) && !_.isEmpty(doc.current_meds)) {
+    fitObj.current_meds = doc.current_meds.join(',');
+  }
+  if (!_.isNil(doc.files) && !_.isEmpty(doc.files)) {
+    fitObj.files = doc.files.join(',');
+  }
 
   // w.r.t Treatment
-  fitObj.teeth_number = !_.isNil(doc.teeth_number)
-    ? doc.teeth_number.join(',')
-    : null;
-  fitObj.treatment_date = !_.isNil(doc.treatment_date)
-    ? new Date(doc.treatment_date).toISOString()
-    : null;
+  if (!_.isNil(doc.teeth_number)) {
+    fitObj.teeth_number = doc.teeth_number.join(',');
+  }
+  if (!_.isNil(doc.treatment_date)) {
+    fitObj.treatment_date = new Date(doc.treatment_date).toISOString();
+  }
 
   // w.r.t Appointment
-  fitObj.appointment_date = !_.isNil(doc.appointment_date)
-    ? new Date(doc.appointment_date).toISOString()
-    : null;
-  fitObj.status = !_.isNil(doc.status)
-    ? STATUS_AS_WORDS[doc.status]
-    : null;
+  if (!_.isNil(doc.appointment_date)) {
+    fitObj.appointment_date = new Date(doc.appointment_date).toISOString();
+  }
+  if (!_.isNil(doc.status)) {
+    fitObj.status = STATUS_AS_WORDS[doc.status];
+  }
 
   fitObj.created_at = doc.created_at.toISOString();
   delete fitObj._id, fitObj.__v;
@@ -51,42 +51,41 @@ function fitForXls(doc) {
 function fitForDB(doc) {
   let fitObj = new Object(doc);
   // w.r.t Patient
-  fitObj.dob = !_.isNil(doc.dob)
-    ? new Date(doc.dob)
-    : null;
-    fitObj.med_history = !_.isNil(doc.med_history)
-    ? doc.med_history.split(',')
-    : null;
-  fitObj.current_meds = !_.isNil(doc.current_meds)
-    ? doc.current_meds.split(',')
-    : null;
-  fitObj.files = !_.isNil(doc.files)
-    ? doc.files.split(',')
-    : null;
-  fitObj.age = !_.isNil(doc.age) && _.isFinite(parseInt(doc.age))
-    ? parseInt(fitObj.age)
-    : null;
-  fitObj.contact = !_.isNil(doc.contact)
-    ? parseInt(doc.contact)
-    : null;
+  if (!_.isNil(doc.dob)) {
+    fitObj.dob = new Date(doc.dob);
+  }
+  if (!_.isNil(doc.med_history) && _.isString(doc.med_history)) {
+    fitObj.med_history = doc.med_history.split(',');
+  }
+  if (!_.isNil(doc.current_meds) && _.isString(doc.current_meds)) {
+    fitObj.current_meds = doc.current_meds.split(',');
+  }
+  if (!_.isNil(doc.files) && _.isString(doc.files)) {
+    fitObj.files = doc.files.split(',');
+  }
+  if (!_.isNil(doc.age) && _.isFinite(parseInt(doc.age))) {
+    fitObj.age = parseInt(fitObj.age);
+  }
+  if (!_.isNil(doc.contact)) {
+    fitObj.contact = parseInt(doc.contact);
+  }
 
   // w.r.t Treatment
-  fitObj.teeth_number = !_.isNil(doc.teeth_number)
-    ? doc.teeth_number.split(',').map(n => parseInt(n, 10))
-    : null;
-  fitObj.treatment_date = !_.isNil(doc.treatment_date)
-    ? new Date(doc.treatment_date)
-    : null;
+  if (!_.isNil(doc.teeth_number)) {
+    fitObj.teeth_number = doc.teeth_number.split(',').map(n => parseInt(n, 10));
+  }
+  if (!_.isNil(doc.treatment_date)) {
+    fitObj.treatment_date = new Date(doc.treatment_date);
+  }
 
   // w.r.t Appointment
-  fitObj.appointment_date = !_.isNil(doc.appointment_date)
-    ? new Date(doc.appointment_date)
-    : null;
-  fitObj.status = !_.isNil(doc.status) && _.includes(STATUS_AS_WORDS, doc.status)
-    ? _.indexOf(STATUS_AS_WORDS, doc.status)
-    : null;
+  if (!_.isNil(doc.appointment_date)) {
+    fitObj.appointment_date = new Date(doc.appointment_date);
+  }
+  if (!_.isNil(doc.status) && _.includes(STATUS_AS_WORDS, doc.status)) {
+    fitObj.status = _.indexOf(STATUS_AS_WORDS, doc.status);
+  }
 
-  fitObj.created_at = new Date(doc.created_at);
   return fitObj;
 }
 
@@ -136,9 +135,9 @@ function ImportXlsHandler(filename, type) {
 async function ExportPatientsAsXls(outFile) {
   try {
     let keys = [
-      "p_id","name","dob","age","area",
-      "gender","address","contact","med_history",
-      "current_meds","files","created_at"
+      "p_id", "name", "dob", "age", "area",
+      "gender", "address", "contact", "med_history",
+      "current_meds", "files", "created_at"
     ];
 
     const { status, body } = await PatientUtils.AllPatientHandler();
@@ -146,7 +145,7 @@ async function ExportPatientsAsXls(outFile) {
       console.log(`[UTILS] Empty response from db`);
       return { status: 204, body: null };
     }
-    let docs = body.docs.map(fitForXls);
+    let docs = _.chain(body.docs).sortBy(o => o.created_at).map(fitForXls).value();
     await createXlsFile(outFile, docs, keys);
 
     console.log(`[UTILS] ExportPatientsAsXls success`);
@@ -160,8 +159,8 @@ async function ExportPatientsAsXls(outFile) {
 async function ExportTreatmentsAsXls(outFile) {
   try {
     let keys = [
-      "t_id", "p_id","procedure_done","teeth_number",
-      "treatment_date","doctor", "remarks","created_at"
+      "t_id", "p_id", "procedure_done", "teeth_number",
+      "treatment_date", "doctor", "remarks", "created_at"
     ];
 
     const { status, body } = await TreatmentUtils.AllTreatmentHandler();
@@ -169,7 +168,7 @@ async function ExportTreatmentsAsXls(outFile) {
       console.log(`[UTILS] Empty response from db`);
       return { status: 204, body: null };
     }
-    let docs = body.docs.map(fitForXls);
+    let docs = _.chain(body.docs).sortBy(o => o.created_at).map(fitForXls).value();
     await createXlsFile(outFile, docs, keys);
 
     console.log(`[UTILS] ExportTreatmentsAsXls success`);
@@ -192,7 +191,7 @@ async function ExportAppointmentsAsXls(outFile) {
       console.log(`[UTILS] Empty response from db`);
       return { status: 204, body: null };
     }
-    let docs = body.docs.map(fitForXls);
+    let docs = _.chain(body.docs).sortBy(o => o.created_at).map(fitForXls).value();
     await createXlsFile(outFile, docs, keys);
 
     console.log(`[UTILS] ExportAppointmentsAsXls success`);
