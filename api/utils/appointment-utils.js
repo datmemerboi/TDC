@@ -189,7 +189,7 @@ async function PatientAppointmentHandler(pid, count = false) {
         console.log(`[UTILS] PatientAppointmentHandler success`);
         return { status: 200, body: { total_docs: instances } };
       } else {
-        let docs = db.Appointment.findByPid(pid);
+        let docs = await db.Appointment.findByPid(pid);
         console.log(`[UTILS] PatientAppointmentHandler success`);
         return { status: 200, body: { total_docs: instances, docs: docs } };
       }
@@ -295,21 +295,22 @@ async function ImportAppointmentsHandler(docs) {
   try {
     const db = await dbUtils.connect();
     for (let doc of docs) {
-      if (!_.isNil(doc.app_id)) {
-        let existing = await db.Appointment.getByPid(doc.app_id);
-        if (!_.isEqual(existing, doc)) {
+      if (_.has(doc, 'app_id')) {
+        let existing = await db.Appointment.getByAppid(doc.app_id);
+        if (!_.isNil(existing) && !_.isEmpty(existing)) {
           await db.Appointment.updateDoc(existing.app_id, doc);
+          continue;
         }
-      } else {
-        if (!_.isNil(doc.created_at)) delete doc.created_at;
-        let appid = await makeNextAppid(db);
-        doc.app_id = appid;
-        await db.Appointment.create(doc);
       }
+      doc = sanitize(doc);
+      if (_.has(doc, 'created_at')) delete doc.created_at;
+      let appid = await makeNextAppid(db);
+      doc.app_id = appid;
+      await db.Appointment.create(doc);
     }
-    return { status: 200, body: null };
+    return { status: 200, body: { total_docs: docs.length, docs } };
   } catch (err) {
-    console.error(`[UTILS] Error @ ImportAppointmentsHandler \n ${JSON.stringify(err)}`);
+    console.error(`[UTILS] Error @ ImportPatientsHandler \n ${JSON.stringify(err)}`);
     throw err;
   }
 }
