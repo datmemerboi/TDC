@@ -54,7 +54,8 @@ function generatePdf(obj) {
         qty,
         total
       }
-    ]
+    ],
+    created_at
   }
   */
   const outputPath = path.join(__dirname, '..', '..', 'invoice');
@@ -114,7 +115,14 @@ function generatePdf(obj) {
       .text(trt.teeth_number && trt.teeth_number.length ? `Teeth: ${trt.teeth_number.join(',')}` : null)
       .text(trt.cost, posx.table.body.cost.x, currentHeight, { width: posx.table.body.cost.max_width })
       .text(trt.qty, posx.table.body.qty.x, currentHeight, { width: posx.table.body.qty.max_width })
-      .text(trt.total?.toFixed(2) || null, posx.table.body.total.x, currentHeight, { width: posx.table.body.total.max_width });
+      .text(
+        !_.isNil(trt.total)
+          ? parseFloat(trt.total).toFixed(2)
+          : null,
+        posx.table.body.total.x,
+        currentHeight,
+        { width: posx.table.body.total.max_width }
+      );
   });
 
   // 14 REGULAR BLACK
@@ -123,7 +131,7 @@ function generatePdf(obj) {
     .text(`${obj.patient.age} / ${obj.patient.gender}`)
     .text(obj.patient.contact)
     .text("Doctor:", posx.data.doctor.x, posx.data.doctor.y)
-    .text(obj.invoice_date, posx.data.date.x, posx.data.date.y, { align: 'right' })
+    .text(obj.created_at, posx.data.date.x, posx.data.date.y, { align: 'right' })
     .text("Sub Total: Rs.", posx.total_foot.x, posx.total_foot.sub_y)
     .text("Grand Total: Rs.", posx.total_foot.x, posx.total_foot.grand_y);
 
@@ -131,8 +139,8 @@ function generatePdf(obj) {
   doc.font(path.join(miscPath, 'ProximaNova-Semibold.ttf'))
     .text(obj.doctor.join(', '), posx.data.doctor.name_x, posx.data.doctor.y)
     .text(obj.patient.p_id, posx.data.patient.pid.x, posx.data.patient.pid.y, { align: 'right' })
-    .text(obj.sub_total.toFixed(2), 0, posx.total_foot.sub_y, { align: 'right' })
-    .text(obj.grand_total.toFixed(2), 0, posx.total_foot.grand_y, { align: 'right' })
+    .text(!_.isNil(obj.sub_total) ? parseFloat(obj.sub_total).toFixed(2) : null, 0, posx.total_foot.sub_y, { align: 'right' })
+    .text(!_.isNil(obj.grand_total) ? parseFloat(obj.grand_total).toFixed(2) : null, 0, posx.total_foot.grand_y, { align: 'right' })
     .fontSize(16).text(obj.inv_id, posx.data.invoice.x, posx.data.invoice.y, { align: 'right' }) // 16 SEMIBOLD BLACK
     .fontSize(12) // 12 SEMIBOLD BLACK
     .text("Payment Method:", posx.payment.method.name_x, posx.payment.method.y)
