@@ -17,7 +17,6 @@ for %%i in ("%TDC_PATH%..") do (
 )
 
 @REM START FILES
-set TDC_START=%TDC_PATH%win-start.bat
 set CLIENT_START=%CLIENT_PATH%win-start.bat
 
 @REM INSTALLING PACKAGE DEPENDENCIES
@@ -41,12 +40,14 @@ for %%l in (%REQUIRED_LIST%) do (
 echo @echo off>%RUNBAT%
 echo @title="TDC Server">>%RUNBAT%
 echo set MONGO_PATH=%MONGO_PATH%>>%RUNBAT%
-echo set TDC_START=%TDC_START%>>%RUNBAT%
+echo set TDC_PATH=%TDC_PATH%>>%RUNBAT%
 echo set CLIENT_START=%CLIENT_START%>>%RUNBAT%
 echo start call %MONGO_PATH%>>%RUNBAT%
 echo echo Starting TDC..>>%RUNBAT%
-echo start cmd /c "%TDC_START%">>%RUNBAT%
 echo start cmd /c "%CLIENT_START%">>%RUNBAT%
+echo cd %TDC_PATH%>>%RUNBAT%
+echo call npm start>>%RUNBAT%
+echo pause>>%RUNBAT%
 
 echo.
 echo RunTDC shortcut created in desktop
