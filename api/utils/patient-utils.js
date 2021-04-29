@@ -115,7 +115,7 @@ async function BulkPatientsHandler(pidList) {
     const docs = await db.Patient.getByPidList(pidList);
     if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] BulkPatientsHandler returns empty data`);
-      return { status: 404, body: null };
+      return { status: 204, body: null };
     } else {
       console.log(`[UTILS] BulkPatientsHandler success`);
       return { status: 200, body: { total_docs: docs.length, docs } };
@@ -165,7 +165,7 @@ async function SearchByName(term) {
     let docs = await db.Patient.findByName(term);
     if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] SearchByName returns empty data`);
-      return { status: 404, body: null };
+      return { status: 204, body: null };
     } else {
       console.log(`[UTILS] SearchByName success`);
       return { status: 200, body: { total_docs: docs.length, docs } };
@@ -183,7 +183,7 @@ async function SearchByArea(term) {
     let docs = await db.Patient.findByArea(term);
     if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] SearchByArea returns empty data`);
-      return { status: 404, body: null };
+      return { status: 204, body: null };
     } else {
       console.log(`[UTILS] SearchByArea success`);
       return { status: 200, body: { total_docs: docs.length, docs } };
@@ -205,7 +205,7 @@ async function SearchByContact(term) {
       let docs = await db.Patient.findByContact(parseInt(term));
       if (_.isNil(docs) || _.isEmpty(docs)) {
         console.log(`[UTILS] SearchByContact returns empty data`);
-        return { status: 404, body: null };
+        return { status: 204, body: null };
       } else {
         console.log(`[UTILS] SearchByContact success`);
         return { status: 200, body: { total_docs: docs.length, docs } };

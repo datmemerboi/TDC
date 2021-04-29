@@ -163,7 +163,7 @@ async function AllAppointmentHandler() {
     if (instances < 1) {
       // No appointment records found
       console.error(`[UTILS] AllAppointmentHandler returns empty data`);
-      return { status: 404, body: null };
+      return { status: 204, body: null };
     } else {
       let docs = await db.Appointment.getAll();
       console.log(`[UTILS] AllAppointmentHandler success`);
@@ -182,7 +182,7 @@ async function PatientAppointmentHandler(pid, count = false) {
     if (instances < 1) {
       // No appointment records found
       console.log(`[UTILS] PatientAppointmentHandler returns empty data`);
-      return { status: 404, body: null };
+      return { status: 204, body: null };
     } else {
       if (count) {
         // Request for only count of records
@@ -207,7 +207,7 @@ async function DoctorAppointmentHandler(doctor, count = false) {
     if (instances < 1) {
       // No appointment records found
       console.error(`[UTILS] DoctorAppointmentHandler returns empty data`);
-      return { status: 404, body: null };
+      return { status: 204, body: null };
     } else {
       if (count) {
         // Request for only count of records
@@ -232,7 +232,7 @@ async function StatusAppointmentHandler(status, count = false) {
     if (instances < 0) {
       // No appointment records found
       console.log(`[UTILS] StatusAppointmentHandler return empty data`);
-      return { status: 404, body: null };
+      return { status: 204, body: null };
     } else {
       if (count) {
         // Request for only count of records

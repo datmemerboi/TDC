@@ -77,7 +77,7 @@ async function AllTreatmentHandler() {
     if (instances < 1) {
       // No treatment records found
       console.error(`[UTILS] AllTreatmentHandler returns empty data`);
-      return { status: 404, body: null };
+      return { status: 204, body: null };
     } else {
       let docs = await db.Treatment.getAll();
       console.log(`[UTILS] AllTreatmentHandler success`);
@@ -96,7 +96,7 @@ async function GetTreatmentHandler(tid) {
     let doc = await db.Treatment.getByTid(tid);
     if (_.isNil(doc)) {
       console.log(`[UTILS] GetTreatmentHandler returns empty data`);
-      return { status: 404, body: doc };
+      return { status: 204, body: null };
     } else {
       console.log(`[UTILS] GetTreatmentHandler success`);
       return { status: 200, body: doc };
@@ -114,7 +114,7 @@ async function PidTreatmentHandler(pid) {
     if (instances < 1) {
       // No treament records found
       console.log(`[UTILS] PidTreatmentHandler returns empty data`);
-      return { status: 404, body: {} };
+      return { status: 204, body: null };
     } else {
       let docs = await db.Treatment.findByPid(pid);
       console.log(`[UTILS] PidTreatmentHandler success`);
@@ -132,7 +132,7 @@ async function DistinctProceduresHandler() {
     let docs = await db.Treatment.getDistinctProcedures();
     if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] DistinctProceduresHandler returns empty data`);
-      return { status: 404, body: {} };
+      return { status: 204, body: null };
     } else {
       console.log(`[UTILS] DistinctProceduresHandler success`);
       return { status: 200, body: { total_docs: docs.length, docs } };
@@ -150,7 +150,7 @@ async function DoctorTreatmentHandler(doctor, count = false) {
     if (instances < 1) {
       // No treament records found
       console.log(`[UTILS] DoctorTreatmentHandler returns empty data`);
-      return { status: 404, body: {} };
+      return { status: 204, body: null };
     } else {
       if (count) {
         // Request for only count
@@ -203,7 +203,7 @@ async function TreatmentHistoryHandler(pid, quick = false) {
     let docs = await db.Treatment.findByPid(pid);
     if (_.isNil(docs) || _.isEmpty(docs)) {
       console.log(`[UTILS] TreatmentHistoryHandler returns empty data`);
-      return { status: 404, body: {} };
+      return { status: 204, body: null };
     } else {
       let result = { total_docs: docs.length };
       if (quick) {
