@@ -1,3 +1,9 @@
+/**
+ * Patient Routes
+ *
+ * Registers all routes required for patient module.
+ * Exports the router.
+ */
 const _ = require('lodash');
 const router = require('express').Router();
 const PatientUtils = require('../utils/patient-utils');

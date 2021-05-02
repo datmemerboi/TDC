@@ -1,3 +1,9 @@
+/**
+ * Appointment Schema
+ *
+ * Contains the schema for appointment collection and the binded static functions.
+ * Exports the schema object.
+ */
 const Schema = require('mongoose').Schema;
 
 let Appointment = new Schema({

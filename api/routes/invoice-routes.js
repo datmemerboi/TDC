@@ -1,3 +1,9 @@
+/**
+ * Invoice Routes
+ *
+ * Registers all routes required for invoice module.
+ * Exports the router.
+ */
 const _ = require('lodash');
 const router = require('express').Router();
 const InvoiceUtils = require('../utils/invoice-utils');

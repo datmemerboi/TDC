@@ -1,3 +1,9 @@
+/**
+ * Invoice Schema
+ *
+ * Contains the schema for invoice collection and the binded static functions.
+ * Exports the schema object.
+ */
 const Schema = require('mongoose').Schema;
 
 let Invoice = new Schema({

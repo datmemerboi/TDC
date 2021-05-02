@@ -1,3 +1,10 @@
+/**
+ * App.js
+ *
+ * The index of this project and the start point for the Express server.
+ * Binds the routers registered for each module (in routes/) and starts the server.
+ * Exports the app for testing.
+ */
 const express = require('express');
 const app = express();
 

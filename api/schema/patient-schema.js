@@ -1,3 +1,9 @@
+/**
+ * Patient Schema
+ *
+ * Contains the schema for patient collection and the binded static functions.
+ * Exports the schema object.
+ */
 const Schema = require('mongoose').Schema;
 
 let Patient = new Schema({

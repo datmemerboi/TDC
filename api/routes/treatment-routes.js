@@ -1,3 +1,9 @@
+/**
+ * Treatment Routes
+ *
+ * Registers all routes required for treatment module.
+ * Exports the router.
+ */
 const _ = require('lodash');
 const router = require('express').Router();
 const TreatmentUtils = require('../utils/treatment-utils');

@@ -1,3 +1,9 @@
+/**
+ * Treatment Schema
+ *
+ * Contains the schema for treatment collection and the binded static functions.
+ * Exports the schema object.
+ */
 const Schema = require('mongoose').Schema;
 
 let Treatment = new Schema({
@@ -94,7 +100,4 @@ Treatment.statics.deleteByTid = function (tid) {
   return this.deleteOne({ t_id: tid }).exec();
 };
 
-// ALT MOST RECENT TREATMENT ID
-// db.patients.aggregate({ $group: { _id: null, max: { $max: '$Age' }}})
-// find().sort().limit()
 module.exports = Treatment;

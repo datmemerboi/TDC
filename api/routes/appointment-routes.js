@@ -1,3 +1,9 @@
+/**
+ * Appointment Routes
+ *
+ * Registers all routes required for appointment module.
+ * Exports the router.
+ */
 const _ = require('lodash');
 const router = require('express').Router();
 const AppointmentUtils = require('../utils/appointment-utils');
