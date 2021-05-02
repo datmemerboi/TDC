@@ -121,7 +121,7 @@ function generatePdf(invoiceObj) {
     .text(invoiceObj.payment_id ?? null, posx.payment.id.x, posx.payment.id.y);
 
   invoiceObj.treatments.forEach((trt, ind) => {
-    let currentHeight = posx.table.body.base_proc.y + 64 * ind;
+    let currentHeight = posx.table.body.base_proc.y + 60 * ind;
     doc
       .text(trt.procedure_done, posx.table.body.base_proc.x, currentHeight, {
         width: posx.table.body.base_proc.max_width,
@@ -147,12 +147,23 @@ function generatePdf(invoiceObj) {
     .text(`${invoiceObj.patient.age} / ${invoiceObj.patient.gender}`)
     .text(invoiceObj.patient.contact)
     .text("Doctor:", posx.data.doctor.x, posx.data.doctor.y)
-    .text(invoiceObj.created_at, posx.data.date.x, posx.data.date.y, { align: 'right' })
     .text("Sub Total: Rs.", posx.total_foot.x, posx.total_foot.sub_y)
-    .text("Grand Total: Rs.", posx.total_foot.x, posx.total_foot.grand_y);
+    .text("Grand Total: Rs.", posx.total_foot.x, posx.total_foot.grand_y)
+    .fontSize(10) // 10 REGULAR BLACK (SUB TEXT)
+    .text(
+      `Generated on ${invoiceObj.created_at.toLocaleString("default", {
+        day: "numeric",
+        month: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true
+      })}`,
+      posx.data.date.x, posx.data.date.y, { align: "center" }
+    );
 
   // 14 SEMIBOLD BLACK
-  doc.font(path.join(miscPath, 'ProximaNova-Semibold.ttf'))
+  doc.fontSize(14).font(path.join(miscPath, 'ProximaNova-Semibold.ttf'))
     .text(invoiceObj.doctor.join(', '), posx.data.doctor.name_x, posx.data.doctor.y)
     .text(invoiceObj.patient.p_id, posx.data.patient.pid.x, posx.data.patient.pid.y, { align: 'right' })
     .text(!_.isNil(invoiceObj.sub_total)
@@ -214,11 +225,11 @@ async function NewInvoiceHandler(pid, body) {
       p_id: pid,
       doctor: _.chain(body.treatments).map('doctor').uniq().value(),
       treatments: body.treatments.map(JSON.stringify),
-      payment_method: _.has(body,"payment_method") ? body.payment_method : null,
-      payment_id: _.has(body,"payment_id") ? body.payment_id : null,
-      sub_total: _.has(body,"sub_total") ? body.sub_total : null,
-      discount: _.has(body,"discount") ? body.discount : null,
-      grand_total: _.has(body,"grand_total") ? body.grand_total : null
+      payment_method: _.has(body, "payment_method") ? body.payment_method : null,
+      payment_id: _.has(body, "payment_id") ? body.payment_id : null,
+      sub_total: _.has(body, "sub_total") ? body.sub_total : null,
+      discount: _.has(body, "discount") ? body.discount : null,
+      grand_total: _.has(body, "grand_total") ? body.grand_total : null
     };
     invoiceObj = sanitize(invoiceObj);
     invoiceObj.inv_id = await makeNextInvid(db);
