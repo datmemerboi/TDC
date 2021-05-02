@@ -5,6 +5,14 @@ const dbUtils = require('./db-utils');
 function AppointmentUtils() { }
 
 function makeNextAppid(db) {
+  /**
+   * Checks database and generates next appointment id.
+   *
+   * @version 3.1.2
+   * @param {Object} db The connection to the database.
+   * @returns {String} The appointment id generated.
+   * @exception {Object} err The error object.
+   */
   return new Promise((resolve, reject) => {
     db.Appointment.getLatestAppId()
       .then(top => {
@@ -28,52 +36,63 @@ function makeNextAppid(db) {
 }
 
 function generateStatsForAppointment(docs) {
-  /*
-  doctorsStats = [
-    {
-      type: "doctor",
-      name: "Doctor Name",
-      count: 1
-    }
-  ]
+  /**
+   * Generates stats/meta data for list of appointments.
+   *
+   * @version 3.1.2
+   * @param {Array} docs The list of appointment objects.
+   * @returns {Array} Returns the combined list of doctors & status stats.
+   * @example
+   * [
+   *   {
+   *     type: "doctor",
+   *     name: "Doctor Name",
+   *     count: 1
+   *   },
+   *   {
+   *     type: "status",
+   *     value: 4,
+   *     count: 2
+   *   }
+   * ]
   */
   let doctorStats =
-  _.chain(docs)
-    .map('doctor')
-    .uniq()
-    .map(doctor => {
-      return {
-        type: "doctor",
-        name: doctor,
-        count: _.chain(docs).filter({ "doctor": doctor }).size()
-      };
-    })
-    .value();
-  /*
-  statusStats = [
-    {
-      type: "status",
-      value: 4,
-      count: 2
-    }
-  ]
-  */
+    _.chain(docs)
+      .map('doctor')
+      .uniq()
+      .map(doctor => {
+        return {
+          type: "doctor",
+          name: doctor,
+          count: _.chain(docs).filter({ "doctor": doctor }).size()
+        };
+      })
+      .value();
   let statusStats =
-  _.chain(docs)
-    .map('status')
-    .uniq()
-    .map(status => {
-      return {
-        type: "status",
-        value: status,
-        count: _.chain(docs).filter({ "status": status }).size()
-      };
-    })
-    .value();
+    _.chain(docs)
+      .map('status')
+      .uniq()
+      .map(status => {
+        return {
+          type: "status",
+          value: status,
+          count: _.chain(docs).filter({ "status": status }).size()
+        };
+      })
+      .value();
   return [...doctorStats, ...statusStats];
 }
 
 function mergePatientDetails(db, pid, doc) {
+  /**
+   * Fetches patient details and merges it with the appointment doc.
+   *
+   * @version 3.1.2
+   * @param {Object} db The connection to the database.
+   * @param {String} pid The patient id to be fetched.
+   * @param {Object} doc The appointment document.
+   * @returns {Object} mergedDoc The merged document.
+   */
   return new Promise((resolve) => {
     db.Patient.getByPid(pid)
       .then(patient => {
@@ -95,7 +114,16 @@ function mergePatientDetails(db, pid, doc) {
 }
 
 function checkAppointmentFeasibility(db, doc) {
-  // Check if a new appointment doc is feasible
+  /**
+   * Checks if a new appointment is feasible
+   * by comparing doctor, from & to time, status
+   * of existing appointments.
+   *
+   * @version 3.1.2
+   * @param {Object} db The connection to the database.
+   * @param {Object} doc The new apppointment document.
+   * @returns {Boolean} Returns if the new appointment is feasible.
+   */
   return new Promise((resolve, reject) => {
     if (_.isNil(doc.app_id) || _.isNil(doc.appointment_date) || _.isNil(doc.doctor) || _.isNil(doc.status)) {
       // Appointment id, timing, doctor and status not mentioned
@@ -111,9 +139,8 @@ function checkAppointmentFeasibility(db, doc) {
             // No existing docs
             return resolve(true);
           } else {
-            // Every record is either status Cancelled or Postponed
-            let possible = docs.every(doc => doc.status !== 1 && doc.status !== 2);
-            return resolve(possible);
+            // Ensure every record is Cancelled / Completed / Postponed
+            return resolve(docs.every(doc => doc.status !== 1));
           }
         })
         .catch(err => {
@@ -125,7 +152,13 @@ function checkAppointmentFeasibility(db, doc) {
 }
 
 function sanitize(doc) {
-  // Create a clean object fit for the db
+  /**
+   * Creates a sanitized object, fit for the db.
+   *
+   * @version 3.1.2
+   * @param {object} doc The object to be sanitized.
+   * @returns {object} cleanObj The sanitized object.
+   */
   let cleanObj = new Object(doc);
   for (let key in cleanObj) {
     if (key === "app_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
@@ -137,6 +170,14 @@ function sanitize(doc) {
 }
 
 async function NewAppointmentHandler(doc) {
+  /**
+   * Handles request to create new appointment.
+   *
+   * @version 3.1.2
+   * @param {Object} doc The document contained appointment details.
+   * @returns {Object} Returns the HTTP status and the document.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     const appid = await makeNextAppid(db); // Create the next appointment id
@@ -157,11 +198,18 @@ async function NewAppointmentHandler(doc) {
 }
 
 async function AllAppointmentHandler() {
+  /**
+   * Handles request to list all appointment documents.
+   *
+   * @version 3.1.2
+   * @returns {Object} Returns the HTTP status and all appointment documents.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let instances = await db.Appointment.countAll();
     if (instances < 1) {
-      // No appointment records found
+      // No appointments found
       console.error(`[UTILS] AllAppointmentHandler returns empty data`);
       return { status: 204, body: null };
     } else {
@@ -176,16 +224,24 @@ async function AllAppointmentHandler() {
 }
 
 async function PatientAppointmentHandler(pid, count = false) {
+  /**
+   * Handles request to get appointments for a patient
+   *
+   * @version 3.1.2
+   * @param {String} pid The patient id to fetch appointments.
+   * @param {Boolean} count When true, only count of documents is returned.
+   * @returns {Object} Returns the HTTP status and the appointment documents fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let instances = await db.Appointment.countByPid(pid);
     if (instances < 1) {
-      // No appointment records found
+      // No appointments found
       console.log(`[UTILS] PatientAppointmentHandler returns empty data`);
       return { status: 204, body: null };
     } else {
       if (count) {
-        // Request for only count of records
         console.log(`[UTILS] PatientAppointmentHandler success`);
         return { status: 200, body: { total_docs: instances } };
       } else {
@@ -201,16 +257,24 @@ async function PatientAppointmentHandler(pid, count = false) {
 }
 
 async function DoctorAppointmentHandler(doctor, count = false) {
+  /**
+   * Handles request to get appointments for a doctor.
+   *
+   * @version 3.1.2
+   * @param {String} doctor The doctor name.
+   * @param {Boolean} count When true, only count of documents is returned.
+   * @returns {Object} Returns the HTTP status and the appointment documents fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let instances = await db.Appointment.countByDoctor(doctor);
     if (instances < 1) {
-      // No appointment records found
+      // No appointments found
       console.error(`[UTILS] DoctorAppointmentHandler returns empty data`);
       return { status: 204, body: null };
     } else {
       if (count) {
-        // Request for only count of records
         console.log(`[UTILS] DoctorAppointmentHandler success`);
         return { status: 200, body: { total_docs: instances } };
       } else {
@@ -226,16 +290,24 @@ async function DoctorAppointmentHandler(doctor, count = false) {
 }
 
 async function StatusAppointmentHandler(status, count = false) {
+  /**
+   * Handles request to get appointments by status.
+   *
+   * @version 3.1.2
+   * @param {Number} status The required status.
+   * @param {Boolean} count When true, only count of documents is returned.
+   * @returns {Object} Returns the HTTP status and the appointment documents fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let instances = await db.Appointment.countByStatus(status);
-    if (instances < 0) {
-      // No appointment records found
+    if (instances < 1) {
+      // No appointments found
       console.log(`[UTILS] StatusAppointmentHandler return empty data`);
       return { status: 204, body: null };
     } else {
       if (count) {
-        // Request for only count of records
         console.log(`[UTILS] StatusAppointmentHandler success`);
         return { status: 200, body: { total_docs: instances } };
       } else {
@@ -251,12 +323,20 @@ async function StatusAppointmentHandler(status, count = false) {
 }
 
 async function UpdateAppointmentHandler(appid, doc) {
+  /**
+   * Handles request to update appointment.
+   *
+   * @version 3.1.2
+   * @param {String} appid The appointment id to be updated.
+   * @param {Object} doc The changes to be applied.
+   * @returns {Object} Returns the HTTP status and the updated appointment document.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     doc = sanitize(doc);
     let updatedDoc = await db.Appointment.updateDoc(appid, doc);
-    delete updatedDoc['_id'];
-    delete updatedDoc['__v'];
+    updatedDoc = _.omit(updatedDoc, ['_id', '__v']);
     console.log(`[UTILS] UpdateAppointmentHandler success`);
     return { status: 200, body: updatedDoc };
   } catch (err) {
@@ -266,6 +346,16 @@ async function UpdateAppointmentHandler(appid, doc) {
 }
 
 async function DateAppointmentHandler(from, to, count = false) {
+  /**
+   * Handles request to get appointments by a date range.
+   *
+   * @version 3.1.2
+   * @param {Number} from The from date to filter.
+   * @param {Number} to The to date to filter.
+   * @param {Boolean} count When true, only count of documents is returned.
+   * @returns {Object} Returns the HTTP status and the appointment documents fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     // Convert epoch seconds into JS milliseconds
     from = from < 1000000000000 ? from * 1000 : from;
@@ -273,7 +363,6 @@ async function DateAppointmentHandler(from, to, count = false) {
     const db = await dbUtils.connect();
     let docs = await db.Appointment.findBetweenDate(from, to);
     if (count) {
-      // Request for only count of records
       return { status: 200, body: { total_docs: docs.length } };
     } else {
       const mergedDocs = await Promise.all(docs.map(doc => mergePatientDetails(db, doc.p_id, doc)));
@@ -292,6 +381,14 @@ async function DateAppointmentHandler(from, to, count = false) {
 }
 
 async function ImportAppointmentsHandler(docs) {
+  /**
+   * Handles request to import appointments.
+   *
+   * @version 3.1.2
+   * @param {Array} docs The list of documents to be imported.
+   * @returns {Object} Returns the HTTP status and the appointment documents imported.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     for (let doc of docs) {

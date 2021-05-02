@@ -12,6 +12,13 @@ const STATUS_AS_WORDS = ["Cancelled", "Scheduled", "Completed", "Postponed"];
 function FileUtils() { }
 
 function fitForXls(doc) {
+  /**
+   * Creates an object fit for XLS file.
+   *
+   * @version 3.1.2
+   * @param {Object} doc The document to be altered.
+   * @returns {Object} Returns the fit object.
+   */
   let fitObj = new Object(doc);
   // w.r.t Patient
   if (!_.isNil(doc.dob)) {
@@ -49,6 +56,13 @@ function fitForXls(doc) {
 }
 
 function fitForDB(doc) {
+  /**
+   * Creates an object fit for the db.
+   *
+   * @version 3.1.2
+   * @param {Object} doc The document to be altered.
+   * @returns {Object} Returns the fit object.
+   */
   let fitObj = new Object(doc);
   // w.r.t Patient
   if (!_.isNil(doc.dob)) {
@@ -90,13 +104,32 @@ function fitForDB(doc) {
 }
 
 async function createXlsFile(outFile, docs, keys) {
+  /**
+   * Creates an XLS file for a list of documents.
+   *
+   * @version 3.1.2
+   * @param {Path} outFile The output file path.
+   * @param {Array} docs The list of documents to convert into XLS.
+   * @param {Array} keys The list of column keys.
+   * @returns {Function} Returns the writeFileSync function.
+   */
+  _.chain(docs).map(doc => _.pick(doc, keys)).value(); // Removing fields not present in keys
   let workbook = XLSX.utils.book_new();
   let data = XLSX.utils.json_to_sheet(docs, { header: keys });
   XLSX.utils.book_append_sheet(workbook, data, "Sheet1");
-  await XLSX.writeFileSync(workbook, outFile);
+  return await XLSX.writeFileSync(workbook, outFile);
 }
 
 function ImportXlsHandler(filename, type) {
+  /**
+   * Handles request to import data from XLS file.
+   *
+   * @version 3.1.2
+   * @param {String} filename The filename to be imported (located in data/ folder).
+   * @param {String} type The type of data contained in the file (Patient/Treatment/Appointment)
+   * @returns {Function} Returns the import function according to the type.
+   * @throws {Object} Throws the error object.
+   */
   try {
     if (!_.includes(["Patient", "Treatment", "Appointment"], type)) {
       console.error(`[UTILS] Invalid type @ ImportXlsHandler \n ${type}`);
@@ -133,6 +166,14 @@ function ImportXlsHandler(filename, type) {
 }
 
 async function ExportPatientsAsXls(outFile) {
+  /**
+   * Exports all patient documents into XLS file.
+   *
+   * @version 3.1.2
+   * @param {Path} outFile The output file path.
+   * @returns {Object} Returns the HTTP status and the count of documents.
+   * @throws {Object} Throws the error object.
+   */
   try {
     let keys = [
       "p_id", "name", "dob", "age", "area",
@@ -145,7 +186,7 @@ async function ExportPatientsAsXls(outFile) {
       console.log(`[UTILS] Empty response from db`);
       return { status: 204, body: null };
     }
-    let docs = _.chain(body.docs).sortBy(o => o.created_at).map(fitForXls).value();
+    let docs = _.chain(body.docs).sortBy('created_at').map(fitForXls).value();
     await createXlsFile(outFile, docs, keys);
 
     console.log(`[UTILS] ExportPatientsAsXls success`);
@@ -157,6 +198,14 @@ async function ExportPatientsAsXls(outFile) {
 }
 
 async function ExportTreatmentsAsXls(outFile) {
+  /**
+   * Exports all treatment documents into XLS file.
+   *
+   * @version 3.1.2
+   * @param {Path} outFile The output file path.
+   * @returns {Object} Returns the HTTP status and the count of documents.
+   * @throws {Object} Throws the error object.
+   */
   try {
     let keys = [
       "t_id", "p_id", "procedure_done", "teeth_number",
@@ -168,7 +217,7 @@ async function ExportTreatmentsAsXls(outFile) {
       console.log(`[UTILS] Empty response from db`);
       return { status: 204, body: null };
     }
-    let docs = _.chain(body.docs).sortBy(o => o.created_at).map(fitForXls).value();
+    let docs = _.chain(body.docs).sortBy('created_at').map(fitForXls).value();
     await createXlsFile(outFile, docs, keys);
 
     console.log(`[UTILS] ExportTreatmentsAsXls success`);
@@ -180,6 +229,14 @@ async function ExportTreatmentsAsXls(outFile) {
 }
 
 async function ExportAppointmentsAsXls(outFile) {
+  /**
+   * Exports all appointment documents into XLS file.
+   *
+   * @version 3.1.2
+   * @param {Path} outFile The output file path.
+   * @returns {Object} Returns the HTTP status and the count of documents.
+   * @throws {Object} Throws the error object.
+   */
   try {
     let keys = [
       "app_id", "p_id", "appointment_date",
@@ -191,7 +248,7 @@ async function ExportAppointmentsAsXls(outFile) {
       console.log(`[UTILS] Empty response from db`);
       return { status: 204, body: null };
     }
-    let docs = _.chain(body.docs).sortBy(o => o.created_at).map(fitForXls).value();
+    let docs = _.chain(body.docs).sortBy('created_at').map(fitForXls).value();
     await createXlsFile(outFile, docs, keys);
 
     console.log(`[UTILS] ExportAppointmentsAsXls success`);
@@ -203,6 +260,13 @@ async function ExportAppointmentsAsXls(outFile) {
 }
 
 function ExportXlsHandler(type) {
+  /**
+   * Handles request to export documents into XLS.
+   *
+   * @version 3.1.2
+   * @param {String} type The type of data to export (Patient/Treatment/Appointment).
+   * @returns {Function} Returns the export function according to the type.
+   */
   if (!_.includes(["Patient", "Treatment", "Appointment"], type)) {
     console.error(`[UTILS] Invalid type @ ExportXlsHandler \n ${type}`);
     return { status: 400, body: null };

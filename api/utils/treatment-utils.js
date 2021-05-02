@@ -5,6 +5,14 @@ const dbUtils = require('./db-utils');
 function TreatmentUtils() { }
 
 function makeNextTid(db) {
+  /**
+   * Checks database and generates next treatment id.
+   *
+   * @version 3.1.2
+   * @param {Object} db The connection to the database.
+   * @returns {String} The treatment id generated.
+   * @exception {Object} err The error object.
+   */
   return new Promise((resolve, reject) => {
     db.Treatment.getLatestTid()
       .then(top => {
@@ -20,15 +28,27 @@ function makeNextTid(db) {
           return resolve('TRT0001');
         }
       })
-      .catch(err => reject(err));
+      .catch(err => {
+        console.error(`[UTILS] Error @ makeNextTid \n ${JSON.stringify(err)}`);
+        return reject(err);
+      });
   });
 }
 
 async function checkCompatibility(list) {
+  /**
+   * Checks if a list of treatment ids are compatible
+   * to create an invoice.
+   *
+   * @version 3.1.2
+   * @param {Array} list The list of treatment ids to check compatibility.
+   * @returns {Boolean} Returns if the treatments are compatible.
+   * @exception {Object} err The error object.
+   */
   try {
     const db = await dbUtils.connect();
     let treatmentObjArray = await Promise.all(list.map(tid => db.Treatment.getByTid(tid)));
-    const patients = [...new Set(treatmentObjArray.map(obj => obj.p_id))]; // Get list of unique patients
+    const patients = _.chain(treatmentObjArray).map('p_id').uniq().value(); // Get list of unique patients
     if (patients.length > 1) {
       throw `Multiple patient ids obtained ${patients.join(',')}`;
     } else {
@@ -41,7 +61,13 @@ async function checkCompatibility(list) {
 }
 
 function sanitize(doc) {
-  // Create a clean object fit for the db
+  /**
+   * Creates a sanitized object, fit for the db.
+   *
+   * @version 3.1.2
+   * @param {Object} doc The object to be sanitized.
+   * @returns {Object} cleanObj The sanitized object.
+   */
   let cleanObj = new Object(doc);
   for (let key in cleanObj) {
     if (key === "t_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
@@ -56,11 +82,18 @@ function sanitize(doc) {
 }
 
 async function NewTreatmentHandler(doc) {
+  /**
+   * Handles request to create new treatment.
+   *
+   * @version 3.1.2
+   * @param {Object} doc The document containing treatment details.
+   * @returns {Object} Returns the HTTP status and the document.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
-    const tid = await makeNextTid(db);
     doc = sanitize(doc);
-    doc.t_id = tid;
+    doc.t_id = await makeNextTid(db);
     await db.Treatment.create(doc);
     console.log(`[UTILS] NewTreatmentHandler success`);
     return { status: 201, body: doc };
@@ -71,11 +104,18 @@ async function NewTreatmentHandler(doc) {
 }
 
 async function AllTreatmentHandler() {
+  /**
+   * Handles request to list all treatment documents.
+   *
+   * @version 3.1.2
+   * @returns {Object} Returns the HTTP status and all treatment documents.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let instances = await db.Treatment.countAll();
     if (instances < 1) {
-      // No treatment records found
+      // No treatment documents found
       console.error(`[UTILS] AllTreatmentHandler returns empty data`);
       return { status: 204, body: null };
     } else {
@@ -91,6 +131,14 @@ async function AllTreatmentHandler() {
 }
 
 async function GetTreatmentHandler(tid) {
+  /**
+   * Handles request to get treatment document.
+   *
+   * @version 3.1.2
+   * @param {String} tid The treatment id to fetch.
+   * @returns {Object} Returns the HTTP status and the treatment document fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let doc = await db.Treatment.getByTid(tid);
@@ -108,11 +156,18 @@ async function GetTreatmentHandler(tid) {
 }
 
 async function PidTreatmentHandler(pid) {
+  /**
+   * Handles request to get treatments for a patient.
+   *
+   * @version 3.1.2
+   * @param {String} pid The patient id to fetch treatments.
+   * @returns {Object} Returns the HTTP status and the treatment documents fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let instances = await db.Treatment.countByPid(pid);
     if (instances < 1) {
-      // No treament records found
       console.log(`[UTILS] PidTreatmentHandler returns empty data`);
       return { status: 204, body: null };
     } else {
@@ -127,6 +182,13 @@ async function PidTreatmentHandler(pid) {
 }
 
 async function DistinctProceduresHandler() {
+  /**
+   * Handles request to get distinct procedures done.
+   *
+   * @version 3.1.2
+   * @returns {Object} Returns the HTTP status and the list of unique procedures fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let docs = await db.Treatment.getDistinctProcedures();
@@ -144,16 +206,23 @@ async function DistinctProceduresHandler() {
 }
 
 async function DoctorTreatmentHandler(doctor, count = false) {
+  /**
+   * Handles request to get treatments for a doctor.
+   *
+   * @version 3.1.2
+   * @param {String} doctor The doctor name.
+   * @param {Boolean} count When true, only count of documents is returned.
+   * @returns {Object} Returns the HTTP status and the treatment documents fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let instances = await db.Treatment.countByDoctor(doctor);
     if (instances < 1) {
-      // No treament records found
       console.log(`[UTILS] DoctorTreatmentHandler returns empty data`);
       return { status: 204, body: null };
     } else {
       if (count) {
-        // Request for only count
         console.log(`[UTILS] DoctorTreatmentHandler success`);
         return { status: 200, body: { total_docs: instances } };
       } else {
@@ -169,12 +238,20 @@ async function DoctorTreatmentHandler(doctor, count = false) {
 }
 
 async function UpdateTreatmentHandler(tid, doc) {
+  /**
+   * Handles request to update treatment .
+   *
+   * @version 3.1.2
+   * @param {String} tid The treatment id to be updated.
+   * @param {Object} doc The changes to be applied.
+   * @returns {Object} Returns the HTTP status and the updated treatment document.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     doc = sanitize(doc);
     let updatedDoc = await db.Treatment.updateDoc(tid, doc);
-    delete updatedDoc['_id'];
-    delete updatedDoc['__v'];
+    updatedDoc = _.omit(updatedDoc, ['_id', '__v']);
     console.log(`[UTILS] UpdateTreatmentHandler success`);
     return { status: 200, body: updatedDoc };
   } catch (err) {
@@ -184,10 +261,19 @@ async function UpdateTreatmentHandler(tid, doc) {
 }
 
 async function DateTreatmentHandler(from, to) {
+  /**
+   * Handles request to get treatments by date.
+   *
+   * @version 3.1.2
+   * @param {Number} from The from date to filter.
+   * @param {Number} to The to date to filter.
+   * @returns {Object} Returns the HTTP status and the treatment documents fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
-    from = from < 1000000000000 ? from * 1000 : from;
-    to = to < 1000000000000 ? to * 1000 : to;
+    from = from < 1000000000000 ? from * 1000 : from; // Converting Epoch timestamp to JS milliseconds
+    to = to < 1000000000000 ? to * 1000 : to; // Converting Epoch timestamp to JS milliseconds
     let docs = await db.Treatment.findBetweenDate(from, to);
     console.log(`[UTILS] DateTreatmentHandler success`);
     return { status: 200, body: { total_docs: docs.length, docs } };
@@ -198,6 +284,15 @@ async function DateTreatmentHandler(from, to) {
 }
 
 async function TreatmentHistoryHandler(pid, quick = false) {
+  /**
+   * Handles request to get treatment history for a patient.
+   *
+   * @version 3.1.2
+   * @param {String} pid The patient id to fetch treatments.
+   * @param {Boolean} quick When true, a concise treatment history is returned.
+   * @returns {Object} Returns the HTTP status and the treatment documents fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let docs = await db.Treatment.findByPid(pid);
@@ -218,7 +313,7 @@ async function TreatmentHistoryHandler(pid, quick = false) {
           .sortBy('treatment_date')
           .value();
         result.doctors = _.chain(docs).map('doctor').uniq().value();
-        result.last_visit = result.procedures[0]['treatment_date'];
+        result.last_visit = _.last(result.procedures)['treatment_date'];
       } else {
         // Detailed treatment history
         result.procedures = _.chain(docs)
@@ -226,16 +321,16 @@ async function TreatmentHistoryHandler(pid, quick = false) {
             return {
               procedure_done: doc.procedure_done,
               treatment_date: doc.treatment_date,
-              remarks: doc?.remarks ?? null,
+              remarks: _.has(doc, 'remarks') ? doc.remarks : null,
               doctor: doc.doctor,
-              teeth_number: doc?.teeth_number ?? null,
+              teeth_number: _.has(doc, 'teeth_number') ? doc.teeth_number : null,
               t_id: doc.t_id
             };
           })
           .sortBy('treatment_date')
           .value();
         result.doctors = _.chain(docs).map('doctor').uniq().value();
-        result.last_visit = result.procedures[0]['treatment_date'];
+        result.last_visit = _.last(result.procedures)['treatment_date'];
       }
       console.log(`[UTILS] TreatmentHistoryHandler success`);
       return { status: 200, body: result };
@@ -247,6 +342,15 @@ async function TreatmentHistoryHandler(pid, quick = false) {
 }
 
 async function CheckCompatibilityHandler(list) {
+  /**
+   * Handles request to check if list of treatments are
+   * compatible to create an invoice.
+   *
+   * @version 3.1.2
+   * @param {Array} list The list of treatment ids to check.
+   * @returns {Object} Returns the HTTP status and the treatments compatiblity.
+   * @throws {Object} Throws the error object.
+   */
   try {
     let compatibility = await checkCompatibility(list);
     console.log(`[UTILS] CheckCompatibilityHandler success`);
@@ -258,6 +362,14 @@ async function CheckCompatibilityHandler(list) {
 }
 
 async function ImportTreatmentsHandler(docs) {
+  /**
+   * Handles request to import treatments.
+   *
+   * @version 3.1.2
+   * @param {Array} docs The list of documents to be imported.
+   * @returns {Object} Returns the HTTP status and the treatment documents imported.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     for (let doc of docs) {
@@ -270,8 +382,7 @@ async function ImportTreatmentsHandler(docs) {
       }
       doc = sanitize(doc);
       if (_.has(doc, 'created_at')) delete doc.created_at;
-      let tid = await makeNextTid(db);
-      doc.t_id = tid;
+      doc.t_id = await makeNextTid(db);
       await db.Treatment.create(doc);
     }
     return { status: 200, body: { total_docs: docs.length, docs } };

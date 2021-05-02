@@ -10,6 +10,14 @@ const config = require('../config.json')[process.env.NODE_ENV ?? "development"];
 function InvoiceUtils() { }
 
 function makeNextInvid(db) {
+  /**
+   * Checks database and generates next invoice id.
+   *
+   * @version 3.1.2
+   * @param {Object} db The connection to the database.
+   * @returns {String} The invoice id generated.
+   * @exception {Object} err The error object.
+   */
   return new Promise((resolve, reject) => {
     db.Invoice.getLatestInvid()
       .then(top => {
@@ -25,48 +33,58 @@ function makeNextInvid(db) {
           return resolve('INV0001');
         }
       })
-      .catch(err => reject(err));
+      .catch(err => {
+        console.error(`[UTILS] Error @ makeNextInvId \n ${JSON.stringify(err)}`);
+        return reject(err);
+      });
   });
 }
 
-function generatePdf(obj) {
-  /*
-  obj = {
-    inv_id,
-    payment_method,
-    payment_id,
-    sub_total,
-    grand_total,
-    doctor: [],
-    patient: {
-      p_id,
-      name,
-      gender,
-      age,
-      contact
-    }
-    treatments: [
-      {
-        procedure_done,
-        treatment_date,
-        tooth_number,
-        cost,
-        qty,
-        total
-      }
-    ],
-    created_at
-  }
-  */
-  const outputPath = path.join(__dirname, '..', '..', 'invoice');
+function generatePdf(invoiceObj) {
+  /**
+   * Generates a PDF for an invoice object.
+   *
+   * @version 3.1.2
+   * @param {Object} invoiceObj The inovice object.
+   * @returns {String} Returns the absolute path of the PDF.
+   * @example
+   * invoiceObj sample keys
+   * {
+   *   inv_id,
+   *   payment_method,
+   *   payment_id,
+   *   sub_total,
+   *   grand_total,
+   *   doctor: [],
+   *   patient: {
+   *     p_id,
+   *     name,
+   *     gender,
+   *     age,
+   *     contact
+   *   }
+   *   treatments: [
+   *     {
+   *       procedure_done,
+   *       treatment_date,
+   *       tooth_number,
+   *       cost,
+   *       qty,
+   *       total
+   *     }
+   *   ],
+   *   created_at
+   * }
+   */
+  const outPath = path.join(__dirname, '..', '..', 'invoice');
   const miscPath = path.join(__dirname, '..', '..', 'misc');
-  const outputFile = path.join(outputPath, obj.inv_id + '.pdf');
+  const outFile = path.resolve(path.join(outPath, invoiceObj.inv_id + '.pdf'));
   let doc = new PDF();
 
-  if (!fs.existsSync(outputPath)) {
-    fs.mkdirSync(outputPath);
+  if (!fs.existsSync(outPath)) {
+    fs.mkdirSync(outPath);
   }
-  doc.pipe(fs.createWriteStream(outputFile));
+  doc.pipe(fs.createWriteStream(outFile));
 
   // LOGO
   doc.image(path.join(miscPath, 'logo.png'), 60, 60, {
@@ -99,49 +117,55 @@ function generatePdf(obj) {
     .text(config.CLINIC_ADDRESS_LINE_1 ?? "1, Doe Road", posx.header.address.x, posx.header.address.line_1_y)
     .text(config.CLINIC_ADDRESS_LINE_2 ?? "90000 90000", posx.header.address.x, posx.header.address.line_2_y)
     .text(config.CLINIC_ADDRESS_LINE_3 ?? "john@doe.com", posx.header.address.x, posx.header.address.line_3_y)
-    .text(obj.payment_method ?? null, posx.payment.method.x, posx.payment.method.y)
-    .text(obj.payment_id ?? null, posx.payment.id.x, posx.payment.id.y);
-  obj.treatments.forEach((trt, ind) => {
+    .text(invoiceObj.payment_method ?? null, posx.payment.method.x, posx.payment.method.y)
+    .text(invoiceObj.payment_id ?? null, posx.payment.id.x, posx.payment.id.y);
+
+  invoiceObj.treatments.forEach((trt, ind) => {
     let currentHeight = posx.table.body.base_proc.y + 64 * ind;
     doc
       .text(trt.procedure_done, posx.table.body.base_proc.x, currentHeight, {
         width: posx.table.body.base_proc.max_width,
         height: posx.table.body.base_proc.max_height
       })
-      .text(trt.treatment_date
+      .text(!_.isNil(trt.treatment_date)
         ? new Date(trt.treatment_date).toLocaleString("default", { day: "numeric", month: "short", year: "numeric" })
         : null
       )
-      .text(trt.teeth_number && trt.teeth_number.length ? `Teeth: ${trt.teeth_number.join(',')}` : null)
+      .text(!_.isNil(trt.teeth_number) && !_.isEmpty(trt.teeth_number) ? `Teeth: ${trt.teeth_number.join(',')}` : null)
       .text(trt.cost, posx.table.body.cost.x, currentHeight, { width: posx.table.body.cost.max_width })
       .text(trt.qty, posx.table.body.qty.x, currentHeight, { width: posx.table.body.qty.max_width })
-      .text(
-        !_.isNil(trt.total)
-          ? parseFloat(trt.total).toFixed(2)
-          : null,
-        posx.table.body.total.x,
-        currentHeight,
-        { width: posx.table.body.total.max_width }
+      .text(!_.isNil(trt.total)
+        ? parseFloat(trt.total).toFixed(2)
+        : null,
+        posx.table.body.total.x, currentHeight, { width: posx.table.body.total.max_width }
       );
   });
 
   // 14 REGULAR BLACK
   doc.fontSize(14)
-    .text(`${obj.patient.name}`, posx.data.patient.name.x, posx.data.patient.name.y)
-    .text(`${obj.patient.age} / ${obj.patient.gender}`)
-    .text(obj.patient.contact)
+    .text(`${invoiceObj.patient.name}`, posx.data.patient.name.x, posx.data.patient.name.y)
+    .text(`${invoiceObj.patient.age} / ${invoiceObj.patient.gender}`)
+    .text(invoiceObj.patient.contact)
     .text("Doctor:", posx.data.doctor.x, posx.data.doctor.y)
-    .text(obj.created_at, posx.data.date.x, posx.data.date.y, { align: 'right' })
+    .text(invoiceObj.created_at, posx.data.date.x, posx.data.date.y, { align: 'right' })
     .text("Sub Total: Rs.", posx.total_foot.x, posx.total_foot.sub_y)
     .text("Grand Total: Rs.", posx.total_foot.x, posx.total_foot.grand_y);
 
   // 14 SEMIBOLD BLACK
   doc.font(path.join(miscPath, 'ProximaNova-Semibold.ttf'))
-    .text(obj.doctor.join(', '), posx.data.doctor.name_x, posx.data.doctor.y)
-    .text(obj.patient.p_id, posx.data.patient.pid.x, posx.data.patient.pid.y, { align: 'right' })
-    .text(!_.isNil(obj.sub_total) ? parseFloat(obj.sub_total).toFixed(2) : null, 0, posx.total_foot.sub_y, { align: 'right' })
-    .text(!_.isNil(obj.grand_total) ? parseFloat(obj.grand_total).toFixed(2) : null, 0, posx.total_foot.grand_y, { align: 'right' })
-    .fontSize(16).text(obj.inv_id, posx.data.invoice.x, posx.data.invoice.y, { align: 'right' }) // 16 SEMIBOLD BLACK
+    .text(invoiceObj.doctor.join(', '), posx.data.doctor.name_x, posx.data.doctor.y)
+    .text(invoiceObj.patient.p_id, posx.data.patient.pid.x, posx.data.patient.pid.y, { align: 'right' })
+    .text(!_.isNil(invoiceObj.sub_total)
+      ? parseFloat(invoiceObj.sub_total).toFixed(2)
+      : null,
+      0, posx.total_foot.sub_y, { align: 'right' }
+    )
+    .text(!_.isNil(invoiceObj.grand_total)
+      ? parseFloat(invoiceObj.grand_total).toFixed(2)
+      : null,
+      0, posx.total_foot.grand_y, { align: 'right' }
+    )
+    .fontSize(16).text(invoiceObj.inv_id, posx.data.invoice.x, posx.data.invoice.y, { align: 'right' }) // 16 SEMIBOLD BLACK
     .fontSize(12) // 12 SEMIBOLD BLACK
     .text("Payment Method:", posx.payment.method.name_x, posx.payment.method.y)
     .text("Payment ID:", posx.payment.id.name_x, posx.payment.id.y)
@@ -152,10 +176,16 @@ function generatePdf(obj) {
     .text("PROCEDURE", posx.table.head.proc_x, posx.table.head.y);
 
   doc.end();
-  return outputFile;
+  return outFile;
 }
 
 function sanitize(doc) {
+  /**
+   * Creates a sanitized object, fit for the db.
+   *
+   * @version 3.1.2
+   * @returns {Object} cleanObj The sanitized object.
+   */
   let cleanObj = new Object(doc);
   for (let key in cleanObj) {
     if (key === "inv_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
@@ -170,6 +200,14 @@ function sanitize(doc) {
 }
 
 async function NewInvoiceHandler(pid, body) {
+  /**
+   * Handles request to create new invoice.
+   *
+   * @version 3.1.2
+   * @param {String} pid The patient id for the invoice.
+   * @param {Object} body The document containing invoice details.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let invoiceObj = {
@@ -194,10 +232,19 @@ async function NewInvoiceHandler(pid, body) {
 }
 
 async function AllInvoiceHandler(count = false) {
+  /**
+   * Handles request to list all invoice documents.
+   *
+   * @version 3.1.2
+   * @param {Boolean} count When true, only count of documents is returned.
+   * @returns {Object} Returns the HTTP status and the invoice documents fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let instances = await db.Invoice.countAll();
     if (instances < 1) {
+      // No invoices found
       console.log(`[UTILS] AllInvoiceHandler returns empty data`);
       return { status: 204, body: {} };
     } else {
@@ -222,6 +269,14 @@ async function AllInvoiceHandler(count = false) {
 }
 
 async function GetInvoiceHandler(invid) {
+  /**
+   * Handles request to get invoice document.
+   *
+   * @version 3.1.2
+   * @param {Stirng} invid The invoice id to be fetched.
+   * @returns {Object} Returns the HTTP status and the document fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let doc = await db.Invoice.getByInvid(invid);
@@ -239,15 +294,22 @@ async function GetInvoiceHandler(invid) {
 }
 
 async function PrintInvoiceHandler(invid) {
+  /**
+   * Handles request to return PDF of an invoice.
+   *
+   * @version 3.1.2
+   * @param {String} invid The invoice id to print.
+   * @returns {Object} Returns the HTTP status and the location of created file.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let doc = await db.Invoice.getByInvid(invid);
-    let patientObj = await db.Patient.getByPid(doc.p_id);
     doc.treatments = doc.treatments.map(JSON.parse);
-    doc.patient = patientObj;
-    let outputFile = await generatePdf(doc);
+    doc.patient = await db.Patient.getByPid(doc.p_id);
+    let outFile = await generatePdf(doc);
     await dbUtils.close();
-    return { status: 201, body: { file: outputFile } };
+    return { status: 201, body: { file: outFile } };
   } catch (err) {
     console.error(`[UTILS] Error @ PrintInvoiceHandler \n ${JSON.stringify(err)}`);
     throw err;

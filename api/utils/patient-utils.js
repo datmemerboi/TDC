@@ -5,6 +5,14 @@ const dbUtils = require('./db-utils');
 function PatientUtils() { }
 
 function makeNextPid(db) {
+  /**
+   * Checks database and generates the next patient id.
+   *
+   * @version 3.1.2
+   * @param {Object} db The connection to the database.
+   * @returns {String} The patient id generated.
+   * @exception {Object} err The error object.
+   */
   return new Promise((resolve, reject) => {
     db.Patient.getLatestPid()
       .then(top => {
@@ -21,13 +29,20 @@ function makeNextPid(db) {
         }
       })
       .catch(err => {
-        console.error(`[UTILS] Error @ makeNextAid \n ${JSON.stringify(err)}`);
+        console.error(`[UTILS] Error @ makeNextPid \n ${JSON.stringify(err)}`);
         return reject(err);
       });
   });
 }
 
 function sanitize(doc) {
+  /**
+   * Creates a sanitized object, fit for the db.
+   *
+   * @version 3.1.2
+   * @param {object} doc The object to be sanitized.
+   * @returns {object} cleanObj The sanitized object.
+   */
   let cleanObj = new Object(doc);
   for (let key in cleanObj) {
     if (_.isNil(cleanObj[key]) || key === "p_id") delete cleanObj[key];
@@ -54,6 +69,14 @@ function sanitize(doc) {
 }
 
 async function NewPatientHandler(doc) {
+  /**
+   * Handles request to create new patient.
+   *
+   * @version 3.1.2
+   * @param {Object} doc The document containing patient details.
+   * @returns {Object} Returns the HTTP status and the document.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     // doc.p_id = doc.name.replace(/\s/g, '').split('.').filter(word => word.length > 2)[0].slice(0, 3) + doc.contact.toString().slice(-4);
@@ -70,6 +93,14 @@ async function NewPatientHandler(doc) {
 }
 
 async function AllPatientHandler(count = false) {
+  /**
+   * Handles request to list all patient documents.
+   *
+   * @version 3.1.2
+   * @param {Boolean} count When true, only count of documents is returned.
+   * @returns {Object} Returns the HTTP status and all patient documents (or only count of documents).
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let instances = await db.Patient.countAll();
@@ -93,6 +124,14 @@ async function AllPatientHandler(count = false) {
 }
 
 async function GetPatientHandler(pid) {
+  /**
+   * Handles request to get patient document.
+   *
+   * @version 3.1.2
+   * @param {String} pid The patient id to fetch.
+   * @returns {Object} Returns the HTTP status and the patient document fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     const doc = await db.Patient.getByPid(pid);
@@ -110,6 +149,14 @@ async function GetPatientHandler(pid) {
 }
 
 async function BulkPatientsHandler(pidList) {
+  /**
+   * Handles request to get bulk patients.
+   *
+   * @version 3.1.2
+   * @param {Array} pidList The list of patient ids to fetch.
+   * @returns {Object} Returns the HTTP status and the patient documents fetched.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     const docs = await db.Patient.getByPidList(pidList);
@@ -127,6 +174,13 @@ async function BulkPatientsHandler(pidList) {
 }
 
 async function GetDistinctAreasHandler() {
+  /**
+   * Handles request to get distinct areas.
+   *
+   * @version 3.1.2
+   * @returns {Object} Returns the HTTP status and the list of distinct areas.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     let docs = await db.Patient.getDistinctArea();
@@ -144,12 +198,20 @@ async function GetDistinctAreasHandler() {
 }
 
 async function UpdatePatientHandler(pid, doc) {
+  /**
+   * Handles request to update patient.
+   *
+   * @version 3.1.2
+   * @param {String} pid The patient id to be updated.
+   * @param {Object} doc The changes to be applied.
+   * @returns {Object} Returns the HTTP status and the updated patient document.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     doc = sanitize(doc);
     let updatedDoc = await db.Patient.updateDoc(pid, doc);
-    delete updatedDoc['_id'];
-    delete updatedDoc['__v'];
+    updatedDoc = _.omit(updatedDoc, ['_id', '__v']);
     console.log("[UTILS] UpdatePatientHandler success");
     return { status: 200, body: updatedDoc };
   } catch (err) {
@@ -159,6 +221,14 @@ async function UpdatePatientHandler(pid, doc) {
 }
 
 async function SearchByName(term) {
+  /**
+   * Handles request to search by name.
+   *
+   * @version 3.1.2
+   * @param {String} term The term to search for.
+   * @returns {Object} Returns the HTTP status and the patient documents found.
+   * @throws {Object} Throws the error object.
+   */
   console.log("[UTILS] Searching for Name");
   try {
     const db = await dbUtils.connect();
@@ -177,6 +247,14 @@ async function SearchByName(term) {
 }
 
 async function SearchByArea(term) {
+  /**
+   * Handles request to search by area.
+   *
+   * @version 3.1.2
+   * @param {String} term The term to search for.
+   * @returns {Object} Returns the HTTP status and the patient documents found.
+   * @throws {Object} Throws the error object.
+   */
   console.log("[UTILS] Searching for Area");
   try {
     const db = await dbUtils.connect();
@@ -195,6 +273,14 @@ async function SearchByArea(term) {
 }
 
 async function SearchByContact(term) {
+  /**
+   * Handles request to search by contact.
+   *
+   * @version 3.1.2
+   * @param {String} term The term to search for.
+   * @returns {Object} Returns the HTTP status and the patient documents found.
+   * @throws {Object} Throws the error object.
+   */
   console.log("[UTILS] Searching for Contact");
   try {
     if (isNaN(term)) {
@@ -218,6 +304,14 @@ async function SearchByContact(term) {
 }
 
 function SearchPatientHandler(term, type) {
+  /**
+   * Handles search request based on type.
+   *
+   * @version 3.1.2
+   * @param {String} term The term to search for.
+   * @param {String} type The search type (name/area/contact).
+   * @returns {Function} Returns the search function according to the type.
+   */
   switch (type) {
     case "name":
       return SearchByName(term);
@@ -232,6 +326,14 @@ function SearchPatientHandler(term, type) {
 }
 
 async function ImportPatientsHandler(docs) {
+  /**
+   * Handles request to import patients.
+   *
+   * @version 3.1.2
+   * @param {Array} docs The list of documents to be imported.
+   * @returns {Object} Returns the HTTP status and the patient documents imported.
+   * @throws {Object} Throws the error object.
+   */
   try {
     const db = await dbUtils.connect();
     for (let doc of docs) {
