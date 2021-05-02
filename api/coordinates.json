@@ -45,29 +45,29 @@
         },
         "date": {
             "x": 0,
-            "y": 250
+            "y": 705
         }
     },
     "table": {
         "head": {
             "banner_up": {
                 "x": 0,
-                "y": 290
+                "y": 260
             },
             "banner_down": {
                 "x": 612,
-                "y": 320
+                "y": 290
             },
             "proc_x": 120,
             "cost_x": 310,
             "qty_x": 400,
             "total_x": 490,
-            "y": 298
+            "y": 268
         },
         "body": {
             "base_proc": {
                 "x": 80,
-                "y": 340,
+                "y": 310,
                 "max_width": 200,
                 "max_height": 20
             },
@@ -87,24 +87,24 @@
         "foot": {
             "left_x": 60,
             "right_x": 550,
-            "y": 610
+            "y": 550
         }
     },
     "total_foot": {
         "x": 380,
-        "sub_y": 620,
-        "grand_y": 650
+        "sub_y": 560,
+        "grand_y": 590
     },
     "payment": {
         "method": {
             "name_x": 60,
             "x": 160,
-            "y": 670
+            "y": 590
         },
         "id": {
             "name_x": 60,
             "x": 130,
-            "y": 690
+            "y": 610
         }
     }
 }
