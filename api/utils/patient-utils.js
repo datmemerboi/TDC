@@ -49,7 +49,8 @@ function sanitize(doc) {
   }
   if (!_.isNil(cleanObj.dob)) {
     if (_.isFinite(cleanObj.dob) && cleanObj.dob < 1000000000000) {
-      cleanObj.dob = new Date(cleanObj.dob * 1000).getTime();
+      let d = new Date(0).setUTCSeconds(doc.dob);
+      cleanObj.dob = d.getTime();
     }
     if (_.isNil(cleanObj.age)) {
       // Calculate age from DOB
