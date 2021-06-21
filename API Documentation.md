@@ -243,7 +243,7 @@ Allowed Methods: GET, POST, PUT
     <tr>
       <td>term</td>
       <td>String</td>
-      <td>The term to search for (the contact number or</td>
+      <td>The term to search for (the contact number or the area)</td>
     </tr>
   </tbody>
 </table>
