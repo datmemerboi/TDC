@@ -29,11 +29,11 @@ router.post('/new', (req, res) => {
     res.sendStatus(400).end();
   } else {
     TreatmentUtils.NewTreatmentHandler(req.body)
-      .then(result => {
+      .then((result) => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
       });
@@ -43,11 +43,11 @@ router.post('/new', (req, res) => {
 router.all('/all', (req, res) => {
   console.log(`[API] ${req.method} request to /api/treatment/all/`);
   TreatmentUtils.AllTreatmentHandler()
-    .then(result => {
+    .then((result) => {
       console.log(`[API] Request handled successfully`);
       res.status(result.status).json(result.body).end();
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
       res.sendStatus(500).end();
     });
@@ -60,11 +60,11 @@ router.all('/get/:tid', (req, res) => {
     res.sendStatus(400).end();
   } else {
     TreatmentUtils.GetTreatmentHandler(req.params.tid)
-      .then(result => {
+      .then((result) => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
       });
@@ -78,11 +78,11 @@ router.all('/patient/:pid', (req, res) => {
     res.sendStatus(400).end();
   } else {
     TreatmentUtils.PidTreatmentHandler(req.params.pid)
-      .then(result => {
+      .then((result) => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
       });
@@ -91,17 +91,17 @@ router.all('/patient/:pid', (req, res) => {
 
 router.all('/doctor', (req, res) => {
   console.log(`[API] ${req.method} request to /api/treatment/doctor/`);
-  if (req.method === "GET") {
+  if (req.method === 'GET') {
     if (_.isNil(req.query.doctor)) {
       console.error(`[API] Bad Request: missing required parameters`);
       res.sendStatus(400).end();
     } else {
       TreatmentUtils.DoctorTreatmentHandler(req.query.doctor)
-        .then(result => {
+        .then((result) => {
           console.log(`[API] Request handled successfully`);
           res.status(result.status).json(result.body).end();
         })
-        .catch(err => {
+        .catch((err) => {
           console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
           res.sendStatus(500).end();
         });
@@ -115,11 +115,11 @@ router.all('/doctor', (req, res) => {
       res.sendStatus(400).end();
     } else {
       TreatmentUtils.DoctorTreatmentHandler(req.body.doctor)
-        .then(result => {
+        .then((result) => {
           console.log(`[API] Request handled successfully`);
           res.status(result.status).json(result.body).end();
         })
-        .catch(err => {
+        .catch((err) => {
           console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
           res.sendStatus(500).end();
         });
@@ -133,15 +133,13 @@ router.all('/history/:pid', (req, res) => {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
   } else {
-    let quick = _.has(req.query, "quick")
-      ? req.query.quick.toLowerCase() === "true"
-      : false;
+    let quick = _.has(req.query, 'quick') ? req.query.quick.toLowerCase() === 'true' : false;
     TreatmentUtils.TreatmentHistoryHandler(req.params.pid, quick)
-      .then(result => {
+      .then((result) => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500);
       });
@@ -155,11 +153,11 @@ router.put('/update/:tid', (req, res) => {
     res.sendStatus(400).end();
   } else {
     TreatmentUtils.UpdateTreatmentHandler(req.params.tid, req.body)
-      .then(result => {
+      .then((result) => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
       });
@@ -181,11 +179,11 @@ router.post('/compatibility', (req, res) => {
     res.sendStatus(400).end();
   } else {
     TreatmentUtils.CheckCompatibilityHandler(req.body.list)
-      .then(result => {
+      .then((result) => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
       });
@@ -201,26 +199,26 @@ router.put('/import', (req, res) => {
     console.error(`[API] Bad Request: parameters of invalid type`);
     res.sendStatus(400).end();
   } else {
-    FileUtils.ImportXlsHandler(req.body.file, "Treatment")
-      .then(result => {
+    FileUtils.ImportXlsHandler(req.body.file, 'Treatment')
+      .then((result) => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
       });
   }
 });
 
-router.post('/export', (req, res) => {
+router.get('/export', (req, res) => {
   console.log(`[API] ${req.method} request to /api/treatment/export`);
-  FileUtils.ExportXlsHandler("Treatment")
-    .then(result => {
+  FileUtils.ExportXlsHandler('Treatment')
+    .then((result) => {
       console.log(`[API] Request handled successfully`);
       res.status(result.status).json(result.body).end();
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
       res.sendStatus(500).end();
     });

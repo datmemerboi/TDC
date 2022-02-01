@@ -7,9 +7,9 @@ const PatientUtils = require('./patient-utils');
 const TreatmentUtils = require('./treatment-utils');
 const AppointmentUtils = require('./appointment-utils');
 
-const STATUS_AS_WORDS = ["Cancelled", "Scheduled", "Completed", "Postponed"];
+const STATUS_AS_WORDS = ['Cancelled', 'Scheduled', 'Completed', 'Postponed'];
 
-function FileUtils() { }
+function FileUtils() {}
 
 function fitForXls(doc) {
   /**
@@ -19,7 +19,7 @@ function fitForXls(doc) {
    * @param {Object} doc The document to be altered.
    * @returns {Object} Returns the fit object.
    */
-  let fitObj = new Object(doc);
+  let fitObj = _.cloneDeep(doc);
   // w.r.t Patient
   if (!_.isNil(doc.dob)) {
     fitObj.dob = new Date(doc.dob).toISOString();
@@ -49,9 +49,12 @@ function fitForXls(doc) {
   if (!_.isNil(doc.status)) {
     fitObj.status = STATUS_AS_WORDS[doc.status];
   }
+  if (_.isNil(fitObj.created_at) || _.isFinite(fitObj.created_at)) {
+    fitObj.created_at = doc.created_at.toISOString();
+  }
+  _.omit(fitObj, '_id');
+  _.omit(fitObj, '__v');
 
-  fitObj.created_at = doc.created_at.toISOString();
-  delete fitObj._id, fitObj.__v;
   return fitObj;
 }
 
@@ -86,7 +89,7 @@ function fitForDB(doc) {
 
   // w.r.t Treatment
   if (!_.isNil(doc.teeth_number)) {
-    fitObj.teeth_number = doc.teeth_number.split(',').map(n => parseInt(n, 10));
+    fitObj.teeth_number = doc.teeth_number.split(',').map((n) => parseInt(n, 10));
   }
   if (!_.isNil(doc.treatment_date)) {
     fitObj.treatment_date = new Date(doc.treatment_date);
@@ -113,10 +116,12 @@ async function createXlsFile(outFile, docs, keys) {
    * @param {Array} keys The list of column keys.
    * @returns {Function} Returns the writeFileSync function.
    */
-  _.chain(docs).map(doc => _.pick(doc, keys)).value(); // Removing fields not present in keys
+  _.chain(docs)
+    .map((doc) => _.pick(doc, keys))
+    .value(); // Removing fields not present in keys
   let workbook = XLSX.utils.book_new();
   let data = XLSX.utils.json_to_sheet(docs, { header: keys });
-  XLSX.utils.book_append_sheet(workbook, data, "Sheet1");
+  XLSX.utils.book_append_sheet(workbook, data, 'Sheet1');
   return await XLSX.writeFileSync(workbook, outFile);
 }
 
@@ -131,17 +136,20 @@ function ImportXlsHandler(filename, type) {
    * @throws {Object} Throws the error object.
    */
   try {
-    if (!_.includes(["Patient", "Treatment", "Appointment"], type)) {
+    if (!_.includes(['Patient', 'Treatment', 'Appointment'], type)) {
       console.error(`[UTILS] Invalid type @ ImportXlsHandler \n ${type}`);
       return { status: 400, body: null };
     }
-    if (filename.split('.')[1].toLowerCase() !== "xlsx" && filename.split('.')[1].toLowerCase() !== "xls") {
-      throw "Not an excel workbook";
+    if (
+      filename.split('.')[1].toLowerCase() !== 'xlsx' &&
+      filename.split('.')[1].toLowerCase() !== 'xls'
+    ) {
+      throw 'Not an excel workbook';
     }
     let inPath = path.join(__dirname, '..', '..', 'data');
     let inFile = path.join(inPath, filename);
     if (!fs.existsSync(inFile)) {
-      console.error("[UTILS] Mentioned File not found");
+      console.error('[UTILS] Mentioned File not found');
       return { status: 404, body: null };
     }
     let workbook = XLSX.readFile(inFile);
@@ -149,11 +157,11 @@ function ImportXlsHandler(filename, type) {
     const docs = data.map(fitForDB);
 
     switch (type) {
-      case "Patient":
+      case 'Patient':
         return PatientUtils.ImportPatientsHandler(docs);
-      case "Treatment":
+      case 'Treatment':
         return TreatmentUtils.ImportTreatmentsHandler(docs);
-      case "Appointment":
+      case 'Appointment':
         return AppointmentUtils.ImportAppointmentsHandler(docs);
       default:
         console.error(`[UTILS] Invalid type @ ImportXlsHandler \n ${type}`);
@@ -176,9 +184,18 @@ async function ExportPatientsAsXls(outFile) {
    */
   try {
     let keys = [
-      "p_id", "name", "dob", "age", "area",
-      "gender", "address", "contact", "med_history",
-      "current_meds", "files", "created_at"
+      'p_id',
+      'name',
+      'dob',
+      'age',
+      'area',
+      'gender',
+      'address',
+      'contact',
+      'med_history',
+      'current_meds',
+      'files',
+      'created_at'
     ];
 
     const { status, body } = await PatientUtils.AllPatientHandler();
@@ -186,7 +203,7 @@ async function ExportPatientsAsXls(outFile) {
       console.log(`[UTILS] Empty response from db`);
       return { status: 204, body: null };
     }
-    let docs = _.chain(body.docs).sortBy('created_at').map(fitForXls).value();
+    let docs = body.docs.map(fitForXls);
     await createXlsFile(outFile, docs, keys);
 
     console.log(`[UTILS] ExportPatientsAsXls success`);
@@ -208,8 +225,14 @@ async function ExportTreatmentsAsXls(outFile) {
    */
   try {
     let keys = [
-      "t_id", "p_id", "procedure_done", "teeth_number",
-      "treatment_date", "doctor", "remarks", "created_at"
+      't_id',
+      'p_id',
+      'procedure_done',
+      'teeth_number',
+      'treatment_date',
+      'doctor',
+      'remarks',
+      'created_at'
     ];
 
     const { status, body } = await TreatmentUtils.AllTreatmentHandler();
@@ -238,10 +261,7 @@ async function ExportAppointmentsAsXls(outFile) {
    * @throws {Object} Throws the error object.
    */
   try {
-    let keys = [
-      "app_id", "p_id", "appointment_date",
-      "doctor", "status", "room", "created_at"
-    ];
+    let keys = ['app_id', 'p_id', 'appointment_date', 'doctor', 'status', 'room', 'created_at'];
 
     const { status, body } = await AppointmentUtils.AllAppointmentHandler();
     if (status !== 200 || _.isEmpty(body.docs)) {
@@ -267,19 +287,22 @@ function ExportXlsHandler(type) {
    * @param {String} type The type of data to export (Patient/Treatment/Appointment).
    * @returns {Function} Returns the export function according to the type.
    */
-  if (!_.includes(["Patient", "Treatment", "Appointment"], type)) {
+  if (!_.includes(['Patient', 'Treatment', 'Appointment'], type)) {
     console.error(`[UTILS] Invalid type @ ExportXlsHandler \n ${type}`);
     return { status: 400, body: null };
   }
 
-  let monthYear = new Date().toLocaleString('default', { month: "short", year: "numeric" });
+  let monthYear = new Date().toLocaleString('default', {
+    month: 'short',
+    year: 'numeric'
+  });
   let outPath = path.join(__dirname, '..', '..', 'data');
   let outFile;
 
-  if (type === "Patient") {
+  if (type === 'Patient') {
     outFile = path.join(outPath, `Patient List(${monthYear}).xls`);
     return ExportPatientsAsXls(outFile);
-  } else if (type === "Treatment") {
+  } else if (type === 'Treatment') {
     outFile = path.join(outPath, `Treatment List(${monthYear}).xls`);
     return ExportTreatmentsAsXls(outFile);
   } else {

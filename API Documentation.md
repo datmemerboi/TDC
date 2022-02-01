@@ -489,7 +489,7 @@ Required fields: **file**
 ### Export Patients
 Export patient records to XLS file. Exports into `data/Patient List(Month YYYY).xls`.
 ```
-POST /api/patient/export/
+GET /api/patient/export/
 ```
 #### Response
 **Status 200**
@@ -503,7 +503,7 @@ POST /api/patient/export/
 **Status 500** Internal Server Error
 <details>
   <summary>Sample</summary>
-  <pre>curl --location --request POST 'http://127.0.0.1:8000/api/patient/export/'</pre>
+  <pre>curl --location --request GET 'http://127.0.0.1:8000/api/patient/export/'</pre>
   <pre>
     {
       "total_docs": 6
@@ -996,7 +996,7 @@ Required fields: **file**
 ### Export Treatments
 Export treatment records to XLS file. Exports into `data/Treatment List(Month YYYY).xls`.
 ```
-POST /api/treatment/export/
+GET /api/treatment/export/
 ```
 #### Response
 **Status 200**
@@ -1010,7 +1010,7 @@ POST /api/treatment/export/
 **Status 500** Internal Server Error
 <details>
   <summary>Sample</summary>
-  <pre>curl --location --request POST 'http://127.0.0.1:8000/api/treatment/export/'</pre>
+  <pre>curl --location --request GET 'http://127.0.0.1:8000/api/treatment/export/'</pre>
   <pre>
     {
       "total_docs": 2
@@ -1490,7 +1490,7 @@ Required fields: **file**
 ### Export Appointments
 Export appointment records to XLS file. Exports into `data/Appointment List(Month YYYY).xls`.
 ```
-POST /api/appointment/export/
+GET /api/appointment/export/
 ```
 #### Response
 **Status 200**
@@ -1504,7 +1504,7 @@ POST /api/appointment/export/
 **Status 500** Internal Server Error
 <details>
   <summary>Sample</summary>
-  <pre>curl --location --request POST 'http://127.0.0.1:8000/api/appointment/export/'</pre>
+  <pre>curl --location --request GET 'http://127.0.0.1:8000/api/appointment/export/'</pre>
   <pre>
     {
       "total_docs": 1

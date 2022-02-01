@@ -23,11 +23,14 @@ router.post('/new', (req, res) => {
     res.sendStatus(400).end();
   } else {
     InvoiceUtils.NewInvoiceHandler(req.body.p_id, req.body)
-      .then(result => {
+      .then((result) => {
         console.log(`[API] Request handled successfully`);
-        res.status(result.status).json(result.body ?? {}).end();
+        res
+          .status(result.status)
+          .json(result.body ?? {})
+          .end();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
       });
@@ -36,15 +39,13 @@ router.post('/new', (req, res) => {
 
 router.all('/all', (req, res) => {
   console.log(`[API] ${req.method} request to /api/invoice/all/`);
-  let count = _.has(req.query, "count")
-    ? req.query.count.toLocaleLowerCase() === "true"
-    : false;
+  let count = _.has(req.query, 'count') ? req.query.count.toLocaleLowerCase() === 'true' : false;
   InvoiceUtils.AllInvoiceHandler(count)
-    .then(result => {
+    .then((result) => {
       console.log(`[API] Request handled successfully`);
       res.status(result.status).json(result.body).end();
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
       res.sendStatus(500).end();
     });
@@ -57,11 +58,11 @@ router.all('/print/:invid', (req, res) => {
     res.sendStatus(400).end();
   } else {
     InvoiceUtils.PrintInvoiceHandler(req.params.invid)
-      .then(result => {
+      .then((result) => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
       });
