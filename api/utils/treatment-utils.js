@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const dbUtils = require('./db-utils');
 
-function TreatmentUtils() { }
+function TreatmentUtils() {}
 
 function makeNextTid(db) {
   /**
@@ -15,20 +15,19 @@ function makeNextTid(db) {
    */
   return new Promise((resolve, reject) => {
     db.Treatment.getLatestTid()
-      .then(top => {
-        top = top[0] && top[0]?.t_id
-          ? parseInt(top[0].t_id.replace('TRT', ''))
-          : null;
+      .then((top) => {
+        top = top[0] && top[0]?.t_id ? parseInt(top[0].t_id.replace('TRT', '')) : null;
         if (top) {
-          let tid = top < 1000
-            ? "TRT" + ("0000" + (top + 1).toString()).slice(-4)
-            : "TRT" + (top + 1).toString();
+          let tid =
+            top < 1000
+              ? 'TRT' + ('0000' + (top + 1).toString()).slice(-4)
+              : 'TRT' + (top + 1).toString();
           return resolve(tid);
         } else {
           return resolve('TRT0001');
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[UTILS] Error @ makeNextTid \n ${JSON.stringify(err)}`);
         return reject(err);
       });
@@ -47,7 +46,7 @@ async function checkCompatibility(list) {
    */
   try {
     const db = await dbUtils.connect();
-    let treatmentObjArray = await Promise.all(list.map(tid => db.Treatment.getByTid(tid)));
+    let treatmentObjArray = await Promise.all(list.map((tid) => db.Treatment.getByTid(tid)));
     const patients = _.chain(treatmentObjArray).map('p_id').uniq().value(); // Get list of unique patients
     if (patients.length > 1) {
       throw `Multiple patient ids obtained ${patients.join(',')}`;
@@ -68,12 +67,12 @@ function sanitize(doc) {
    * @param {Object} doc The object to be sanitized.
    * @returns {Object} cleanObj The sanitized object.
    */
-  let cleanObj = new Object(doc);
+  let cleanObj = _.cloneDeep(doc);
   for (let key in cleanObj) {
-    if (key === "t_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
+    if (key === 't_id' || _.isNil(cleanObj[key])) delete cleanObj[key];
   }
-  if (!_.isNil(doc.teeth_number) && typeof doc.teeth_number === "string") {
-    cleanObj.teeth_number = doc.teeth_number.split(',').map(n => parseInt(n, 10));
+  if (!_.isNil(doc.teeth_number) && typeof doc.teeth_number === 'string') {
+    cleanObj.teeth_number = doc.teeth_number.split(',').map((n) => parseInt(n, 10));
   }
   if (!_.isNil(cleanObj.treatment_date) && cleanObj.treatment_date < 1000000000000) {
     cleanObj.treatment_date = new Date(cleanObj.treatment_date * 1000).getTime();
@@ -123,8 +122,7 @@ async function AllTreatmentHandler() {
       console.log(`[UTILS] AllTreatmentHandler success`);
       return { status: 200, body: { total_docs: docs.length, docs } };
     }
-  }
-  catch (err) {
+  } catch (err) {
     console.error(`[UTILS] Error @ AllTreatmentHandler \n ${JSON.stringify(err)}`);
     throw err;
   }
@@ -304,7 +302,7 @@ async function TreatmentHistoryHandler(pid, quick = false) {
       if (quick) {
         // Quick treatment history
         result.procedures = _.chain(docs)
-          .map(doc => {
+          .map((doc) => {
             return {
               procedure_done: doc.procedure_done,
               treatment_date: doc.treatment_date
@@ -317,7 +315,7 @@ async function TreatmentHistoryHandler(pid, quick = false) {
       } else {
         // Detailed treatment history
         result.procedures = _.chain(docs)
-          .map(doc => {
+          .map((doc) => {
             return {
               procedure_done: doc.procedure_done,
               treatment_date: doc.treatment_date,

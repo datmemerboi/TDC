@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const dbUtils = require('./db-utils');
 
-function PatientUtils() { }
+function PatientUtils() {}
 
 function makeNextPid(db) {
   /**
@@ -15,20 +15,19 @@ function makeNextPid(db) {
    */
   return new Promise((resolve, reject) => {
     db.Patient.getLatestPid()
-      .then(top => {
-        top = top[0] && top[0]?.p_id
-          ? parseInt(top[0].p_id.replace('PAT', ''))
-          : null;
+      .then((top) => {
+        top = top[0] && top[0]?.p_id ? parseInt(top[0].p_id.replace('PAT', '')) : null;
         if (top) {
-          let pid = top < 1000
-            ? "PAT" + ("0000" + (top + 1).toString()).slice(-4)
-            : "PAT" + (top + 1).toString();
+          let pid =
+            top < 1000
+              ? 'PAT' + ('0000' + (top + 1).toString()).slice(-4)
+              : 'PAT' + (top + 1).toString();
           return resolve(pid);
         } else {
           return resolve('PAT0001');
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[UTILS] Error @ makeNextPid \n ${JSON.stringify(err)}`);
         return reject(err);
       });
@@ -43,18 +42,17 @@ function sanitize(doc) {
    * @param {object} doc The object to be sanitized.
    * @returns {object} cleanObj The sanitized object.
    */
-  let cleanObj = new Object(doc);
+  let cleanObj = _.cloneDeep(doc);
   for (let key in cleanObj) {
-    if (_.isNil(cleanObj[key]) || key === "p_id") delete cleanObj[key];
+    if (_.isNil(cleanObj[key]) || key === 'p_id') delete cleanObj[key];
   }
   if (!_.isNil(cleanObj.dob)) {
     if (_.isFinite(cleanObj.dob) && cleanObj.dob < 1000000000000) {
-      let d = new Date(0).setUTCSeconds(doc.dob);
-      cleanObj.dob = d.getTime();
+      cleanObj.dob = new Date(0).setUTCSeconds(doc.dob);
     }
     if (_.isNil(cleanObj.age)) {
       // Calculate age from DOB
-      cleanObj.age = Math.floor((new Date() - cleanObj.dob) / 3.15576e+10);
+      cleanObj.age = Math.floor((new Date() - cleanObj.dob) / 3.15576e10);
     }
   }
   if (!_.isNil(cleanObj.med_history) && _.isString(cleanObj.med_history)) {
@@ -213,7 +211,7 @@ async function UpdatePatientHandler(pid, doc) {
     doc = sanitize(doc);
     let updatedDoc = await db.Patient.updateDoc(pid, doc);
     updatedDoc = _.omit(updatedDoc, ['_id', '__v']);
-    console.log("[UTILS] UpdatePatientHandler success");
+    console.log('[UTILS] UpdatePatientHandler success');
     return { status: 200, body: updatedDoc };
   } catch (err) {
     console.error(`[UTILS] Error @ UpdatePatientHandler \n ${JSON.stringify(err)}`);
@@ -230,7 +228,7 @@ async function SearchByName(term) {
    * @returns {Object} Returns the HTTP status and the patient documents found.
    * @throws {Object} Throws the error object.
    */
-  console.log("[UTILS] Searching for Name");
+  console.log('[UTILS] Searching for Name');
   try {
     const db = await dbUtils.connect();
     let docs = await db.Patient.findByName(term);
@@ -256,7 +254,7 @@ async function SearchByArea(term) {
    * @returns {Object} Returns the HTTP status and the patient documents found.
    * @throws {Object} Throws the error object.
    */
-  console.log("[UTILS] Searching for Area");
+  console.log('[UTILS] Searching for Area');
   try {
     const db = await dbUtils.connect();
     let docs = await db.Patient.findByArea(term);
@@ -282,7 +280,7 @@ async function SearchByContact(term) {
    * @returns {Object} Returns the HTTP status and the patient documents found.
    * @throws {Object} Throws the error object.
    */
-  console.log("[UTILS] Searching for Contact");
+  console.log('[UTILS] Searching for Contact');
   try {
     if (isNaN(term)) {
       console.log(`[UTILS] Requested search term is not a number`);
@@ -314,11 +312,11 @@ function SearchPatientHandler(term, type) {
    * @returns {Function} Returns the search function according to the type.
    */
   switch (type) {
-    case "name":
+    case 'name':
       return SearchByName(term);
-    case "area":
+    case 'area':
       return SearchByArea(term);
-    case "contact":
+    case 'contact':
       return SearchByContact(term);
     default:
       console.log(`[UTILS] Unexpected search type ${type}`);

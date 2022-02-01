@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const dbUtils = require('./db-utils');
 
-function AppointmentUtils() { }
+function AppointmentUtils() {}
 
 function makeNextAppid(db) {
   /**
@@ -15,20 +15,19 @@ function makeNextAppid(db) {
    */
   return new Promise((resolve, reject) => {
     db.Appointment.getLatestAppId()
-      .then(top => {
-        top = top[0] && top[0]?.app_id
-          ? parseInt(top[0].app_id.replace('APP', ''))
-          : null;
+      .then((top) => {
+        top = top[0] && top[0]?.app_id ? parseInt(top[0].app_id.replace('APP', '')) : null;
         if (top) {
-          let appid = top < 1000
-            ? "APP" + ("0000" + (top + 1).toString()).slice(-4)
-            : "APP" + (top + 1).toString();
+          let appid =
+            top < 1000
+              ? 'APP' + ('0000' + (top + 1).toString()).slice(-4)
+              : 'APP' + (top + 1).toString();
           return resolve(appid);
         } else {
           return resolve('APP0001');
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[UTILS] Error @ makeNextAppid \n ${JSON.stringify(err)}`);
         return reject(err);
       });
@@ -55,31 +54,29 @@ function generateStatsForAppointment(docs) {
    *     count: 2
    *   }
    * ]
-  */
-  let doctorStats =
-    _.chain(docs)
-      .map('doctor')
-      .uniq()
-      .map(doctor => {
-        return {
-          type: "doctor",
-          name: doctor,
-          count: _.chain(docs).filter({ "doctor": doctor }).size()
-        };
-      })
-      .value();
-  let statusStats =
-    _.chain(docs)
-      .map('status')
-      .uniq()
-      .map(status => {
-        return {
-          type: "status",
-          value: status,
-          count: _.chain(docs).filter({ "status": status }).size()
-        };
-      })
-      .value();
+   */
+  let doctorStats = _.chain(docs)
+    .map('doctor')
+    .uniq()
+    .map((doctor) => {
+      return {
+        type: 'doctor',
+        name: doctor,
+        count: _.chain(docs).filter({ doctor: doctor }).size()
+      };
+    })
+    .value();
+  let statusStats = _.chain(docs)
+    .map('status')
+    .uniq()
+    .map((status) => {
+      return {
+        type: 'status',
+        value: status,
+        count: _.chain(docs).filter({ status: status }).size()
+      };
+    })
+    .value();
   return [...doctorStats, ...statusStats];
 }
 
@@ -95,7 +92,7 @@ function mergePatientDetails(db, pid, doc) {
    */
   return new Promise((resolve) => {
     db.Patient.getByPid(pid)
-      .then(patient => {
+      .then((patient) => {
         let mergedDoc = {
           ...doc,
           patient: {
@@ -106,7 +103,7 @@ function mergePatientDetails(db, pid, doc) {
         };
         return resolve(mergedDoc);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[UTILS] Error @ mergePatientDetails \n ${JSON.stringify(err)}`);
         return resolve(doc);
       });
@@ -125,7 +122,12 @@ function checkAppointmentFeasibility(db, doc) {
    * @returns {Boolean} Returns if the new appointment is feasible.
    */
   return new Promise((resolve, reject) => {
-    if (_.isNil(doc.app_id) || _.isNil(doc.appointment_date) || _.isNil(doc.doctor) || _.isNil(doc.status)) {
+    if (
+      _.isNil(doc.app_id) ||
+      _.isNil(doc.appointment_date) ||
+      _.isNil(doc.doctor) ||
+      _.isNil(doc.status)
+    ) {
       // Appointment id, timing, doctor and status not mentioned
       return resolve(false);
     } else {
@@ -134,16 +136,16 @@ function checkAppointmentFeasibility(db, doc) {
 
       // Check if the doctor has any appointments 15 mins before or after the mentioned timing
       db.Appointment.findByAvailability(doc.doctor, from, to)
-        .then(docs => {
+        .then((docs) => {
           if (_.isNil(docs) || _.isEmpty(docs)) {
             // No existing docs
             return resolve(true);
           } else {
             // Ensure every record is Cancelled / Completed / Postponed
-            return resolve(docs.every(doc => doc.status !== 1));
+            return resolve(docs.every((doc) => doc.status !== 1));
           }
         })
-        .catch(err => {
+        .catch((err) => {
           console.error(`[UTILS] Error @ checkAppointmentFeasibility \n ${JSON.stringify(err)}`);
           return reject(false);
         });
@@ -159,9 +161,9 @@ function sanitize(doc) {
    * @param {object} doc The object to be sanitized.
    * @returns {object} cleanObj The sanitized object.
    */
-  let cleanObj = new Object(doc);
+  let cleanObj = _.cloneDeep(doc);
   for (let key in cleanObj) {
-    if (key === "app_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
+    if (key === 'app_id' || _.isNil(cleanObj[key])) delete cleanObj[key];
   }
   if (!_.isNil(cleanObj.appointment_date) && cleanObj.appointment_date < 1000000000000) {
     cleanObj.appointment_date = new Date(cleanObj.appointment_date * 1000).getTime();
@@ -215,7 +217,14 @@ async function AllAppointmentHandler() {
     } else {
       let docs = await db.Appointment.getAll();
       console.log(`[UTILS] AllAppointmentHandler success`);
-      return { status: 200, body: { total_docs: instances, docs, meta: generateStatsForAppointment(docs) } };
+      return {
+        status: 200,
+        body: {
+          total_docs: instances,
+          docs,
+          meta: generateStatsForAppointment(docs)
+        }
+      };
     }
   } catch (err) {
     console.error(`[UTILS] Error @ AllAppointmentHandler \n ${JSON.stringify(err)}`);
@@ -365,7 +374,9 @@ async function DateAppointmentHandler(from, to, count = false) {
     if (count) {
       return { status: 200, body: { total_docs: docs.length } };
     } else {
-      const mergedDocs = await Promise.all(docs.map(doc => mergePatientDetails(db, doc.p_id, doc)));
+      const mergedDocs = await Promise.all(
+        docs.map((doc) => mergePatientDetails(db, doc.p_id, doc))
+      );
       let result = {
         total_docs: docs.length,
         docs: mergedDocs,

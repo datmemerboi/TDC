@@ -5,9 +5,9 @@ const path = require('path');
 const PDF = require('pdfkit');
 const dbUtils = require('./db-utils');
 const posx = require('../coordinates.json');
-const config = require('../config.json')[process.env.NODE_ENV ?? "development"];
+const config = require('../config.json')[process.env.NODE_ENV ?? 'development'];
 
-function InvoiceUtils() { }
+function InvoiceUtils() {}
 
 function makeNextInvid(db) {
   /**
@@ -20,20 +20,19 @@ function makeNextInvid(db) {
    */
   return new Promise((resolve, reject) => {
     db.Invoice.getLatestInvid()
-      .then(top => {
-        top = top && top[0] && top[0]?.inv_id
-          ? parseInt(top[0].inv_id.replace('INV', ''))
-          : null;
+      .then((top) => {
+        top = top && top[0] && top[0]?.inv_id ? parseInt(top[0].inv_id.replace('INV', '')) : null;
         if (top) {
-          let invid = top < 1000
-            ? "INV" + ("0000" + (top + 1).toString()).slice(-4)
-            : "INV" + (top + 1).toString();
+          let invid =
+            top < 1000
+              ? 'INV' + ('0000' + (top + 1).toString()).slice(-4)
+              : 'INV' + (top + 1).toString();
           return resolve(invid);
         } else {
           return resolve('INV0001');
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(`[UTILS] Error @ makeNextInvId \n ${JSON.stringify(err)}`);
         return reject(err);
       });
@@ -94,12 +93,14 @@ function generatePdf(invoiceObj) {
   });
 
   // BANNER
-  doc.save()
+  doc
+    .save()
     .moveTo(posx.table.head.banner_up.x, posx.table.head.banner_up.y)
     .lineTo(posx.table.head.banner_up.x, posx.table.head.banner_down.y)
     .lineTo(posx.table.head.banner_down.x, posx.table.head.banner_down.y)
     .lineTo(posx.table.head.banner_down.x, posx.table.head.banner_up.y)
-    .fill('#0063A3').save() // HEADER MARGIN
+    .fill('#0063A3')
+    .save() // HEADER MARGIN
     .moveTo(posx.table.foot.left_x, posx.table.foot.y)
     .lineTo(posx.table.foot.right_x, posx.table.foot.y)
     .fill('#CCC'); // FOOTER MARGIN
@@ -109,14 +110,29 @@ function generatePdf(invoiceObj) {
     .font(path.join(miscPath, 'ProximaNova-Bold.ttf'))
     .fontSize(20)
     .fill('#0063A3')
-    .text(config.CLINIC_NAME ?? "JD CLINIC", posx.header.title.x, posx.header.title.y)
-    .text("INVOICE", posx.header.invoice.x, posx.header.invoice.y);
+    .text(config.CLINIC_NAME ?? 'JD CLINIC', posx.header.title.x, posx.header.title.y)
+    .text('INVOICE', posx.header.invoice.x, posx.header.invoice.y);
 
   // 12 REGULAR BLACK
-  doc.font(path.join(miscPath, 'ProximaNova-Regular.ttf')).fontSize(12).fill('#000')
-    .text(config.CLINIC_ADDRESS_LINE_1 ?? "1, Doe Road", posx.header.address.x, posx.header.address.line_1_y)
-    .text(config.CLINIC_ADDRESS_LINE_2 ?? "90000 90000", posx.header.address.x, posx.header.address.line_2_y)
-    .text(config.CLINIC_ADDRESS_LINE_3 ?? "john@doe.com", posx.header.address.x, posx.header.address.line_3_y)
+  doc
+    .font(path.join(miscPath, 'ProximaNova-Regular.ttf'))
+    .fontSize(12)
+    .fill('#000')
+    .text(
+      config.CLINIC_ADDRESS_LINE_1 ?? '1, Doe Road',
+      posx.header.address.x,
+      posx.header.address.line_1_y
+    )
+    .text(
+      config.CLINIC_ADDRESS_LINE_2 ?? '90000 90000',
+      posx.header.address.x,
+      posx.header.address.line_2_y
+    )
+    .text(
+      config.CLINIC_ADDRESS_LINE_3 ?? 'john@doe.com',
+      posx.header.address.x,
+      posx.header.address.line_3_y
+    )
     .text(invoiceObj.payment_method ?? null, posx.payment.method.x, posx.payment.method.y)
     .text(invoiceObj.payment_id ?? null, posx.payment.id.x, posx.payment.id.y);
 
@@ -127,64 +143,86 @@ function generatePdf(invoiceObj) {
         width: posx.table.body.base_proc.max_width,
         height: posx.table.body.base_proc.max_height
       })
-      .text(!_.isNil(trt.treatment_date)
-        ? new Date(trt.treatment_date).toLocaleString("default", { day: "numeric", month: "short", year: "numeric" })
-        : null
+      .text(
+        !_.isNil(trt.treatment_date)
+          ? new Date(trt.treatment_date).toLocaleString('default', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            })
+          : null
       )
-      .text(!_.isNil(trt.teeth_number) && !_.isEmpty(trt.teeth_number) ? `Teeth: ${trt.teeth_number.join(',')}` : null)
-      .text(trt.cost, posx.table.body.cost.x, currentHeight, { width: posx.table.body.cost.max_width })
+      .text(
+        !_.isNil(trt.teeth_number) && !_.isEmpty(trt.teeth_number)
+          ? `Teeth: ${trt.teeth_number.join(',')}`
+          : null
+      )
+      .text(trt.cost, posx.table.body.cost.x, currentHeight, {
+        width: posx.table.body.cost.max_width
+      })
       .text(trt.qty, posx.table.body.qty.x, currentHeight, { width: posx.table.body.qty.max_width })
-      .text(!_.isNil(trt.total)
-        ? parseFloat(trt.total).toFixed(2)
-        : null,
-        posx.table.body.total.x, currentHeight, { width: posx.table.body.total.max_width }
+      .text(
+        !_.isNil(trt.total) ? parseFloat(trt.total).toFixed(2) : null,
+        posx.table.body.total.x,
+        currentHeight,
+        { width: posx.table.body.total.max_width }
       );
   });
 
   // 14 REGULAR BLACK
-  doc.fontSize(14)
+  doc
+    .fontSize(14)
     .text(`${invoiceObj.patient.name}`, posx.data.patient.name.x, posx.data.patient.name.y)
     .text(`${invoiceObj.patient.age} / ${invoiceObj.patient.gender}`)
     .text(invoiceObj.patient.contact)
-    .text("Doctor:", posx.data.doctor.x, posx.data.doctor.y)
-    .text("Sub Total: Rs.", posx.total_foot.x, posx.total_foot.sub_y)
-    .text("Grand Total: Rs.", posx.total_foot.x, posx.total_foot.grand_y)
+    .text('Doctor:', posx.data.doctor.x, posx.data.doctor.y)
+    .text('Sub Total: Rs.', posx.total_foot.x, posx.total_foot.sub_y)
+    .text('Grand Total: Rs.', posx.total_foot.x, posx.total_foot.grand_y)
     .fontSize(10) // 10 REGULAR BLACK (SUB TEXT)
     .text(
-      `Generated on ${invoiceObj.created_at.toLocaleString("default", {
-        day: "numeric",
-        month: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "numeric",
+      `Generated on ${invoiceObj.created_at.toLocaleString('default', {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
         hour12: true
       })}`,
-      posx.data.date.x, posx.data.date.y, { align: "center" }
+      posx.data.date.x,
+      posx.data.date.y,
+      { align: 'center' }
     );
 
   // 14 SEMIBOLD BLACK
-  doc.fontSize(14).font(path.join(miscPath, 'ProximaNova-Semibold.ttf'))
+  doc
+    .fontSize(14)
+    .font(path.join(miscPath, 'ProximaNova-Semibold.ttf'))
     .text(invoiceObj.doctor.join(', '), posx.data.doctor.name_x, posx.data.doctor.y)
-    .text(invoiceObj.patient.p_id, posx.data.patient.pid.x, posx.data.patient.pid.y, { align: 'right' })
-    .text(!_.isNil(invoiceObj.sub_total)
-      ? parseFloat(invoiceObj.sub_total).toFixed(2)
-      : null,
-      0, posx.total_foot.sub_y, { align: 'right' }
+    .text(invoiceObj.patient.p_id, posx.data.patient.pid.x, posx.data.patient.pid.y, {
+      align: 'right'
+    })
+    .text(
+      !_.isNil(invoiceObj.sub_total) ? parseFloat(invoiceObj.sub_total).toFixed(2) : null,
+      0,
+      posx.total_foot.sub_y,
+      { align: 'right' }
     )
-    .text(!_.isNil(invoiceObj.grand_total)
-      ? parseFloat(invoiceObj.grand_total).toFixed(2)
-      : null,
-      0, posx.total_foot.grand_y, { align: 'right' }
+    .text(
+      !_.isNil(invoiceObj.grand_total) ? parseFloat(invoiceObj.grand_total).toFixed(2) : null,
+      0,
+      posx.total_foot.grand_y,
+      { align: 'right' }
     )
-    .fontSize(16).text(invoiceObj.inv_id, posx.data.invoice.x, posx.data.invoice.y, { align: 'right' }) // 16 SEMIBOLD BLACK
+    .fontSize(16)
+    .text(invoiceObj.inv_id, posx.data.invoice.x, posx.data.invoice.y, { align: 'right' }) // 16 SEMIBOLD BLACK
     .fontSize(12) // 12 SEMIBOLD BLACK
-    .text("Payment Method:", posx.payment.method.name_x, posx.payment.method.y)
-    .text("Payment ID:", posx.payment.id.name_x, posx.payment.id.y)
+    .text('Payment Method:', posx.payment.method.name_x, posx.payment.method.y)
+    .text('Payment ID:', posx.payment.id.name_x, posx.payment.id.y)
     .fill('#FFF') // 12 SEMIBOLD WHITE
-    .text("TOTAL", posx.table.head.total_x, posx.table.head.y)
-    .text("QTY", posx.table.head.qty_x, posx.table.head.y)
-    .text("COST", posx.table.head.cost_x, posx.table.head.y)
-    .text("PROCEDURE", posx.table.head.proc_x, posx.table.head.y);
+    .text('TOTAL', posx.table.head.total_x, posx.table.head.y)
+    .text('QTY', posx.table.head.qty_x, posx.table.head.y)
+    .text('COST', posx.table.head.cost_x, posx.table.head.y)
+    .text('PROCEDURE', posx.table.head.proc_x, posx.table.head.y);
 
   doc.end();
   return outFile;
@@ -197,14 +235,22 @@ function sanitize(doc) {
    * @version 3.1.2
    * @returns {Object} cleanObj The sanitized object.
    */
-  let cleanObj = new Object(doc);
+  let cleanObj = _.cloneDeep(doc);
   for (let key in cleanObj) {
-    if (key === "inv_id" || _.isNil(cleanObj[key])) delete cleanObj[key];
+    if (key === 'inv_id' || _.isNil(cleanObj[key])) delete cleanObj[key];
   }
-  if (!_.isNil(cleanObj.sub_total) && _.isFinite(cleanObj.sub_total) && _.isInteger(cleanObj.sub_total)) {
+  if (
+    !_.isNil(cleanObj.sub_total) &&
+    _.isFinite(cleanObj.sub_total) &&
+    _.isInteger(cleanObj.sub_total)
+  ) {
     cleanObj.sub_total = parseFloat(cleanObj.sub_total);
   }
-  if (!_.isNil(cleanObj.grand_total) && _.isFinite(cleanObj.grand_total) && _.isInteger(cleanObj.grand_total)) {
+  if (
+    !_.isNil(cleanObj.grand_total) &&
+    _.isFinite(cleanObj.grand_total) &&
+    _.isInteger(cleanObj.grand_total)
+  ) {
     cleanObj.grand_total = parseFloat(cleanObj.grand_total);
   }
   return cleanObj;
@@ -225,11 +271,11 @@ async function NewInvoiceHandler(pid, body) {
       p_id: pid,
       doctor: _.chain(body.treatments).map('doctor').uniq().value(),
       treatments: body.treatments.map(JSON.stringify),
-      payment_method: _.has(body, "payment_method") ? body.payment_method : null,
-      payment_id: _.has(body, "payment_id") ? body.payment_id : null,
-      sub_total: _.has(body, "sub_total") ? body.sub_total : null,
-      discount: _.has(body, "discount") ? body.discount : null,
-      grand_total: _.has(body, "grand_total") ? body.grand_total : null
+      payment_method: _.has(body, 'payment_method') ? body.payment_method : null,
+      payment_id: _.has(body, 'payment_id') ? body.payment_id : null,
+      sub_total: _.has(body, 'sub_total') ? body.sub_total : null,
+      discount: _.has(body, 'discount') ? body.discount : null,
+      grand_total: _.has(body, 'grand_total') ? body.grand_total : null
     };
     invoiceObj = sanitize(invoiceObj);
     invoiceObj.inv_id = await makeNextInvid(db);
@@ -265,7 +311,7 @@ async function AllInvoiceHandler(count = false) {
       } else {
         let docs = await db.Invoice.getAll();
         _.chain(docs)
-          .map(doc => {
+          .map((doc) => {
             return _.set(doc, 'treatments', _.map(doc.treatments, JSON.parse));
           })
           .value();
