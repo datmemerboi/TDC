@@ -2,6 +2,7 @@
 about/
 data/
 invoice/
+dist/*
 
 # MISC FILES
 /*/try.js
