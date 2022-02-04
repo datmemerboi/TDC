@@ -132,7 +132,7 @@ async function GetTreatmentHandler(tid) {
   /**
    * Handles request to get treatment document.
    *
-   * @version 3.1.2
+   * @version 3.1.3
    * @param {String} tid The treatment id to fetch.
    * @returns {Object} Returns the HTTP status and the treatment document fetched.
    * @throws {Object} Throws the error object.
@@ -144,8 +144,9 @@ async function GetTreatmentHandler(tid) {
       console.log(`[UTILS] GetTreatmentHandler returns empty data`);
       return { status: 204, body: null };
     } else {
+      let patientDoc = await db.Patient.getByPid(doc.p_id);
       console.log(`[UTILS] GetTreatmentHandler success`);
-      return { status: 200, body: doc };
+      return { status: 200, body: { ...doc, name: patientDoc.name } };
     }
   } catch (err) {
     console.error(`[UTILS] Error @ GetTreatmentHandler \n ${JSON.stringify(err)}`);
@@ -157,7 +158,7 @@ async function PidTreatmentHandler(pid) {
   /**
    * Handles request to get treatments for a patient.
    *
-   * @version 3.1.2
+   * @version 3.1.3
    * @param {String} pid The patient id to fetch treatments.
    * @returns {Object} Returns the HTTP status and the treatment documents fetched.
    * @throws {Object} Throws the error object.
@@ -170,6 +171,8 @@ async function PidTreatmentHandler(pid) {
       return { status: 204, body: null };
     } else {
       let docs = await db.Treatment.findByPid(pid);
+      let patientDoc = await db.Patient.getByPid(pid);
+      docs = docs.map((doc) => ({ ...doc, name: patientDoc.name }));
       console.log(`[UTILS] PidTreatmentHandler success`);
       return { status: 200, body: { total_docs: instances, docs } };
     }
