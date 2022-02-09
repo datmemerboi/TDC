@@ -9,7 +9,7 @@ const Schema = require('mongoose').Schema;
 let Invoice = new Schema({
   inv_id: { type: String, required: true, index: true, unique: true },
   p_id: { type: String, index: true },
-  treatments: [{ type: String }],
+  treatments: [{ type: Object }],
   doctor: [{ type: String }],
   payment_method: String,
   payment_id: String,

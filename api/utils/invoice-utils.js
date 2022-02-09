@@ -260,7 +260,7 @@ async function NewInvoiceHandler(pid, body) {
   /**
    * Handles request to create new invoice.
    *
-   * @version 3.1.2
+   * @version 3.1.3
    * @param {String} pid The patient id for the invoice.
    * @param {Object} body The document containing invoice details.
    * @throws {Object} Throws the error object.
@@ -270,7 +270,7 @@ async function NewInvoiceHandler(pid, body) {
     let invoiceObj = {
       p_id: pid,
       doctor: _.chain(body.treatments).map('doctor').uniq().value(),
-      treatments: body.treatments.map(JSON.stringify),
+      treatments: body.treatments,
       payment_method: _.has(body, 'payment_method') ? body.payment_method : null,
       payment_id: _.has(body, 'payment_id') ? body.payment_id : null,
       sub_total: _.has(body, 'sub_total') ? body.sub_total : null,
@@ -292,7 +292,7 @@ async function AllInvoiceHandler(count = false) {
   /**
    * Handles request to list all invoice documents.
    *
-   * @version 3.1.2
+   * @version 3.1.3
    * @param {Boolean} count When true, only count of documents is returned.
    * @returns {Object} Returns the HTTP status and the invoice documents fetched.
    * @throws {Object} Throws the error object.
@@ -310,13 +310,20 @@ async function AllInvoiceHandler(count = false) {
         return { status: 200, body: { total_docs: instances } };
       } else {
         let docs = await db.Invoice.getAll();
-        _.chain(docs)
-          .map((doc) => {
-            return _.set(doc, 'treatments', _.map(doc.treatments, JSON.parse));
-          })
-          .value();
+
+        let finalDocs = [];
+        for (let i = 0; i < docs.length; i++) {
+          let doc = docs[i];
+          if (typeof doc.treatments === 'string') {
+            doc.treatments = JSON.parse(doc.treatments);
+          }
+          let patientDoc = await db.Patient.getByPid(doc.p_id);
+          doc.name = patientDoc.name;
+
+          finalDocs.push(doc);
+        }
         console.log(`[UTILS] AllInvoiceHandler success`);
-        return { status: 200, body: { total_docs: instances, docs } };
+        return { status: 200, body: { total_docs: instances, docs: finalDocs } };
       }
     }
   } catch (err) {
