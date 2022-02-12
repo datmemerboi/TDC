@@ -42,15 +42,32 @@ router.post('/new', (req, res) => {
 
 router.all('/all', (req, res) => {
   console.log(`[API] ${req.method} request to /api/treatment/all/`);
-  TreatmentUtils.AllTreatmentHandler()
-    .then((result) => {
-      console.log(`[API] Request handled successfully`);
-      res.status(result.status).json(result.body).end();
-    })
-    .catch((err) => {
-      console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
-      res.sendStatus(500).end();
-    });
+  if (_.has(req.query, 'from') && _.has(req.query, 'to')) {
+    // Date request
+    if (_.isNaN(req.query.from) || _.isNaN(req.query.to)) {
+      console.error(`[API] Bad Request: parameters of invalid type`);
+      res.sendStatus(400).end();
+    }
+    TreatmentUtils.DateTreatmentHandler(req.query.from, req.query.to)
+      .then((result) => {
+        console.log(`[API] Request handled successfully`);
+        res.status(result.status).json(result.body).end();
+      })
+      .catch((err) => {
+        console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
+        res.sendStatus(500).end();
+      });
+  } else {
+    TreatmentUtils.AllTreatmentHandler()
+      .then((result) => {
+        console.log(`[API] Request handled successfully`);
+        res.status(result.status).json(result.body).end();
+      })
+      .catch((err) => {
+        console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
+        res.sendStatus(500).end();
+      });
+  }
 });
 
 router.all('/get/:tid', (req, res) => {
@@ -190,16 +207,13 @@ router.post('/compatibility', (req, res) => {
   }
 });
 
-router.put('/import', (req, res) => {
+router.all('/import', (req, res) => {
   console.log(`[API] ${req.method} request to /api/treatment/import`);
-  if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.file)) {
+  if (_.isNil(req.query.file)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
-  } else if (!_.isString(req.body.file)) {
-    console.error(`[API] Bad Request: parameters of invalid type`);
-    res.sendStatus(400).end();
   } else {
-    FileUtils.ImportXlsHandler(req.body.file, 'Treatment')
+    FileUtils.ImportXlsHandler(req.query.file, 'Treatment')
       .then((result) => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
@@ -211,7 +225,7 @@ router.put('/import', (req, res) => {
   }
 });
 
-router.get('/export', (req, res) => {
+router.all('/export', (req, res) => {
   console.log(`[API] ${req.method} request to /api/treatment/export`);
   FileUtils.ExportXlsHandler('Treatment')
     .then((result) => {
