@@ -36,7 +36,7 @@
         },
         "doctor": {
             "x": 60,
-            "name_x": 126,
+            "name_x": 115,
             "y": 230
         },
         "invoice": {

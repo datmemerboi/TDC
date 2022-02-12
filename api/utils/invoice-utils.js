@@ -44,7 +44,7 @@ function generatePdf(invoiceObj) {
   /**
    * Generates a PDF for an invoice object.
    *
-   * @version 3.1.2
+   * @version 3.1.3
    * @param {Object} invoiceObj The inovice object.
    * @returns {String} Returns the absolute path of the PDF.
    * @example
@@ -177,8 +177,16 @@ function generatePdf(invoiceObj) {
     .text(`${invoiceObj.patient.age} / ${invoiceObj.patient.gender}`)
     .text(invoiceObj.patient.contact)
     .text('Doctor:', posx.data.doctor.x, posx.data.doctor.y)
-    .text('Sub Total: Rs.', posx.total_foot.x, posx.total_foot.sub_y)
-    .text('Grand Total: Rs.', posx.total_foot.x, posx.total_foot.grand_y)
+    .text(
+      invoiceObj.sub_total > 99999 ? 'Sub Total: ' : 'Sub Total: Rs.',
+      posx.total_foot.x,
+      posx.total_foot.sub_y
+    )
+    .text(
+      invoiceObj.sub_total > 99999 ? 'Grand Total: ' : 'Grand Total: Rs.',
+      posx.total_foot.x,
+      posx.total_foot.grand_y
+    )
     .fontSize(10) // 10 REGULAR BLACK (SUB TEXT)
     .text(
       `Generated on ${invoiceObj.created_at.toLocaleString('default', {
