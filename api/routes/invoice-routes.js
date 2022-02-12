@@ -5,7 +5,9 @@
  * Exports the router.
  */
 const _ = require('lodash');
+const path = require('path');
 const router = require('express').Router();
+
 const InvoiceUtils = require('../utils/invoice-utils');
 const FileUtils = require('../utils/file-utils');
 
@@ -67,6 +69,20 @@ router.all('/print/:invid', (req, res) => {
         console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
         res.sendStatus(500).end();
       });
+  }
+});
+
+router.all('/get/:invid', (req, res) => {
+  console.log(`[API] ${req.method} request to /api/invoice/get/`);
+  if (_.isNil(req.params.invid)) {
+    console.error(`[API] Bad Request: missing required parameters`);
+    res.sendStatus(400).end();
+  } else {
+    let filePath = path.resolve(
+      path.join(__dirname, '..', '..', 'invoice', `${req.params.invid}.pdf`)
+    );
+    console.log(`[API] Request handled successfully`);
+    res.sendFile(filePath);
   }
 });
 
