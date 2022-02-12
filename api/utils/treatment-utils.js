@@ -69,10 +69,13 @@ function sanitize(doc) {
    */
   let cleanObj = _.cloneDeep(doc);
   for (let key in cleanObj) {
-    if (key === 't_id' || _.isNil(cleanObj[key])) delete cleanObj[key];
+    if (key === 't_id' || _.isNil(cleanObj[key])) _.omit(cleanObj, key);
   }
   if (!_.isNil(doc.teeth_number) && typeof doc.teeth_number === 'string') {
-    cleanObj.teeth_number = doc.teeth_number.split(',').map((n) => parseInt(n, 10));
+    cleanObj.teeth_number = doc.teeth_number
+      .split(',')
+      .map((n) => (!isNaN(parseInt(n, 10)) ? parseInt(n, 10) : null))
+      .filter((n) => !_.isEmpty(n) && !_.isNil(n));
   }
   if (!_.isNil(cleanObj.treatment_date) && cleanObj.treatment_date < 1000000000000) {
     cleanObj.treatment_date = new Date(cleanObj.treatment_date * 1000).getTime();
@@ -375,20 +378,20 @@ async function ImportTreatmentsHandler(docs) {
     const db = await dbUtils.connect();
     for (let doc of docs) {
       if (_.has(doc, 't_id')) {
-        let existing = await db.Treatment.getByPid(doc.t_id);
+        let existing = await db.Treatment.getByTid(doc.t_id);
         if (!_.isNil(existing) && !_.isEmpty(existing)) {
           await db.Treatment.updateDoc(existing.t_id, doc);
           continue;
         }
       }
       doc = sanitize(doc);
-      if (_.has(doc, 'created_at')) delete doc.created_at;
+      if (_.has(doc, 'created_at')) _.omit(doc, 'created_at');
       doc.t_id = await makeNextTid(db);
       await db.Treatment.create(doc);
     }
     return { status: 200, body: { total_docs: docs.length, docs } };
   } catch (err) {
-    console.error(`[UTILS] Error @ ImportPatientsHandler \n ${JSON.stringify(err)}`);
+    console.error(`[UTILS] Error @ ImportTreatmentsHandler \n ${JSON.stringify(err)}`);
     throw err;
   }
 }

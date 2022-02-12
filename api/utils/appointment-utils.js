@@ -418,7 +418,7 @@ async function ImportAppointmentsHandler(docs) {
     }
     return { status: 200, body: { total_docs: docs.length, docs } };
   } catch (err) {
-    console.error(`[UTILS] Error @ ImportPatientsHandler \n ${JSON.stringify(err)}`);
+    console.error(`[UTILS] Error @ ImportAppointmentsHandler \n ${JSON.stringify(err)}`);
     throw err;
   }
 }
