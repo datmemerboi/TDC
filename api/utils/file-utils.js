@@ -3,9 +3,11 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 const XLSX = require('xlsx');
+
 const PatientUtils = require('./patient-utils');
 const TreatmentUtils = require('./treatment-utils');
 const AppointmentUtils = require('./appointment-utils');
+const InvoiceUtils = require('./invoice-utils');
 
 const STATUS_AS_WORDS = ['Cancelled', 'Scheduled', 'Completed', 'Postponed'];
 
@@ -35,7 +37,7 @@ function fitForXls(doc) {
   }
 
   // w.r.t Treatment
-  if (!_.isNil(doc.teeth_number)) {
+  if (!_.isNil(doc.teeth_number) && !_.isEmpty(doc.teeth_number)) {
     fitObj.teeth_number = doc.teeth_number.join(',');
   }
   if (!_.isNil(doc.treatment_date)) {
@@ -52,6 +54,12 @@ function fitForXls(doc) {
   if (_.isNil(fitObj.created_at) || _.isFinite(fitObj.created_at)) {
     fitObj.created_at = doc.created_at.toISOString();
   }
+
+  // w.r.t Invoice
+  if (!_.isNil(doc.treatments) && !_.isEmpty(doc.treatments) && Array.isArray(doc.treatments)) {
+    fitObj.treatments = doc.treatments.join('|');
+  }
+
   _.omit(fitObj, '_id');
   _.omit(fitObj, '__v');
 
@@ -83,24 +91,31 @@ function fitForDB(doc) {
   if (!_.isNil(doc.age) && _.isFinite(parseInt(doc.age))) {
     fitObj.age = parseInt(fitObj.age);
   }
-  if (!_.isNil(doc.contact)) {
+  if (!_.isNil(doc.contact) && !_.isEmpty(doc.contact)) {
     fitObj.contact = parseInt(doc.contact);
   }
 
   // w.r.t Treatment
-  if (!_.isNil(doc.teeth_number)) {
-    fitObj.teeth_number = doc.teeth_number.split(',').map((n) => parseInt(n, 10));
+  if (!_.isNil(doc.teeth_number) && !_.isEmpty(doc.teeth_number)) {
+    fitObj.teeth_number = doc.teeth_number
+      .split(',')
+      .map((n) => (!isNaN(parseInt(n, 10)) ? parseInt(n, 10) : null));
   }
-  if (!_.isNil(doc.treatment_date)) {
+  if (!_.isNil(doc.treatment_date) && !_.isEmpty(doc.treatment_date)) {
     fitObj.treatment_date = new Date(doc.treatment_date);
   }
 
   // w.r.t Appointment
-  if (!_.isNil(doc.appointment_date)) {
+  if (!_.isNil(doc.appointment_date) && !_.isEmpty(doc.appointment_date)) {
     fitObj.appointment_date = new Date(doc.appointment_date);
   }
   if (!_.isNil(doc.status) && _.includes(STATUS_AS_WORDS, doc.status)) {
     fitObj.status = _.indexOf(STATUS_AS_WORDS, doc.status);
+  }
+
+  // w.r.t Invoice
+  if (!_.isNil(doc.treatments) && !_.isEmpty(doc.treatments)) {
+    fitObj.treatments = doc.treatments.split('|').filter((t) => !_.isEmpty(t));
   }
 
   return fitObj;
@@ -129,14 +144,14 @@ function ImportXlsHandler(filename, type) {
   /**
    * Handles request to import data from XLS file.
    *
-   * @version 3.1.2
+   * @version 3.1.3
    * @param {String} filename The filename to be imported (located in data/ folder).
    * @param {String} type The type of data contained in the file (Patient/Treatment/Appointment)
    * @returns {Function} Returns the import function according to the type.
    * @throws {Object} Throws the error object.
    */
   try {
-    if (!_.includes(['Patient', 'Treatment', 'Appointment'], type)) {
+    if (!_.includes(['Patient', 'Treatment', 'Appointment', 'Invoice'], type)) {
       console.error(`[UTILS] Invalid type @ ImportXlsHandler \n ${type}`);
       return { status: 400, body: null };
     }
@@ -163,6 +178,8 @@ function ImportXlsHandler(filename, type) {
         return TreatmentUtils.ImportTreatmentsHandler(docs);
       case 'Appointment':
         return AppointmentUtils.ImportAppointmentsHandler(docs);
+      case 'Invoice':
+        return InvoiceUtils.ImportInvoicesHandler(docs);
       default:
         console.error(`[UTILS] Invalid type @ ImportXlsHandler \n ${type}`);
         return { status: 400, body: null };
@@ -279,6 +296,45 @@ async function ExportAppointmentsAsXls(outFile) {
   }
 }
 
+async function ExportInvoiceAsXls(outFile) {
+  /**
+   * Exports all invoice records into XLS file.
+   *
+   * @version 3.1.2
+   * @param {Path} outFile The output file path.
+   * @returns {Object} Returns the HTTP status and the count of documents.
+   * @throws {Object} Throws the error object.
+   */
+  try {
+    let keys = [
+      'inv_id',
+      'p_id',
+      'treatments',
+      'doctor',
+      'payment_method',
+      'payment_id',
+      'sub_total',
+      'discount',
+      'grand_total',
+      'created_at'
+    ];
+
+    const { status, body } = await InvoiceUtils.AllInvoiceHandler();
+    if (status !== 200 || _.isEmpty(body.docs)) {
+      console.log(`[UTILS] Empty response from db`);
+      return { status: 204, body: null };
+    }
+    let docs = _.chain(body.docs).sortBy('created_at').map(fitForXls).value();
+    await createXlsFile(outFile, docs, keys);
+
+    console.log(`[UTILS] ExportInvoiceAsXls success`);
+    return { status: 200, body: { total_docs: docs.length } };
+  } catch (err) {
+    console.error(`[UTILS] Error @ ExportInvoiceAsXls \n ${JSON.stringify(err)}`);
+    throw err;
+  }
+}
+
 function ExportXlsHandler(type) {
   /**
    * Handles request to export documents into XLS.
@@ -287,7 +343,7 @@ function ExportXlsHandler(type) {
    * @param {String} type The type of data to export (Patient/Treatment/Appointment).
    * @returns {Function} Returns the export function according to the type.
    */
-  if (!_.includes(['Patient', 'Treatment', 'Appointment'], type)) {
+  if (!_.includes(['Patient', 'Treatment', 'Appointment', 'Invoice'], type)) {
     console.error(`[UTILS] Invalid type @ ExportXlsHandler \n ${type}`);
     return { status: 400, body: null };
   }
@@ -299,15 +355,27 @@ function ExportXlsHandler(type) {
   let outPath = path.join(__dirname, '..', '..', 'data');
   let outFile;
 
-  if (type === 'Patient') {
-    outFile = path.join(outPath, `Patient List(${monthYear}).xls`);
-    return ExportPatientsAsXls(outFile);
-  } else if (type === 'Treatment') {
-    outFile = path.join(outPath, `Treatment List(${monthYear}).xls`);
-    return ExportTreatmentsAsXls(outFile);
-  } else {
-    outFile = path.join(outPath, `Appointment List(${monthYear}).xls`);
-    return ExportAppointmentsAsXls(outFile);
+  switch (type) {
+    case 'Patient': {
+      outFile = path.join(outPath, `Patient List (${monthYear}).xls`);
+      return ExportPatientsAsXls(outFile);
+    }
+    case 'Treatment': {
+      outFile = path.join(outPath, `Treatment List (${monthYear}).xls`);
+      return ExportTreatmentsAsXls(outFile);
+    }
+    case 'Appointment': {
+      outFile = path.join(outPath, `Appointment List (${monthYear}).xls`);
+      return ExportAppointmentsAsXls(outFile);
+    }
+    case 'Invoice': {
+      outFile = path.join(outPath, `Invoice List (${monthYear}).xls`);
+      return ExportInvoiceAsXls(outFile);
+    }
+    default: {
+      console.error(`[UTILS] Invalid type @ ExportXlsHandler \n ${type}`);
+      return { status: 400, body: null };
+    }
   }
 }
 

@@ -3,6 +3,7 @@ const fs = require('fs');
 const _ = require('lodash');
 const path = require('path');
 const PDF = require('pdfkit');
+
 const dbUtils = require('./db-utils');
 const posx = require('../coordinates.json');
 const config = require('../config.json')[process.env.NODE_ENV ?? 'development'];
@@ -378,9 +379,41 @@ async function PrintInvoiceHandler(invid) {
   }
 }
 
+async function ImportInvoicesHandler(docs) {
+  /**
+   * Handles request to import invoices.
+   *
+   * @version 3.1.3
+   * @param {Array} docs The list of documents to be imported.
+   * @returns {Object} Returns the HTTP status and the treatment documents imported.
+   * @throws {Object} Throws the error object.
+   */
+  try {
+    const db = await dbUtils.connect();
+    for (let doc of docs) {
+      if (_.has(doc, 'inv_id')) {
+        let existing = await db.Invoice.getByInvid(doc.inv_id);
+        if (!_.isNil(existing) && !_.isEmpty(existing)) {
+          await db.Invoice.updateDoc(existing.inv_id, doc);
+          continue;
+        }
+      }
+      doc = sanitize(doc);
+      if (_.has(doc, 'created_at')) _.omit(doc, 'created_at');
+      doc.inv_id = await makeNextInvid(db);
+      await db.Invoice.create(doc);
+    }
+    return { status: 200, body: { total_docs: docs.length, docs } };
+  } catch (err) {
+    console.error(`[UTILS] Error @ ImportInvoicesHandler \n ${JSON.stringify(err)}`);
+    throw err;
+  }
+}
+
 InvoiceUtils.prototype.NewInvoiceHandler = NewInvoiceHandler;
 InvoiceUtils.prototype.AllInvoiceHandler = AllInvoiceHandler;
 InvoiceUtils.prototype.GetInvoiceHandler = GetInvoiceHandler;
 InvoiceUtils.prototype.PrintInvoiceHandler = PrintInvoiceHandler;
+InvoiceUtils.prototype.ImportInvoicesHandler = ImportInvoicesHandler;
 
 module.exports = new InvoiceUtils();
