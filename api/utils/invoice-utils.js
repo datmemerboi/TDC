@@ -270,7 +270,7 @@ async function NewInvoiceHandler(pid, body) {
     let invoiceObj = {
       p_id: pid,
       doctor: _.chain(body.treatments).map('doctor').uniq().value(),
-      treatments: body.treatments,
+      treatments: body.treatments.map(JSON.stringify),
       payment_method: _.has(body, 'payment_method') ? body.payment_method : null,
       payment_id: _.has(body, 'payment_id') ? body.payment_id : null,
       sub_total: _.has(body, 'sub_total') ? body.sub_total : null,
@@ -314,9 +314,7 @@ async function AllInvoiceHandler(count = false) {
         let finalDocs = [];
         for (let i = 0; i < docs.length; i++) {
           let doc = docs[i];
-          if (typeof doc.treatments === 'string') {
-            doc.treatments = JSON.parse(doc.treatments);
-          }
+          doc.treatments = doc.treatments.map(JSON.parse);
           let patientDoc = await db.Patient.getByPid(doc.p_id);
           doc.name = patientDoc.name;
 
