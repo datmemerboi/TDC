@@ -1,13 +1,13 @@
 'use strict';
 const fs = require('fs');
-const path = require('path');
 const _ = require('lodash');
+const path = require('path');
 const XLSX = require('xlsx');
 
 const PatientUtils = require('./patient-utils');
+const InvoiceUtils = require('./invoice-utils');
 const TreatmentUtils = require('./treatment-utils');
 const AppointmentUtils = require('./appointment-utils');
-const InvoiceUtils = require('./invoice-utils');
 
 const STATUS_AS_WORDS = ['Cancelled', 'Scheduled', 'Completed', 'Postponed'];
 
@@ -379,10 +379,48 @@ function ExportXlsHandler(type) {
   }
 }
 
+async function ChangeDoctorsInConfig(req, res) {
+  /**
+   * Handles API request to change the list of doctors in
+   * config file of React repo.
+   *
+   * @version 3.1.3
+   * @param {Array} doctors The final list of doctors to be inserted into JSON.
+   * @returns {Array | Null} The final array of doctors post modification.
+   */
+  if (_.isNil(req.body) || _.isEmpty(req.body) || !Array.isArray(req.body)) {
+    return res.sendStatus(400).end();
+  }
+  try {
+    let file = path.resolve(path.join(__dirname, '..', '..', '..', 'TDC-client', 'config.json'));
+    let text = await fs.readFileSync(file);
+    let jsonObj = JSON.parse(text);
+
+    let doctors = req.body
+      .map((d) => {
+        if (!/^Dr(\.| )/gi.test(d)) {
+          return 'Dr. ' + d;
+        }
+        return d;
+      })
+      .filter((d) => !jsonObj.DOCTORS.includes(d));
+
+    jsonObj.DOCTORS = [...jsonObj.DOCTORS, ...doctors];
+
+    await fs.writeFileSync(file, JSON.stringify(jsonObj, null, 2));
+    console.log('[UTILS] ChangeDoctorsInConfig success');
+    return res.status(200).json(jsonObj.DOCTORS).end();
+  } catch (e) {
+    console.error(`[UTILS] Error @ ChangeDoctorsInConfig \n ${JSON.stringify(e)}`);
+    return res.sendStatus(500).end();
+  }
+}
+
 FileUtils.prototype.ImportXlsHandler = ImportXlsHandler;
 FileUtils.prototype.ExportXlsHandler = ExportXlsHandler;
 FileUtils.prototype.ExportPatientsAsXls = ExportPatientsAsXls;
 FileUtils.prototype.ExportTreatmentsAsXls = ExportTreatmentsAsXls;
 FileUtils.prototype.ExportAppointmentsAsXls = ExportAppointmentsAsXls;
+FileUtils.prototype.ChangeDoctorsInConfig = ChangeDoctorsInConfig;
 
 module.exports = new FileUtils();
