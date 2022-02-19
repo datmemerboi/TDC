@@ -238,4 +238,22 @@ router.all('/export', (req, res) => {
     });
 });
 
+router.delete('/delete/:tid', (req, res) => {
+  console.log(`[API] ${req.method} request to /api/treatment/delete/`);
+  if (_.isNil(req.params.tid)) {
+    console.error(`[API] Bad Request: missing required parameters`);
+    res.sendStatus(400).end();
+  } else {
+    TreatmentUtils.DeleteTreatmentHandler(req.params.tid, req.body)
+      .then((result) => {
+        console.log(`[API] Request handled successfully`);
+        res.status(result.status).json(result.body).end();
+      })
+      .catch((err) => {
+        console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
+        res.sendStatus(500).end();
+      });
+  }
+});
+
 module.exports = router;

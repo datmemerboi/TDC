@@ -195,4 +195,22 @@ router.all('/export', (req, res) => {
     });
 });
 
+router.delete('/delete/:pid', (req, res) => {
+  console.log(`[API] ${req.method} request to /api/patient/delete/`);
+  if (_.isNil(req.params.pid)) {
+    console.error(`[API] Bad Request: missing required parameters`);
+    res.sendStatus(400).end();
+  } else {
+    PatientUtils.DeletePatientHandler(req.params.pid)
+      .then((result) => {
+        console.log(`[API] Request handled successfully`);
+        res.status(result.status).end();
+      })
+      .catch((err) => {
+        console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
+        res.sendStatus(500).end();
+      });
+  }
+});
+
 module.exports = router;

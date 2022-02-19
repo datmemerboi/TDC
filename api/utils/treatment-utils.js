@@ -396,6 +396,30 @@ async function ImportTreatmentsHandler(docs) {
   }
 }
 
+async function DeleteTreatmentHandler(tid) {
+  /**
+   * Handles request to delete treatment .
+   *
+   * @version 3.1.3
+   * @param {String} tid The treatment id to be deleted.
+   * @returns {Object} Returns the HTTP status.
+   * @throws {Object} Throws the error object.
+   */
+  try {
+    const db = await dbUtils.connect();
+    let existing = await db.Treatment.getByTid(tid);
+    if (_.isNil(existing) || _.isEmpty(existing)) {
+      return { status: 404 };
+    }
+    await db.Treatment.deleteByTid(tid);
+    console.log(`[UTILS] DeleteTreatmentHandler success`);
+    return { status: 204 };
+  } catch (err) {
+    console.error(`[UTILS] Error @ DeleteTreatmentHandler \n ${JSON.stringify(err)}`);
+    throw err;
+  }
+}
+
 TreatmentUtils.prototype.NewTreatmentHandler = NewTreatmentHandler;
 TreatmentUtils.prototype.AllTreatmentHandler = AllTreatmentHandler;
 TreatmentUtils.prototype.GetTreatmentHandler = GetTreatmentHandler;
@@ -407,5 +431,6 @@ TreatmentUtils.prototype.DateTreatmentHandler = DateTreatmentHandler;
 TreatmentUtils.prototype.TreatmentHistoryHandler = TreatmentHistoryHandler;
 TreatmentUtils.prototype.CheckCompatibilityHandler = CheckCompatibilityHandler;
 TreatmentUtils.prototype.ImportTreatmentsHandler = ImportTreatmentsHandler;
+TreatmentUtils.prototype.DeleteTreatmentHandler = DeleteTreatmentHandler;
 
 module.exports = new TreatmentUtils();
