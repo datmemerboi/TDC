@@ -78,4 +78,12 @@ Invoice.statics.updateDoc = function (invid, doc) {
     .exec();
 };
 
+Invoice.statics.deleteByInvid = function (invid) {
+  return this.deleteOne({inv_id: invid}).exec();
+};
+
+Invoice.statics.deleteByPid = function (pid) {
+  return this.deleteOne({ p_id: pid }).exec();
+};
+
 module.exports = Invoice;

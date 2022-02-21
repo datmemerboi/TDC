@@ -372,6 +372,7 @@ async function DeletePatientHandler(pid) {
     if (_.isNil(existing) || _.isEmpty(existing)) {
       return { status: 404 };
     }
+    await db.Invoice.deleteByPid(pid);
     await db.Treatment.deleteByPid(pid);
     await db.Patient.deleteByPid(pid);
     console.log('[UTILS] DeletePatientHandler success');
