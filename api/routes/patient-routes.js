@@ -164,16 +164,13 @@ router.all('/search', (req, res) => {
   }
 });
 
-router.put('/import', (req, res) => {
+router.all('/import', (req, res) => {
   console.log(`[API] ${req.method} request to /api/patient/import`);
-  if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.file)) {
+  if (_.isNil(req.query.file)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
-  } else if (!_.isString(req.body.file)) {
-    console.error(`[API] Bad Request: parameters of invalid type`);
-    res.sendStatus(400).end();
   } else {
-    FileUtils.ImportXlsHandler(req.body.file, 'Patient')
+    FileUtils.ImportXlsHandler(req.query.file, 'Patient')
       .then((result) => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
@@ -185,7 +182,7 @@ router.put('/import', (req, res) => {
   }
 });
 
-router.get('/export', (req, res) => {
+router.all('/export', (req, res) => {
   console.log(`[API] ${req.method} request to /api/patient/export`);
   FileUtils.ExportXlsHandler('Patient')
     .then((result) => {
@@ -196,6 +193,24 @@ router.get('/export', (req, res) => {
       console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
       res.sendStatus(500).end();
     });
+});
+
+router.delete('/delete/:pid', (req, res) => {
+  console.log(`[API] ${req.method} request to /api/patient/delete/`);
+  if (_.isNil(req.params.pid)) {
+    console.error(`[API] Bad Request: missing required parameters`);
+    res.sendStatus(400).end();
+  } else {
+    PatientUtils.DeletePatientHandler(req.params.pid)
+      .then((result) => {
+        console.log(`[API] Request handled successfully`);
+        res.status(result.status).end();
+      })
+      .catch((err) => {
+        console.error(`[API] Failed to handle request \n ${JSON.stringify(err)}`);
+        res.sendStatus(500).end();
+      });
+  }
 });
 
 module.exports = router;

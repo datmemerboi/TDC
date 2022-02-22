@@ -188,16 +188,13 @@ router.put('/update/:appid', (req, res) => {
   }
 });
 
-router.put('/import', (req, res) => {
+router.all('/import', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/import`);
-  if (_.isNil(req.body) || _.isEmpty(req.body) || _.isNil(req.body.file)) {
+  if (_.isNil(req.query.file)) {
     console.error(`[API] Bad Request: missing required parameters`);
     res.sendStatus(400).end();
-  } else if (!_.isString(req.body.file)) {
-    console.error(`[API] Bad Request: parameters of invalid type`);
-    res.sendStatus(400).end();
   } else {
-    FileUtils.ImportXlsHandler(req.body.file, 'Appointment')
+    FileUtils.ImportXlsHandler(req.query.file, 'Appointment')
       .then((result) => {
         console.log(`[API] Request handled successfully`);
         res.status(result.status).json(result.body).end();
@@ -209,7 +206,7 @@ router.put('/import', (req, res) => {
   }
 });
 
-router.get('/export', (req, res) => {
+router.all('/export', (req, res) => {
   console.log(`[API] ${req.method} request to /api/appointment/export`);
   FileUtils.ExportXlsHandler('Appointment')
     .then((result) => {

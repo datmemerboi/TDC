@@ -356,6 +356,33 @@ async function ImportPatientsHandler(docs) {
   }
 }
 
+async function DeletePatientHandler(pid) {
+  /**
+   * Handles request to delete a patient.
+   *
+   * @version 3.1.3
+   * @param {String} pid The patient id to be deleted.
+   * @returns {Object} Returns the HTTP status.
+   * @throws {Object} Throws the error object.
+   */
+
+  try {
+    const db = await dbUtils.connect();
+    let existing = await db.Patient.getByPid(pid);
+    if (_.isNil(existing) || _.isEmpty(existing)) {
+      return { status: 404 };
+    }
+    await db.Invoice.deleteByPid(pid);
+    await db.Treatment.deleteByPid(pid);
+    await db.Patient.deleteByPid(pid);
+    console.log('[UTILS] DeletePatientHandler success');
+    return { status: 204 };
+  } catch (err) {
+    console.error(`[UTILS] Error @ DeletePatientHandler \n ${JSON.stringify(err)}`);
+    throw err;
+  }
+}
+
 PatientUtils.prototype.NewPatientHandler = NewPatientHandler;
 PatientUtils.prototype.AllPatientHandler = AllPatientHandler;
 PatientUtils.prototype.GetPatientHandler = GetPatientHandler;
@@ -364,5 +391,6 @@ PatientUtils.prototype.GetDistinctAreasHandler = GetDistinctAreasHandler;
 PatientUtils.prototype.UpdatePatientHandler = UpdatePatientHandler;
 PatientUtils.prototype.SearchPatientHandler = SearchPatientHandler;
 PatientUtils.prototype.ImportPatientsHandler = ImportPatientsHandler;
+PatientUtils.prototype.DeletePatientHandler = DeletePatientHandler;
 
 module.exports = new PatientUtils();

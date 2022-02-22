@@ -3,6 +3,7 @@ const fs = require('fs');
 const _ = require('lodash');
 const path = require('path');
 const PDF = require('pdfkit');
+
 const dbUtils = require('./db-utils');
 const posx = require('../coordinates.json');
 const config = require('../config.json')[process.env.NODE_ENV ?? 'development'];
@@ -43,7 +44,7 @@ function generatePdf(invoiceObj) {
   /**
    * Generates a PDF for an invoice object.
    *
-   * @version 3.1.2
+   * @version 3.1.3
    * @param {Object} invoiceObj The inovice object.
    * @returns {String} Returns the absolute path of the PDF.
    * @example
@@ -176,8 +177,16 @@ function generatePdf(invoiceObj) {
     .text(`${invoiceObj.patient.age} / ${invoiceObj.patient.gender}`)
     .text(invoiceObj.patient.contact)
     .text('Doctor:', posx.data.doctor.x, posx.data.doctor.y)
-    .text('Sub Total: Rs.', posx.total_foot.x, posx.total_foot.sub_y)
-    .text('Grand Total: Rs.', posx.total_foot.x, posx.total_foot.grand_y)
+    .text(
+      invoiceObj.sub_total > 99999 ? 'Sub Total: ' : 'Sub Total: Rs.',
+      posx.total_foot.x,
+      posx.total_foot.sub_y
+    )
+    .text(
+      invoiceObj.sub_total > 99999 ? 'Grand Total: ' : 'Grand Total: Rs.',
+      posx.total_foot.x,
+      posx.total_foot.grand_y
+    )
     .fontSize(10) // 10 REGULAR BLACK (SUB TEXT)
     .text(
       `Generated on ${invoiceObj.created_at.toLocaleString('default', {
@@ -260,7 +269,7 @@ async function NewInvoiceHandler(pid, body) {
   /**
    * Handles request to create new invoice.
    *
-   * @version 3.1.2
+   * @version 3.1.3
    * @param {String} pid The patient id for the invoice.
    * @param {Object} body The document containing invoice details.
    * @throws {Object} Throws the error object.
@@ -292,7 +301,7 @@ async function AllInvoiceHandler(count = false) {
   /**
    * Handles request to list all invoice documents.
    *
-   * @version 3.1.2
+   * @version 3.1.3
    * @param {Boolean} count When true, only count of documents is returned.
    * @returns {Object} Returns the HTTP status and the invoice documents fetched.
    * @throws {Object} Throws the error object.
@@ -310,13 +319,18 @@ async function AllInvoiceHandler(count = false) {
         return { status: 200, body: { total_docs: instances } };
       } else {
         let docs = await db.Invoice.getAll();
-        _.chain(docs)
-          .map((doc) => {
-            return _.set(doc, 'treatments', _.map(doc.treatments, JSON.parse));
-          })
-          .value();
+
+        let finalDocs = [];
+        for (let i = 0; i < docs.length; i++) {
+          let doc = docs[i];
+          doc.treatments = doc.treatments.map(JSON.parse);
+          let patientDoc = await db.Patient.getByPid(doc.p_id);
+          doc.name = patientDoc.name;
+
+          finalDocs.push(doc);
+        }
         console.log(`[UTILS] AllInvoiceHandler success`);
-        return { status: 200, body: { total_docs: instances, docs } };
+        return { status: 200, body: { total_docs: instances, docs: finalDocs } };
       }
     }
   } catch (err) {
@@ -373,9 +387,41 @@ async function PrintInvoiceHandler(invid) {
   }
 }
 
+async function ImportInvoicesHandler(docs) {
+  /**
+   * Handles request to import invoices.
+   *
+   * @version 3.1.3
+   * @param {Array} docs The list of documents to be imported.
+   * @returns {Object} Returns the HTTP status and the treatment documents imported.
+   * @throws {Object} Throws the error object.
+   */
+  try {
+    const db = await dbUtils.connect();
+    for (let doc of docs) {
+      if (_.has(doc, 'inv_id')) {
+        let existing = await db.Invoice.getByInvid(doc.inv_id);
+        if (!_.isNil(existing) && !_.isEmpty(existing)) {
+          await db.Invoice.updateDoc(existing.inv_id, doc);
+          continue;
+        }
+      }
+      doc = sanitize(doc);
+      if (_.has(doc, 'created_at')) _.omit(doc, 'created_at');
+      doc.inv_id = await makeNextInvid(db);
+      await db.Invoice.create(doc);
+    }
+    return { status: 200, body: { total_docs: docs.length, docs } };
+  } catch (err) {
+    console.error(`[UTILS] Error @ ImportInvoicesHandler \n ${JSON.stringify(err)}`);
+    throw err;
+  }
+}
+
 InvoiceUtils.prototype.NewInvoiceHandler = NewInvoiceHandler;
 InvoiceUtils.prototype.AllInvoiceHandler = AllInvoiceHandler;
 InvoiceUtils.prototype.GetInvoiceHandler = GetInvoiceHandler;
 InvoiceUtils.prototype.PrintInvoiceHandler = PrintInvoiceHandler;
+InvoiceUtils.prototype.ImportInvoicesHandler = ImportInvoicesHandler;
 
 module.exports = new InvoiceUtils();

@@ -5,13 +5,15 @@
  * Binds the routers registered for each module (in routes/) and starts the server.
  * Exports the app for testing.
  */
-const express = require('express');
 const cors = require('cors');
+const express = require('express');
 
 const PatientRoutes = require('./routes/patient-routes');
+const InvoiceRoutes = require('./routes/invoice-routes');
 const TreatmentRoutes = require('./routes/treatment-routes');
 const AppointmentRoutes = require('./routes/appointment-routes');
-const InvoiceRoutes = require('./routes/invoice-routes');
+
+const FileUtils = require('./utils/file-utils');
 
 const config = require('./config.json')[process.env.NODE_ENV ?? 'development'];
 const PORT = config.PORT ?? 8080;
@@ -31,6 +33,8 @@ app.get('/_health', (req, res) => {
   console.log(`[API] Request handled successfully`);
   res.json({ success: true, health: 'Good' }).end();
 });
+
+app.put('/doctor', FileUtils.ChangeDoctorsInConfig);
 
 app.all('*', (req, res) => {
   res.sendStatus(404).end();

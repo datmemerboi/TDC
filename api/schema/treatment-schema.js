@@ -100,4 +100,8 @@ Treatment.statics.deleteByTid = function (tid) {
   return this.deleteOne({ t_id: tid }).exec();
 };
 
+Treatment.statics.deleteByPid = function (pid) {
+  return this.deleteMany({ p_id: pid }).exec();
+};
+
 module.exports = Treatment;

@@ -69,10 +69,13 @@ function sanitize(doc) {
    */
   let cleanObj = _.cloneDeep(doc);
   for (let key in cleanObj) {
-    if (key === 't_id' || _.isNil(cleanObj[key])) delete cleanObj[key];
+    if (key === 't_id' || _.isNil(cleanObj[key])) _.omit(cleanObj, key);
   }
   if (!_.isNil(doc.teeth_number) && typeof doc.teeth_number === 'string') {
-    cleanObj.teeth_number = doc.teeth_number.split(',').map((n) => parseInt(n, 10));
+    cleanObj.teeth_number = doc.teeth_number
+      .split(',')
+      .map((n) => (!isNaN(parseInt(n, 10)) ? parseInt(n, 10) : null))
+      .filter((n) => !_.isEmpty(n) && !_.isNil(n));
   }
   if (!_.isNil(cleanObj.treatment_date) && cleanObj.treatment_date < 1000000000000) {
     cleanObj.treatment_date = new Date(cleanObj.treatment_date * 1000).getTime();
@@ -132,7 +135,7 @@ async function GetTreatmentHandler(tid) {
   /**
    * Handles request to get treatment document.
    *
-   * @version 3.1.2
+   * @version 3.1.3
    * @param {String} tid The treatment id to fetch.
    * @returns {Object} Returns the HTTP status and the treatment document fetched.
    * @throws {Object} Throws the error object.
@@ -144,8 +147,9 @@ async function GetTreatmentHandler(tid) {
       console.log(`[UTILS] GetTreatmentHandler returns empty data`);
       return { status: 204, body: null };
     } else {
+      let patientDoc = await db.Patient.getByPid(doc.p_id);
       console.log(`[UTILS] GetTreatmentHandler success`);
-      return { status: 200, body: doc };
+      return { status: 200, body: { ...doc, name: patientDoc.name } };
     }
   } catch (err) {
     console.error(`[UTILS] Error @ GetTreatmentHandler \n ${JSON.stringify(err)}`);
@@ -157,7 +161,7 @@ async function PidTreatmentHandler(pid) {
   /**
    * Handles request to get treatments for a patient.
    *
-   * @version 3.1.2
+   * @version 3.1.3
    * @param {String} pid The patient id to fetch treatments.
    * @returns {Object} Returns the HTTP status and the treatment documents fetched.
    * @throws {Object} Throws the error object.
@@ -170,6 +174,8 @@ async function PidTreatmentHandler(pid) {
       return { status: 204, body: null };
     } else {
       let docs = await db.Treatment.findByPid(pid);
+      let patientDoc = await db.Patient.getByPid(pid);
+      docs = docs.map((doc) => ({ ...doc, name: patientDoc.name }));
       console.log(`[UTILS] PidTreatmentHandler success`);
       return { status: 200, body: { total_docs: instances, docs } };
     }
@@ -372,20 +378,44 @@ async function ImportTreatmentsHandler(docs) {
     const db = await dbUtils.connect();
     for (let doc of docs) {
       if (_.has(doc, 't_id')) {
-        let existing = await db.Treatment.getByPid(doc.t_id);
+        let existing = await db.Treatment.getByTid(doc.t_id);
         if (!_.isNil(existing) && !_.isEmpty(existing)) {
           await db.Treatment.updateDoc(existing.t_id, doc);
           continue;
         }
       }
       doc = sanitize(doc);
-      if (_.has(doc, 'created_at')) delete doc.created_at;
+      if (_.has(doc, 'created_at')) _.omit(doc, 'created_at');
       doc.t_id = await makeNextTid(db);
       await db.Treatment.create(doc);
     }
     return { status: 200, body: { total_docs: docs.length, docs } };
   } catch (err) {
-    console.error(`[UTILS] Error @ ImportPatientsHandler \n ${JSON.stringify(err)}`);
+    console.error(`[UTILS] Error @ ImportTreatmentsHandler \n ${JSON.stringify(err)}`);
+    throw err;
+  }
+}
+
+async function DeleteTreatmentHandler(tid) {
+  /**
+   * Handles request to delete treatment .
+   *
+   * @version 3.1.3
+   * @param {String} tid The treatment id to be deleted.
+   * @returns {Object} Returns the HTTP status.
+   * @throws {Object} Throws the error object.
+   */
+  try {
+    const db = await dbUtils.connect();
+    let existing = await db.Treatment.getByTid(tid);
+    if (_.isNil(existing) || _.isEmpty(existing)) {
+      return { status: 404 };
+    }
+    await db.Treatment.deleteByTid(tid);
+    console.log(`[UTILS] DeleteTreatmentHandler success`);
+    return { status: 204 };
+  } catch (err) {
+    console.error(`[UTILS] Error @ DeleteTreatmentHandler \n ${JSON.stringify(err)}`);
     throw err;
   }
 }
@@ -401,5 +431,6 @@ TreatmentUtils.prototype.DateTreatmentHandler = DateTreatmentHandler;
 TreatmentUtils.prototype.TreatmentHistoryHandler = TreatmentHistoryHandler;
 TreatmentUtils.prototype.CheckCompatibilityHandler = CheckCompatibilityHandler;
 TreatmentUtils.prototype.ImportTreatmentsHandler = ImportTreatmentsHandler;
+TreatmentUtils.prototype.DeleteTreatmentHandler = DeleteTreatmentHandler;
 
 module.exports = new TreatmentUtils();
